@@ -4,15 +4,15 @@
     <p class="dashboard__help-description">
       {{ $t('dashboard.alertText') }}
     </p>
-    <a
+
+    <Button
+      prepend-icon="gitlab-full"
       href="https://gitlab.com/baserow/baserow"
-      target="_blank"
       rel="noopener noreferrer"
-      class="button button--primary dashboard__help-button"
+      target="_blank"
     >
       {{ $t('dashboard.starOnGitlab') }}
-      <i class="fab fa-gitlab"></i>
-    </a>
+    </Button>
     <a
       v-tooltip="$t('dashboard.shareOnTwitter')"
       :href="

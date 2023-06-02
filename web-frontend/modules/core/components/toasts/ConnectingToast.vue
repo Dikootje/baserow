@@ -1,11 +1,16 @@
 <template>
-  <Alert loading shadow simple :title="$t('connectingToast.title')"
-    >{{ $t('connectingToast.content') }}
-  </Alert>
+  <Toast>
+    <template #title>{{ $t('connectingToast.title') }}</template>
+    <span>{{ $t('connectingToast.content') }}</span>
+  </Toast>
 </template>
 
 <script>
+import Toast from '@baserow/modules/core/components/toasts/Toast'
 export default {
   name: 'ConnectingToast',
+  components: {
+    Toast,
+  },
 }
 </script>

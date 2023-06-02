@@ -12,14 +12,9 @@
       @keydown-enter="$refs.submitButton.focus()"
     >
       <div class="context__form-actions">
-        <button
-          ref="submitButton"
-          class="button"
-          :class="{ 'button--loading': loading }"
-          :disabled="loading"
-        >
+        <Button ref="submitButton" :loading="loading">
           {{ $t('action.create') }}
-        </button>
+        </Button>
       </div>
     </FieldForm>
   </Context>
@@ -28,6 +23,7 @@
 <script>
 import context from '@baserow/modules/core/mixins/context'
 import FieldForm from '@baserow/modules/database/components/field/FieldForm'
+import Button from '@baserow/modules/core/components/button'
 import { notifyIf } from '@baserow/modules/core/utils/error'
 import { createNewUndoRedoActionGroupId } from '@baserow/modules/database/utils/action'
 

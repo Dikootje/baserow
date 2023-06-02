@@ -1,20 +1,29 @@
 <template>
-  <Alert
-    simple
-    shadow
-    :icon="stateContent.icon"
-    :loading="stateContent.loading"
-    :title="stateContent.title"
-  >
-    {{ stateContent.content }}
-  </Alert>
+  <Toast :icon="stateContent.icon" :loading="stateContent.loading">
+    <template #title>{{ stateContent.title }} </template>
+    <span>{{ stateContent.content }} </span>
+
+    <template #actions>
+      <ButtonText size="small" :icon="undo" @click="restore">
+        {{
+          $t('restoreToast.restore', {
+            type: $t('trashType.' + toast.data.trash_item_type),
+          })
+        }}
+      </ButtonText>
+    </template>
+  </Toast>
 </template>
 
 <script>
+import Toast from '@baserow/modules/core/components/toasts/Toast'
 import { UNDO_REDO_STATES } from '@baserow/modules/core/utils/undoRedoConstants'
 
 export default {
   name: 'UndoRedoToast',
+  components: {
+    Toast,
+  },
   props: {
     state: {
       type: String,

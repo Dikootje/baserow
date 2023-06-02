@@ -1,4 +1,4 @@
-$text-font-stack: 'Open Sans', sans-serif;
+// $text-font-stack: 'Open Sans', sans-serif;
 $logo-font-stack: 'Open Sans', sans-serif;
 
 $scrollbar-size: 6px;
@@ -20,16 +20,6 @@ $color-primary-800: #0a4970 !default;
 $color-primary-900: #062e47 !default;
 
 $color-neutral-10: #fcfcfc !default;
-$color-neutral-50: #fafafa !default;
-$color-neutral-100: #f5f5f5 !default;
-$color-neutral-200: #d9dbde !default;
-$color-neutral-300: #b4bac2 !default;
-$color-neutral-400: #9fa4ab !default;
-$color-neutral-500: #828a95 !default;
-$color-neutral-600: #646b75 !default;
-$color-neutral-700: #4d535c !default;
-$color-neutral-800: #373c42 !default;
-$color-neutral-900: #272b30 !default;
 
 $color-success-100: #e6fff1 !default;
 $color-success-200: #bdffdc !default;
@@ -102,12 +92,12 @@ $z-index-context: 7 !default;
 // and contexts.
 $z-index-tooltip: 8 !default;
 
-// The toasts will be on top of anything else, because the message is temporary
+// The notifications will be on top of anything else, because the message is temporary
 // and must always be visible.
-$z-index-toasts: 9 !default;
+$z-index-notifications: 9 !default;
 
 // normalize overrides
-$base-font-family: $text-font-stack !default;
+// $base-font-family: $text-font-stack !default;
 $font-awesome-font-family: 'Font Awesome 5 Free', sans-serif !default;
 $font-awesome-font-weight: 900 !default;
 
@@ -127,5 +117,3 @@ $file-field-modal-body-nav-width: 120px !default;
 $file-field-modal-foot-height: 108px !default;
 
 $dashboard-breakpoint: 1100px;
-
-$builder-page-max-width: 1280px;

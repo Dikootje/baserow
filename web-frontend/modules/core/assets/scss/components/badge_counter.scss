@@ -1,0 +1,15 @@
+.badge-counter {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4px 6px;
+  font-size: 10px;
+  font-weight: bold;
+  gap: 8px;
+  background: $color-red-500 !important;
+  color: $white;
+  line-height: 10px;
+  text-align: center;
+  @include rounded($radius-3xl);
+}

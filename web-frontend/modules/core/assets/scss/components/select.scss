@@ -117,7 +117,7 @@
       @extend .fas;
       @extend %select__item-size;
 
-      content: fa-content($fa-var-check-circle);
+      // content: fa-content($fa-var-check-circle);
       width: 32px;
       text-align: center;
       color: $color-success-500;

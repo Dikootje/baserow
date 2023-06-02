@@ -22,7 +22,8 @@ RUN apt-get update && \
     && apt-get autoclean \
     && apt-get clean \
     && apt-get autoremove \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && npx playwright install-deps
 
 # The node image already creates a non-root user to run as, update its ids so they
 # match the provided UID and GID we wish to build and run this image with.

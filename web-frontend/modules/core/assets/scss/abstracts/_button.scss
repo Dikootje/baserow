@@ -1,0 +1,46 @@
+$button-primary: $color-primary;
+$button-secondary: $white;
+$button-danger: $color-red-600;
+
+$button-regular-height: 36px;
+$button-regular-top-bottom-padding: 8px;
+$button-regular-right-left-padding: 12px;
+
+$button-large-height: 44px;
+$button-large-top-bottom-padding: 12px;
+$button-large-right-left-padding: 20px;
+
+@mixin button-size(
+  $height: $button-regular-height,
+  $padding-top-bottom: $button-regular-top-bottom-padding,
+  $padding-right-left: $button-regular-right-left-padding
+) {
+  height: $height;
+  padding: $padding-top-bottom, $padding-right-left;
+}
+
+@mixin button-style(
+  $background: $color-primary,
+  $background-hover: $color-blue-600,
+  $background-active: $color-blue-700,
+  $color: $white,
+  $color-active: $color-blue-100
+) {
+  background: $background;
+  color: $color;
+
+  &:hover {
+    background: $background-hover;
+  }
+
+  &.active,
+  &:active {
+    background: $background-active;
+    color: $color-active;
+  }
+
+  &.button--loading {
+    background: $background-hover;
+    color: $background-hover;
+  }
+}

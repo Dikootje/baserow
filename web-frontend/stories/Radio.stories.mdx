@@ -1,0 +1,115 @@
+import { Meta, Story, Props, Canvas } from '@storybook/addon-docs/blocks'
+import { config, withDesign } from 'storybook-addon-designs'
+import { action } from '@storybook/addon-actions'
+import { useArgs } from '@storybook/client-api'
+
+import RadioGroup from '@baserow/modules/core/components/RadioGroup'
+
+<Meta
+    title="Baserow/Form/Radio"
+    component={RadioGroup}
+    parameters={{
+        backgrounds: {
+            default: 'white',
+            values: [
+                { name: 'white', value: '#ffffff' },
+                { name: 'light', value: '#eeeeee' },
+                { name: 'dark', value: '#222222' },
+            ],
+        },
+    }}
+    decorators={[
+        withDesign,
+        (story, context) => {
+            const [_, updateArgs] = useArgs()
+            return story({ ...context, updateArgs })
+        },
+    ]}
+    argTypes={{
+        name: {
+            control: {
+                type: 'text',
+            },
+            defaultValue: 'radio-group',
+        },
+        modelValue: {
+            control: {
+                type: 'text',
+            },
+        },
+        options: {
+            control: {
+                type: 'Array',
+            },
+            defaultValue: [
+                { id: 'option-1', value: 'option-1', label: 'Option 1' },
+                { id: 'option-2', value: 'option-2', label: 'Option 2' },
+                {
+                    id: 'option-3',
+                    value: 'option-3',
+                    label: 'Option 3',
+                    disabled: true,
+                },
+                {
+                    id: 'option-4',
+                    value: 'option-4',
+                    label: 'Option 4',
+                    loading: true,
+                },
+                {
+                    id: 'option-4',
+                    value: 'option-5',
+                    label: 'Option 5',
+                    error: true,
+                },
+            ],
+        },
+    }}
+/>
+
+# Form Radio Group
+
+export const Template = (args, { argTypes, updateArgs }) => ({
+    methods: {
+        action,
+        handleModelValueUpdate(value) {
+            const modelValue = value
+            updateArgs({ ...args, modelValue })
+            action('updateModelValue')(value)
+        },
+    },
+    components: { RadioGroup },
+    props: Object.keys(argTypes),
+    template: `
+    <RadioGroup @update:modelValue="handleModelValueUpdate" v-bind="$props">
+    </RadioGroup>
+    `,
+})
+
+export const designConfig = {
+    type: 'figma',
+    url: 'https://www.figma.com/file/W7R2rQW7ohsZMeHRfEcPFW/Design-Library?type=design&node-id=55-1362&mode=design&t=cmL4N8ioJfhJisud-0',
+}
+
+<Canvas>
+    <Story
+        name="Group"
+        parameters={{
+            design: config(designConfig),
+        }}
+    >
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+## Example
+
+```javascript
+<RadioGroup
+    @update:modelValue="handleModelValueUpdate" :options="{ id: 'option-1', value: 'option-1', label: 'Option 1' }, { id: 'option-2', value: 'option-2', label: 'Option 2' },{ id: 'option-3', value: 'option-3', label: 'Option 3', disabled: true}">
+</RadioGroup>
+```
+
+## Props
+
+<Props of={RadioGroup} />

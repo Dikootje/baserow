@@ -1,0 +1,12 @@
+.radio-group {
+  display: flex;
+  gap: 10px;
+}
+
+.radio-group .radio__input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}

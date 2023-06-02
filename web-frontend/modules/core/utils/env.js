@@ -4,8 +4,8 @@
  * @param env: The environment that should be used to get the flags from
  * @returns {string[]}
  */
-export function getFeatureFlags(env = process.env) {
-  return (env.FEATURE_FLAGS || '')
+export function getFeatureFlags(runtimeConfig) {
+  return (runtimeConfig?.featureFlags || '')
     .split(',')
     .map((flag) => flag.trim().toLowerCase())
 }

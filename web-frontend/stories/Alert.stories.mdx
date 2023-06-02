@@ -1,0 +1,153 @@
+import { Meta, Story, Props, Canvas } from '@storybook/addon-docs/blocks'
+import { config, withDesign } from 'storybook-addon-designs'
+import { action } from '@storybook/addon-actions'
+
+import Alert from '@baserow/modules/core/components/Alert'
+import ButtonText from '@baserow/modules/core/components/ButtonText'
+
+<Meta
+    title="Baserow/Toasts & Alerts/Alerts"
+    component={Alert}
+    decorators={[withDesign]}
+    argTypes={{
+        default: {
+            defaultValue:
+                'Lorem ipsum dolor sit amet consectetur adipisicing elit. Aliquid pariatur, ipsum similique veniam.',
+        },
+        type: {
+            control: {
+                type: 'select',
+                options: [
+                    'info-neutral',
+                    'info-primary',
+                    'warning',
+                    'error',
+                    'success',
+                ],
+            },
+            defaultValue: 'success',
+        },
+        position: {
+            control: {
+                type: 'radio',
+                options: ['top', 'bottom'],
+            },
+        },
+    }}
+/>
+
+# Alert
+
+export const Template = (args, { argTypes }) => ({
+    components: { Alert, ButtonText },
+    props: Object.keys(argTypes),
+    template: `
+    <Alert v-bind="$props">
+        <template v-if="${'title' in args}" v-slot:title>${
+        args.title
+    }</template>
+        <template v-slot>${args.default}</template>
+        <template v-if="${'actions' in args}" v-slot:actions>${
+        args.actions
+    }</template>
+    </Alert>
+    `,
+})
+
+export const designConfig = {
+    type: 'figma',
+    url: 'https://www.figma.com/file/W7R2rQW7ohsZMeHRfEcPFW/Design-Library?node-id=53%3A21&mode=dev',
+}
+
+<Canvas>
+    <Story
+        name="Info primary"
+        args={{
+            type: 'info-primary',
+            title: 'We’ve just released a new feature',
+            actions:
+                '<ButtonText size="small">View</ButtonText><ButtonText size="small">Dismiss</ButtonText>',
+        }}
+        parameters={{
+            design: config(designConfig),
+        }}
+    >
+        {Template.bind({})}
+    </Story>
+    <Story
+        name="Info neutral"
+        args={{
+            type: 'info-neutral',
+            title: 'We’ve just released a new feature',
+            actions:
+                '<ButtonText size="small">View</ButtonText><ButtonText size="small">Dismiss</ButtonText>',
+        }}
+        parameters={{
+            design: config(designConfig),
+        }}
+    >
+        {Template.bind({})}
+    </Story>
+    <Story
+        name="Warning"
+        args={{
+            type: 'warning',
+            title: 'This action might cause problems',
+            actions: '<ButtonText size="small">Dismiss</ButtonText>',
+        }}
+        parameters={{
+            design: config(designConfig),
+        }}
+    >
+        {Template.bind({})}
+    </Story>
+    <Story
+        name="Error"
+        args={{
+            type: 'error',
+            title: 'There was a problem with this action',
+            actions: '<ButtonText size="small">Dismiss</ButtonText>',
+        }}
+        parameters={{
+            design: config(designConfig),
+        }}
+    >
+        {Template.bind({})}
+    </Story>
+    <Story
+        name="Success"
+        args={{
+            type: 'success',
+            title: 'Successfully updated profile',
+            actions:
+                '<ButtonText size="small">Dismiss</ButtonText><ButtonText size="small">View changes</ButtonText>',
+        }}
+        parameters={{
+            design: config(designConfig),
+        }}
+    >
+        {Template.bind({})}
+    </Story>
+    <Story
+        name="Loading"
+        args={{
+            type: 'loading',
+            title: 'Loading...',
+        }}
+        parameters={{
+            design: config(designConfig),
+        }}
+    >
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+## Example
+
+```javascript
+<Alert type="success">Lorem ipsum dolor sit amet</Alert>
+```
+
+## Props
+
+<Props of={Alert} />

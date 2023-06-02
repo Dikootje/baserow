@@ -1,0 +1,83 @@
+.floating-button {
+  display: flex;
+  width: 40px;
+  height: 40px;
+  padding: 12px;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid $color-neutral-400;
+  background: $white;
+  flex-shrink: 0;
+  box-shadow: 0 6px 12px 0 rgba(7, 8, 16, 0.08);
+  position: relative;
+
+  @include rounded($radius-3xl);
+
+  &:hover {
+    background: $color-neutral-25;
+    color: $color-blue-600;
+    text-decoration: none;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #070810;
+  }
+
+  &.active,
+  &:active {
+    background: $color-neutral-50;
+    color: $color-blue-700;
+    box-shadow: none !important;
+    border: 1px solid $color-neutral-400;
+  }
+
+  &.disabled,
+  &[disabled] {
+    cursor: not-allowed;
+    background: $color-neutral-100 !important;
+    color: $color-neutral-700;
+    box-shadow: 0 1px 2px 0 rgba(7, 8, 16, 0.1);
+  }
+}
+
+.floating-button--fixed {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.floating-button--loading {
+  position: relative;
+  cursor: wait;
+  user-select: none;
+
+  &:hover,
+  &:focus {
+    box-shadow: none;
+  }
+
+  &::after {
+    content: ' ';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -5px;
+    display: block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 0.15em solid;
+    border-color: $color-neutral-700 transparent $color-neutral-700 transparent;
+    animation: spin infinite 1800ms;
+    animation-timing-function: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+  }
+}
+
+.floating-button--secondary {
+  border: 1px solid $color-neutral-200;
+}
+
+.floating-button__icon {
+  font-size: 16px;
+}

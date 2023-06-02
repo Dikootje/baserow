@@ -3,16 +3,15 @@
     class="avatar"
     :class="{
       'avatar--rounded': rounded,
-      'avatar--icon': Boolean(icon),
-      'avatar--image': Boolean(image),
-      'avatar--initials': Boolean(initials),
-      [`avatar--size-${size}`]: true,
+      [`avatar--${size}`]: true,
       [`avatar--${color}`]: color,
     }"
   >
-    <i v-if="icon" class="fas" :class="`fa-${icon}`" />
+    <!-- <i v-if="icon" class="fas" :class="`fa-${icon}`" /> -->
     <img v-if="image" :src="image" class="avatar__image" />
-    <span v-if="initials">{{ initials }}</span>
+    <span v-if="initials && !image" class="avatar__initials">{{
+      initials
+    }}</span>
   </div>
 </template>
 
@@ -23,34 +22,42 @@ export default {
     image: {
       type: String,
       required: false,
-      default: '',
-    },
-    icon: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    initials: {
-      type: String,
-      required: false,
-      default: '',
+      default: null,
     },
     rounded: {
       type: Boolean,
       required: false,
-      default: true,
+      default: false,
+    },
+    initials: {
+      type: String,
+      required: false,
+      default: null,
     },
     color: {
-      //  primary - success - warning - error - ghost
       required: false,
       type: String,
-      default: 'primary',
+      default: 'blue',
+      validator: function (value) {
+        return [
+          'blue',
+          'cyan',
+          'green',
+          'yellow',
+          'red',
+          'magenta',
+          'purple',
+          'neutral',
+        ].includes(value)
+      },
     },
     size: {
-      // normal - large - tiny
       type: String,
       required: false,
-      default: 'normal',
+      default: 'medium',
+      validator: function (value) {
+        return ['small', 'medium', 'large', 'x-large'].includes(value)
+      },
     },
   },
 }

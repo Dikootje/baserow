@@ -1,0 +1,9 @@
+$radius-none: 0;
+$radius-base: 4px;
+$radius-md: 6px;
+$radius-2xl: 16px;
+$radius-3xl: 24px;
+
+@mixin rounded($radius: $radius-base) {
+  border-radius: $radius;
+}

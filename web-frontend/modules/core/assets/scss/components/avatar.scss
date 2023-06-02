@@ -1,51 +1,75 @@
 .avatar {
-  display: flex;
+  display: inline-flex;
   justify-content: center;
   align-items: center;
-  flex: 0 0 36px;
   font-weight: bold;
+  font-size: 10px;
+  overflow: hidden;
   color: $white;
-  background-color: $color-primary-500;
-  border: 1px solid transparent;
-
-  @include center-text(36px, 15px);
-}
-
-.avatar--size-large {
-  flex: 0 0 42px;
-
-  @include center-text(42px, 16px);
-}
-
-.avatar--size-tiny {
-  flex: 0 0 32px;
-
-  @include center-text(32px, 14px);
-}
-
-.avatar--rounded {
-  border-radius: 50%;
+  @include rounded($radius-md);
 }
 
 .avatar__image {
-  max-width: calc(100% - 20px);
-  max-height: calc(100% - 20px);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.avatar--success {
-  background-color: $color-success-500;
+.avatar--small {
+  width: 14px;
+  height: 14px;
+  font-size: 8px;
 }
 
-.avatar--warning {
-  background-color: $color-warning-500;
+.avatar--medium {
+  width: 24px;
+  height: 24px;
 }
 
-.avatar--error {
-  background-color: $color-error-500;
+.avatar--large {
+  width: 32px;
+  height: 32px;
+  font-size: 11px;
 }
 
-.avatar--ghost {
-  background-color: $white;
-  border-color: $color-neutral-400;
-  color: $color-primary-900;
+.avatar--x-large {
+  width: 40px;
+  height: 40px;
+  font-size: 13px;
+}
+
+.avatar--rounded {
+  @include rounded($radius-3xl);
+}
+
+.avatar--blue {
+  background: $color-blue-500;
+}
+
+.avatar--cyan {
+  background: $color-cyan-500;
+}
+
+.avatar--green {
+  background: $color-green-500;
+}
+
+.avatar--yellow {
+  background: $color-yellow-500;
+}
+
+.avatar--red {
+  background: $color-red-500;
+}
+
+.avatar--magenta {
+  background: $color-magenta-500;
+}
+
+.avatar--purple {
+  background: $color-purple-500;
+}
+
+.avatar--neutral {
+  background: $color-neutral-500;
 }

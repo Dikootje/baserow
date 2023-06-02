@@ -1,0 +1,27 @@
+@mixin alert-style($background, $color, $accent-color, $border-color) {
+  background-color: $background;
+  border: 1px solid $border-color;
+
+  .alert__icon {
+    color: $accent-color;
+  }
+
+  .alert__title {
+    color: $accent-color;
+  }
+
+  .alert__content {
+    p {
+      color: $color;
+    }
+  }
+
+  button {
+    color: $color;
+    cursor: pointer;
+  }
+
+  .alert__close {
+    color: $accent-color;
+  }
+}

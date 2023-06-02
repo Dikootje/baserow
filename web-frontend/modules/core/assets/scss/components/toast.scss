@@ -1,40 +1,127 @@
-.toast__top-right {
-  position: fixed;
-  top: 0;
-  right: 30px;
-  width: 320px;
-  z-index: $z-index-toasts;
-}
-
-.toast__bottom-right {
+.toast {
   display: flex;
-  flex-direction: column-reverse;
-  align-items: flex-end;
+  padding: 16px;
+  align-items: flex-start;
+  gap: 16px;
+  background: $white;
+  border: 1px solid $color-neutral-400;
+  box-shadow: 0 6px 12px 0 rgba(7, 8, 16, 0.08);
+  max-width: 380px;
+  z-index: $z-index-notifications;
+
+  @include rounded($radius-md);
+}
+
+.toast__content {
+  margin: 0;
+  padding: 0;
+  flex: 1 1 auto;
+  font-size: 12px;
+
+  p {
+    margin: 0;
+  }
+}
+
+.toast__title {
+  font-weight: 500;
+  line-height: 20px;
+  font-size: 13px;
+  color: $color-neutral-1300;
+}
+
+.toast__message {
+  color: $color-neutral-900;
+  line-height: 20px;
+}
+
+.toast__icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  @include rounded($radius-3xl);
+}
+
+.toast__close {
+  background: none;
+  width: 16px;
+  height: 16px;
+  border: none;
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+  flex: 0 1 auto;
+  color: $color-neutral-900;
+  cursor: pointer;
+}
+
+.toast__icon--success {
+  background: $color-green-50;
+  color: $color-green-600;
+}
+
+.toast__icon--warning {
+  background: $color-yellow-50;
+  color: $color-yellow-600;
+}
+
+.toast__icon--error {
+  background: $color-red-50;
+  color: $color-red-600;
+}
+
+.toast__icon--info-neutral {
+  background: $color-neutral-25;
+  color: $color-neutral-900;
+}
+
+.toast__icon--info-primary {
+  background: $color-blue-50;
+  color: $color-blue-600;
+}
+
+.toast__icon--loading {
+  background: $color-neutral-50;
+}
+
+.toast__actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+}
+
+.toast--bottom {
   position: fixed;
-  bottom: 0;
   right: 30px;
-  z-index: $z-index-toasts;
+  bottom: 0;
 }
 
-.toast__undo-delete {
-  margin: 5px;
-  box-shadow: $color-primary-200;
-
-  &.toast__undo-delete--pulsing {
-    animation: pulse 1s 2;
-  }
+.toast--top {
+  position: fixed;
+  right: 30px;
+  top: 0;
 }
 
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 $color-primary-400;
-  }
+.toast__loading {
+  cursor: wait;
+  user-select: none;
+  width: 14px;
+  height: 14px;
+  position: relative;
 
-  70% {
-    box-shadow: 0 0 0 5px rgba(0, 0, 0, 0);
-  }
-
-  100% {
-    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  &::after {
+    content: ' ';
+    display: block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 0.15em solid;
+    border-color: $color-neutral-700 transparent $color-neutral-700 transparent;
+    animation: spin infinite 1800ms;
+    animation-timing-function: cubic-bezier(0.785, 0.135, 0.15, 0.86);
   }
 }

@@ -1,24 +1,24 @@
 <template>
-  <Alert
-    simple
-    shadow
-    type="error"
-    icon="exclamation"
-    :title="$t('authorizationErrorToast.title')"
-  >
-    {{ $t('authorizationErrorToast.content') }}
-    <a
-      class="button margin-top-1"
-      :class="{ 'button--loading': loading }"
-      @click="reload()"
-      >{{ $t('authorizationErrorToast.action') }}</a
-    >
-  </Alert>
+  <Toast type="error" icon="warning-triangle">
+    <template #title>{{ $t('authorizationErrorToast.title') }}</template>
+    <span> {{ $t('authorizationErrorToast.content') }}</span>
+    <template #actions>
+      <ButtonText :loading="loading" size="small" @click="reload()">
+        {{ $t('authorizationErrorToast.action') }}</ButtonText
+      >
+    </template>
+  </Toast>
 </template>
 
 <script>
+import Toast from '@baserow/modules/core/components/toasts/Toast'
+import ButtonText from '@baserow/modules/core/components/ButtonText'
 export default {
   name: 'AuthorizationErrorToast',
+  components: {
+    Toast,
+    ButtonText,
+  },
   data() {
     return {
       loading: false,

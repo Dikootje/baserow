@@ -1,6 +1,20 @@
 <template>
-  <div class="radio" :class="classNames" @click="select(value)">
-    <slot></slot>
+  <div class="radio" :class="classNames" @click="select">
+    <div v-if="loading" class="radio__loading"></div>
+    <div v-else class="radio__input">
+      <input
+        :id="id"
+        type="radio"
+        :name="name"
+        :value="value"
+        :checked="isSelected"
+        :disabled="disabled || loading"
+      />
+      <label :for="id"></label>
+    </div>
+    <div class="radio__label">
+      <slot></slot>
+    </div>
   </div>
 </template>
 
@@ -12,10 +26,17 @@ export default {
     event: 'input',
   },
   props: {
+    id: {
+      type: String,
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
     value: {
       type: [String, Number, Boolean, Object],
-      required: false,
-      default: '',
+      required: true,
     },
     modelValue: {
       type: [String, Number, Boolean, Object],
@@ -32,29 +53,32 @@ export default {
       required: false,
       default: false,
     },
+    error: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
     classNames() {
       return {
-        'radio--has-content': Object.prototype.hasOwnProperty.call(
-          this.$slots,
-          'default'
-        ),
         'radio--disabled': this.disabled,
         'radio--loading': this.loading,
-        selected: this.modelValue === this.value,
+        'radio--error': this.error,
+        selected: this.isSelected,
       }
     },
-    selected() {
+    isSelected() {
       return this.modelValue === this.value
     },
   },
   methods: {
-    select(value) {
-      if (this.disabled || this.selected) {
+    select() {
+      if (this.disabled || this.loading || this.isSelected) {
         return
       }
-      this.$emit('input', value)
+
+      this.$emit('input', this.value)
     },
   },
 }

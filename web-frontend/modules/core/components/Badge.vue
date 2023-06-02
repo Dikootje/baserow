@@ -1,13 +1,6 @@
 <template>
-  <div
-    class="badge"
-    :class="{
-      'badge--primary': primary,
-      'badge--success': success,
-      'badge-warning': warning,
-      'badge--error': error,
-    }"
-  >
+  <div class="badge" :class="classes">
+    <i v-if="indicator" class="badge__indicator"></i>
     <slot />
   </div>
 </template>
@@ -16,25 +9,49 @@
 export default {
   name: 'Badge',
   props: {
-    primary: {
+    color: {
+      type: String,
+      required: false,
+      default: 'cyan',
+      validator: function (value) {
+        return [
+          'cyan',
+          'green',
+          'yellow',
+          'red',
+          'magenta',
+          'purple',
+          'neutral',
+        ].includes(value)
+      },
+    },
+    indicator: {
       type: Boolean,
       required: false,
       default: false,
     },
-    success: {
+    rounded: {
       type: Boolean,
       required: false,
       default: false,
     },
-    warning: {
-      type: Boolean,
+    size: {
+      type: String,
       required: false,
-      default: false,
+      default: 'regular',
+      validator: function (value) {
+        return ['regular', 'small', 'large'].includes(value)
+      },
     },
-    error: {
-      type: Boolean,
-      required: false,
-      default: false,
+  },
+  computed: {
+    classes() {
+      const classObj = {
+        [`badge--${this.color}`]: this.color,
+        [`badge--${this.size}`]: this.size,
+        [`badge--rounded`]: this.rounded,
+      }
+      return classObj
     },
   },
 }

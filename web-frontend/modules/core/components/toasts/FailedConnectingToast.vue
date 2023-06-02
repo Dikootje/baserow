@@ -1,23 +1,24 @@
 <template>
-  <Alert
-    shadow
-    simple
-    type="error"
-    icon="exclamation"
-    :title="$t('failedConnectingToast.title')"
-    >{{ $t('failedConnectingToast.content') }}
-    <a
-      class="button margin-top-1"
-      :class="{ 'button--loading': loading }"
-      @click="reload()"
-      >{{ $t('failedConnectingToast.action') }}
-    </a>
-  </Alert>
+  <Toast type="error" icon="warning-triangle">
+    <template #title>{{ $t('failedConnectingToast.title') }}</template>
+    <span>{{ $t('failedConnectingToast.content') }}</span>
+    <template #actions>
+      <ButtonText :loading="loading" @click="reload()">
+        {{ $t('failedConnectingToast.action') }}
+      </ButtonText>
+    </template>
+  </Toast>
 </template>
 
 <script>
+import Toast from '@baserow/modules/core/components/toasts/Toast'
+import ButtonText from '@baserow/modules/core/components/ButtonText'
 export default {
   name: 'FailedConnectingToast',
+  components: {
+    Toast,
+    ButtonText,
+  },
   data() {
     return {
       loading: false,

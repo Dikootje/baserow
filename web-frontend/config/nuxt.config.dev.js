@@ -27,4 +27,7 @@ export default Object.assign(base(), {
     ],
     transpile: ['axios'],
   },
+  storybook: {
+    port: 6006,
+  },
 })

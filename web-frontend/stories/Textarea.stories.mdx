@@ -1,0 +1,86 @@
+import { Meta, Story, Props, Canvas } from '@storybook/addon-docs/blocks'
+import { config, withDesign } from 'storybook-addon-designs'
+import { action } from '@storybook/addon-actions'
+
+import Textarea from '@baserow/modules/core/components/FormTextarea'
+
+<Meta
+    title="Baserow/Form/Textarea"
+    component={Textarea}
+    parameters={{
+        backgrounds: {
+            default: 'light',
+            values: [
+                { name: 'white', value: '#ffffff' },
+                { name: 'light', value: '#eeeeee' },
+                { name: 'dark', value: '#222222' },
+            ],
+        },
+    }}
+    decorators={[withDesign]}
+    argTypes={{
+        label: {
+            control: {
+                type: 'text',
+            },
+            defaultValue: 'Label',
+        },
+        placeholder: {
+            control: {
+                type: 'text',
+            },
+            defaultValue: 'Placeholder text...',
+        },
+        required: {
+            control: {
+                type: 'boolean',
+                options: [true, false],
+            },
+            defaultValue: false,
+        },
+    }}
+/>
+
+# Textarea
+
+export const Template = (args, { argTypes }) => ({
+    components: { Textarea },
+    props: Object.keys(argTypes),
+    template: `
+    <Textarea v-bind="$props">
+        <template v-slot>${args.default}</template>
+    </Textarea>
+    `,
+})
+
+export const designConfig = {
+    type: 'figma',
+    url: 'https://www.figma.com/file/W7R2rQW7ohsZMeHRfEcPFW/Design-Library?node-id=1%3A87&mode=dev',
+}
+
+<Canvas>
+    <Story
+        name="Default"
+        parameters={{
+            design: config(designConfig),
+        }}
+        args={{
+            id: 'firstname',
+            helperText:
+                'We’ll use this address if we need to contact you about your account.',
+            iconRight: 'db',
+        }}
+    >
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+## Example
+
+```javascript
+<FormTextarea>Label</FormTextarea>
+```
+
+## Props
+
+<Props of={FormTextarea} />

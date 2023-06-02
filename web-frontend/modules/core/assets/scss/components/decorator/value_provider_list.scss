@@ -32,7 +32,7 @@
     &::after {
       @extend .fas;
 
-      content: fa-content($fa-var-check-circle);
+      // content: fa-content($fa-var-check-circle);
       text-align: center;
       color: $color-success-500;
 

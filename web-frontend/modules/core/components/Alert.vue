@@ -1,29 +1,22 @@
 <template>
-  <div
-    class="alert"
-    :class="{
-      'alert--simple': simple,
-      [`alert--${type}`]: type,
-      'alert--has-icon': icon || loading,
-      'alert--with-shadow': shadow,
-      'alert--minimal': minimal,
-    }"
-  >
-    <a v-if="closeButton" class="alert__close" @click="$emit('close')">
-      <i class="fas fa-times"></i>
-    </a>
+  <div class="alert" :class="classes">
+    <i v-if="type !== 'loading'" class="alert__icon" :class="iconClass"></i>
+    <i v-else class="alert__loading"></i>
 
-    <div v-if="loading" class="alert__icon">
-      <div class="loading alert__icon-loading"></div>
+    <div class="alert__content">
+      <div v-if="hasTitleSlot" class="alert__title">
+        <slot name="title" />
+      </div>
+      <p class="alert__message"><slot /></p>
+
+      <div v-if="hasActionsSlot" class="alert__actions">
+        <slot name="actions" />
+      </div>
     </div>
 
-    <div v-if="icon && !loading" class="alert__icon">
-      <i v-if="icon" class="fas" :class="`fa-${icon}`" />
-    </div>
-
-    <div v-if="!minimal && title" class="alert__title">{{ title }}</div>
-
-    <p class="alert__content"><slot /></p>
+    <button class="alert__close" @click="$emit('close')">
+      <i class="iconoir-cancel"></i>
+    </button>
   </div>
 </template>
 
@@ -31,44 +24,74 @@
 export default {
   props: {
     type: {
+      required: true,
+      type: String,
+      default: null,
+      validator: function (value) {
+        return [
+          'info-neutral',
+          'info-primary',
+          'warning',
+          'error',
+          'success',
+          'loading',
+        ].includes(value)
+      },
+    },
+    position: {
       required: false,
       type: String,
-      default: '',
+      default: null,
+      validator: function (value) {
+        return ['top', 'bottom'].includes(value)
+      },
     },
-    simple: {
-      required: false,
-      type: Boolean,
-      default: false,
+  },
+  computed: {
+    hasTitleSlot() {
+      return !!this.$slots.title
     },
-    shadow: {
-      required: false,
-      type: Boolean,
-      default: false,
+    hasActionsSlot() {
+      return !!this.$slots.actions
     },
-    title: {
-      required: false,
-      type: String,
-      default: '',
+    classes() {
+      const classObj = {
+        [`alert--${this.type}`]: this.type,
+        [`alert--${this.position}`]: this.position,
+      }
+      return classObj
     },
-    icon: {
-      required: false,
-      type: String,
-      default: '',
+    isWarningAlert() {
+      return this.type === 'warning'
     },
-    loading: {
-      required: false,
-      type: Boolean,
-      default: false,
+    isErrorAlert() {
+      return this.type === 'error'
     },
-    closeButton: {
-      required: false,
-      type: Boolean,
-      default: false,
+    isInfoAlert() {
+      return this.type === 'info-neutral' || this.type === 'info-primary'
     },
-    minimal: {
-      required: false,
-      type: Boolean,
-      default: false,
+    isSuccessAlert() {
+      return this.type === 'success'
+    },
+    iconClass() {
+      const classObj = {
+        'iconoir-warning-triangle': this.isWarningAlert,
+        'iconoir-info-empty': this.isInfoAlert,
+        'iconoir-check-circle': this.isSuccessAlert,
+        'iconoir-warning-circle': this.isErrorAlert,
+      }
+      return classObj
+    },
+  },
+  methods: {
+    customBind(ctaOptions) {
+      const attr = {}
+      if (ctaOptions.external) {
+        attr.href = ctaOptions.link
+        attr.target = '_blank'
+        attr.rel = 'nofollow noopener noreferrer'
+      } else attr.to = ctaOptions.link
+      return attr
     },
   },
 }

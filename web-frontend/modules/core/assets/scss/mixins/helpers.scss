@@ -82,3 +82,10 @@
     }
   }
 }
+
+@mixin padding($top, $right, $bottom: $top, $left: $right) {
+  padding-top: $top;
+  padding-left: $left;
+  padding-bottom: $bottom;
+  padding-right: $right;
+}

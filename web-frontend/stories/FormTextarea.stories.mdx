@@ -1,0 +1,128 @@
+import { Meta, Story, Props, Canvas } from '@storybook/addon-docs/blocks'
+import { config, withDesign } from 'storybook-addon-designs'
+import { action } from '@storybook/addon-actions'
+
+import FormTextarea from '@baserow/modules/core/components/FormTextarea'
+
+<Meta
+    title="Baserow/Form/Textarea"
+    component={FormTextarea}
+    parameters={{
+        backgrounds: {
+            default: 'light',
+            values: [
+                { name: 'white', value: '#ffffff' },
+                { name: 'light', value: '#eeeeee' },
+                { name: 'dark', value: '#222222' },
+            ],
+        },
+    }}
+    decorators={[withDesign]}
+    argTypes={{
+        label: {
+            control: {
+                type: 'text',
+            },
+            defaultValue: 'Label',
+        },
+        placeholder: {
+            control: {
+                type: 'text',
+            },
+            defaultValue: 'Placeholder text...',
+        },
+        required: {
+            control: {
+                type: 'boolean',
+                options: [true, false],
+            },
+            defaultValue: false,
+        },
+    }}
+/>
+
+# Form Textarea
+
+export const Template = (args, { argTypes }) => ({
+    components: { FormTextarea },
+    props: Object.keys(argTypes),
+    template: `
+    <FormTextarea v-bind="$props">
+        <template v-slot>${args.default}</template>
+    </FormTextarea>
+    `,
+})
+
+export const designConfig = {
+    type: 'figma',
+    url: 'https://www.figma.com/file/W7R2rQW7ohsZMeHRfEcPFW/Design-Library?node-id=1%3A87&mode=dev',
+}
+
+<Canvas>
+    <Story
+        name="Default"
+        parameters={{
+            design: config(designConfig),
+        }}
+        args={{
+            id: 'textarea-story-1',
+            helperText:
+                'We’ll use this addressssssss if we need to contact you about your account.',
+        }}
+    >
+        {Template.bind({})}
+    </Story>
+    <Story
+        name="Small label"
+        parameters={{
+            design: config(designConfig),
+        }}
+        args={{
+            id: 'textarea-story-2',
+            smallLabel: true,
+            helperText:
+                'We’ll use this address if we need to contact you about your account.',
+        }}
+    >
+        {Template.bind({})}
+    </Story>
+    <Story
+        name="Disabled"
+        parameters={{
+            design: config(designConfig),
+        }}
+        args={{
+            id: 'textarea-story-3',
+            disabled: true,
+            helperText:
+                'We’ll use this address if we need to contact you about your account.',
+        }}
+    >
+        {Template.bind({})}
+    </Story>
+    <Story
+        name="Error"
+        parameters={{
+            design: config(designConfig),
+        }}
+        args={{
+            id: 'textarea-story-4',
+            helperText:
+                'We’ll use this address if we need to contact you about your account.',
+            error: 'This is an error message',
+            iconRight: 'db',
+        }}
+    >
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+## Example
+
+```javascript
+<FormTextarea>Label</FormTextarea>
+```
+
+## Props
+
+<Props of={FormTextarea} />

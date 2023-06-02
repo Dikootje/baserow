@@ -1,0 +1,26 @@
+.chips {
+  display: inline-flex;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  background: rgba(78, 92, 254, 0.06);
+  border: 1px solid $color-neutral-400;
+  cursor: pointer;
+  @include rounded($radius-md);
+
+  &:focus {
+    box-shadow: rgb(255, 255, 255) 0 0 0 2px, rgb(7, 8, 16) 0 0 0 4px;
+    background: $white;
+  }
+
+  &:hover,
+  &:active,
+  .active {
+    border: 1px solid $color-blue-300;
+    background: rgba(78, 92, 254, 0.06);
+  }
+}

@@ -187,5 +187,8 @@ export default function CoreModule(options) {
   this.options.router.middleware.push('authentication')
 
   // Add the main scss file which contains all the generic scss code.
-  this.options.css.push(path.resolve(__dirname, 'assets/scss/default.scss'))
+  this.options.css.push(
+    path.resolve(__dirname, 'assets/scss/default.scss'),
+    'iconoir/css/iconoir.css'
+  )
 }

@@ -67,7 +67,7 @@
     &::after {
       @extend .fas;
 
-      content: fa-content($fa-var-check-circle);
+      // content: fa-content($fa-var-check-circle);
       width: 32px;
       line-height: 20px;
       text-align: center;

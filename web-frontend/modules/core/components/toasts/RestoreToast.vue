@@ -1,28 +1,29 @@
 <template>
-  <button
-    class="button toast__undo-delete"
-    :disabled="loading"
-    :class="{
-      'button--loading': loading,
-      'toast__undo-delete--pulsing': pulsing,
-    }"
-    @click="restore"
-  >
-    <i class="button__icon fas fa-undo"></i>
-    {{
-      $t('restoreToast.restore', {
-        type: $t('trashType.' + toast.data.trash_item_type),
-      })
-    }}
-  </button>
+  <Toast @close="close">
+    <template #actions>
+      <ButtonText size="small" :loading="loading" :icon="undo" @click="restore">
+        {{
+          $t('restoreToast.restore', {
+            type: $t('trashType.' + toast.data.trash_item_type),
+          })
+        }}
+      </ButtonText>
+    </template>
+  </Toast>
 </template>
 
 <script>
+import Toast from '@baserow/modules/core/components/toasts/Toast'
+import ButtonText from '@baserow/modules/core/components/ButtonText'
 import TrashService from '@baserow/modules/core/services/trash'
 import { notifyIf } from '@baserow/modules/core/utils/error'
 
 export default {
   name: 'RestoreToast',
+  components: {
+    Toast,
+    ButtonText,
+  },
   props: {
     toast: {
       type: Object,
@@ -37,9 +38,6 @@ export default {
   },
   mounted() {
     setTimeout(() => {
-      this.pulsing = false
-    }, 2000)
-    setTimeout(() => {
       this.close()
     }, 5000)
   },
@@ -49,7 +47,6 @@ export default {
     },
     async restore() {
       this.loading = true
-      this.pulsing = false
       try {
         await TrashService(this.$client).restore(this.toast.data)
       } catch (error) {

@@ -24,7 +24,7 @@
   &.active::before {
     font-family: $font-awesome-font-family;
     font-weight: $font-awesome-font-weight;
-    content: fa-content($fa-var-check);
+    // content: fa-content($fa-var-check);
     color: $color-primary-900;
     text-align: center;
     font-size: 13px;
