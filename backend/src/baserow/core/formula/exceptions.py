@@ -22,3 +22,7 @@ def formula_exception_handler(e):
         f"developers at https://baserow.io/contact."
     )
     logger.exception(e)
+
+
+class DispatchContextError(Exception):
+    """Raised an error related to data ledger context is raised."""
