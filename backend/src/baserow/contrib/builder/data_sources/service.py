@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from django.contrib.auth.models import AbstractUser
 from django.utils import translation
@@ -10,6 +10,7 @@ from baserow.contrib.builder.data_sources.models import DataSource
 from baserow.contrib.builder.data_sources.operations import (
     CreateDataSourceOperationType,
     DeleteDataSourceOperationType,
+    DispatchDataSourceOperationType,
     ListDataSourcesPageOperationType,
     ReadDataSourceOperationType,
     UpdateDataSourceOperationType,
@@ -24,6 +25,7 @@ from baserow.contrib.builder.data_sources.signals import (
 from baserow.contrib.builder.data_sources.types import DataSourceForUpdate
 from baserow.contrib.builder.pages.models import Page
 from baserow.core.exceptions import CannotCalculateIntermediateOrder
+from baserow.core.formula.data_ledger import DataLedger
 from baserow.core.handler import CoreHandler
 from baserow.core.services.registries import ServiceType
 
@@ -72,7 +74,7 @@ class DataSourceService:
         user_data_sources = CoreHandler().filter_queryset(
             user,
             ListDataSourcesPageOperationType.type,
-            DataSource.objects.all(),
+            DataSource.objects.filter(page=page),
             workspace=page.builder.workspace,
             context=page,
         )
@@ -211,6 +213,27 @@ class DataSourceService:
         data_source_deleted.send(
             self, data_source_id=data_source.id, page=page, user=user
         )
+
+    def dispatch_data_source(
+        self, user, data_source: DataSource, data_ledger: DataLedger
+    ) -> Any:
+        """
+        Dispatch the service related to the data_source if the user has the permission.
+
+        :param user: The current user.
+        :param data_source: The data source to be dispatched.
+        :param data_ledger: The data ledger used to resolve formulas.
+        :return: The result of dispatching the data source.
+        """
+
+        CoreHandler().check_permissions(
+            user,
+            DispatchDataSourceOperationType.type,
+            workspace=data_source.page.builder.workspace,
+            context=data_source,
+        )
+
+        return self.handler.dispatch_data_source(data_source, data_ledger)
 
     def move_data_source(
         self,

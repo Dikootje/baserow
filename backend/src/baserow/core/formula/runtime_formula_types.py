@@ -2,7 +2,6 @@ import abc
 from typing import List, Optional
 
 from baserow.core.registry import Instance
-from baserow.core.utils import get_nested_value_from_dict
 from baserow.formula.parser.exceptions import (
     InvalidFormulaArgumentType,
     InvalidNumberOfArguments,
@@ -12,7 +11,7 @@ from baserow.formula.types.argument_types import (
     NumberBaserowRuntimeFormulaArgumentType,
     TextBaserowRuntimeFormulaArgumentType,
 )
-from baserow.formula.types.types import (
+from baserow.formula.types import (
     RuntimeFormulaArg,
     RuntimeFormulaArgs,
     RuntimeFormulaContext,
@@ -141,7 +140,7 @@ class RuntimeGet(RuntimeFormulaFunction):
     args = [TextBaserowRuntimeFormulaArgumentType()]
 
     def execute(self, context: RuntimeFormulaContext, args: RuntimeFormulaArgs):
-        return get_nested_value_from_dict(context, args[0])
+        return context[args[0]]
 
 
 class RuntimeAdd(RuntimeFormulaFunction):

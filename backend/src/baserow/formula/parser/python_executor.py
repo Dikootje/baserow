@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from _decimal import Decimal
 
@@ -25,8 +25,9 @@ class FunctionCollection(ABC):
 
 
 class BaserowPythonExecutor(BaserowFormulaVisitor):
-    def __init__(self, functions: FunctionCollection, context: Dict[str, Any] = None):
-        self.functions = functions
+    def __init__(
+        self, functions: FunctionCollection, context: Optional[Dict[str, Any]] = None
+    ):
         self.context = context
 
     def visitRoot(self, ctx: BaserowFormula.RootContext):

@@ -1,5 +1,9 @@
 from django.contrib.auth import get_user_model
 
+from baserow.contrib.builder.data_sources.operations import (
+    DispatchDataSourceOperationType,
+    ListDataSourcesPageOperationType,
+)
 from baserow.contrib.builder.elements.operations import ListElementsPageOperationType
 from baserow.contrib.builder.models import Builder
 from baserow.core.operations import ReadApplicationOperationType
@@ -13,7 +17,7 @@ User = get_user_model()
 
 class AllowPublicBuilderManagerType(PermissionManagerType):
     """
-    Allow read operations on public builders for all users even anonymous.
+    Allow some read operations on public builders for all users even anonymous.
     """
 
     type = "allow_public_builder"
@@ -21,10 +25,20 @@ class AllowPublicBuilderManagerType(PermissionManagerType):
 
     def check_multiple_permissions(self, checks, workspace=None, include_trash=False):
         result = {}
+
         for check in checks:
             operation_type = operation_type_registry.get(check.operation_name)
-            if operation_type.type == ListElementsPageOperationType.type:
+            # Public elements and public data sources
+            if operation_type.type in [
+                ListElementsPageOperationType.type,
+                ListDataSourcesPageOperationType.type,
+            ]:
                 builder = check.context.builder
+
+            # Data sources dispatch
+            elif operation_type.type == DispatchDataSourceOperationType.type:
+                builder = check.context.page.builder
+            # Builder
             elif (
                 operation_type.type == ReadApplicationOperationType.type
                 and isinstance(check.context.specific, Builder)
@@ -39,7 +53,6 @@ class AllowPublicBuilderManagerType(PermissionManagerType):
             ):
                 # it's a public builder, we allow it.
                 result[check] = True
-
         return result
 
     def get_permissions_object(self, actor, workspace=None):

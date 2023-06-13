@@ -48,6 +48,13 @@ export default {
       data.builder = builder
       data.page = page
 
+      page.path_params.forEach(({ name, type }) => {
+        store.dispatch('pageParameter/setParameter', {
+          name,
+          value: type === 'numeric' ? 1 : 'test',
+        })
+      })
+
       await store.dispatch('element/fetch', { page })
     } catch (e) {
       // In case of a network error we want to fail hard.

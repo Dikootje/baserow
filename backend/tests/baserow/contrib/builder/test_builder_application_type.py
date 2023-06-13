@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 
 from baserow.contrib.builder.application_types import BuilderApplicationType
@@ -35,6 +37,20 @@ def test_builder_application_export(data_fixture):
     element2 = data_fixture.create_builder_paragraph_element(page=page1)
     element3 = data_fixture.create_builder_heading_element(page=page2)
 
+    integration = data_fixture.create_local_baserow_integration(
+        application=builder, authorized_user=user, name="test"
+    )
+
+    datasource1 = data_fixture.create_builder_local_baserow_get_row_data_source(
+        page=page1, user=user, name="source 1", integration=integration
+    )
+    datasource2 = data_fixture.create_builder_local_baserow_get_row_data_source(
+        page=page2, user=user, name="source 2", integration=integration
+    )
+    datasource3 = data_fixture.create_builder_local_baserow_list_rows_data_source(
+        page=page2, user=user, name="source 3", integration=integration
+    )
+
     serialized = BuilderApplicationType().export_serialized(
         builder, ImportExportConfig(include_permission_data=True)
     )
@@ -47,6 +63,20 @@ def test_builder_application_export(data_fixture):
                 "order": page1.order,
                 "path": page1.path,
                 "path_params": page1.path_params,
+                "data_sources": [
+                    {
+                        "id": datasource1.id,
+                        "name": "source 1",
+                        "order": Decimal("1.00000000000000000000"),
+                        "service": {
+                            "id": datasource1.service.id,
+                            "integration_id": integration.id,
+                            "row_id": "",
+                            "table_id": None,
+                            "type": "local_baserow_get_row",
+                        },
+                    },
+                ],
                 "elements": [
                     {
                         "id": element1.id,
@@ -73,6 +103,31 @@ def test_builder_application_export(data_fixture):
                 "order": page2.order,
                 "path": page2.path,
                 "path_params": page2.path_params,
+                "data_sources": [
+                    {
+                        "id": datasource2.id,
+                        "name": "source 2",
+                        "order": Decimal("1.00000000000000000000"),
+                        "service": {
+                            "id": datasource2.service.id,
+                            "integration_id": integration.id,
+                            "row_id": "",
+                            "table_id": None,
+                            "type": "local_baserow_get_row",
+                        },
+                    },
+                    {
+                        "id": datasource3.id,
+                        "name": "source 3",
+                        "order": Decimal("2.00000000000000000000"),
+                        "service": {
+                            "id": datasource3.service.id,
+                            "integration_id": integration.id,
+                            "table_id": None,
+                            "type": "local_baserow_list_rows",
+                        },
+                    },
+                ],
                 "elements": [
                     {
                         "id": element3.id,
@@ -84,6 +139,15 @@ def test_builder_application_export(data_fixture):
                         "level": element3.level,
                     },
                 ],
+            },
+        ],
+        "integrations": [
+            {
+                "authorized_user_username": user.username,
+                "id": integration.id,
+                "name": "test",
+                "order": Decimal("1.00000000000000000000"),
+                "type": "local_baserow",
             },
         ],
         "id": builder.id,
@@ -116,6 +180,25 @@ IMPORT_REFERENCE = {
                     "value": "",
                 },
             ],
+            "data_sources": [
+                {
+                    "id": 4,
+                    "name": "source 0",
+                    "order": Decimal("1.00000000000000000000"),
+                    "service": None,
+                },
+                {
+                    "id": 5,
+                    "name": "source 1",
+                    "order": Decimal("2.00000000000000000000"),
+                    "service": {
+                        "id": 17,
+                        "integration_id": None,
+                        "table_id": None,
+                        "type": "local_baserow_list_rows",
+                    },
+                },
+            ],
         },
         {
             "id": 998,
@@ -132,6 +215,40 @@ IMPORT_REFERENCE = {
                     "level": 1,
                 }
             ],
+            "data_sources": [
+                {
+                    "id": 1,
+                    "name": "source 2",
+                    "order": Decimal("1.00000000000000000000"),
+                    "service": {
+                        "id": 1,
+                        "integration_id": 42,
+                        "row_id": "",
+                        "table_id": None,
+                        "type": "local_baserow_get_row",
+                    },
+                },
+                {
+                    "id": 3,
+                    "name": "source 3",
+                    "order": Decimal("2.00000000000000000000"),
+                    "service": {
+                        "id": 2,
+                        "integration_id": 42,
+                        "table_id": None,
+                        "type": "local_baserow_list_rows",
+                    },
+                },
+            ],
+        },
+    ],
+    "integrations": [
+        {
+            "authorized_user_username": "test@baserow.io",
+            "id": 42,
+            "name": "test",
+            "order": Decimal("1.00000000000000000000"),
+            "type": "local_baserow",
         },
     ],
     "id": 999,
@@ -143,7 +260,7 @@ IMPORT_REFERENCE = {
 
 @pytest.mark.django_db
 def test_builder_application_import(data_fixture):
-    user = data_fixture.create_user()
+    user = data_fixture.create_user(email="test@baserow.io")
     workspace = data_fixture.create_workspace(user=user)
 
     config = ImportExportConfig(include_permission_data=True)
@@ -154,12 +271,21 @@ def test_builder_application_import(data_fixture):
     assert builder.id != IMPORT_REFERENCE["id"]
     assert builder.page_set.count() == 2
 
-    assert builder.page_set.count() == 2
+    assert builder.integrations.count() == 1
+    first_integration = builder.integrations.first().specific
+    assert first_integration.authorized_user.id == user.id
 
     [page1, page2] = builder.page_set.all()
 
     assert page1.element_set.count() == 2
     assert page2.element_set.count() == 1
+
+    assert page1.datasource_set.count() == 2
+    assert page2.datasource_set.count() == 2
+
+    first_data_source = page2.datasource_set.first()
+    assert first_data_source.name == "source 2"
+    assert first_data_source.service.integration.id == first_integration.id
 
     [element1, element2] = specific_iterator(page1.element_set.all())
 

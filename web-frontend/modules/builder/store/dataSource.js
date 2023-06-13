@@ -1,4 +1,5 @@
 import DataSourceService from '@baserow/modules/builder/services/dataSource'
+import PublishedBuilderService from '@baserow/modules/builder/services/publishedBuilder'
 
 const state = {
   // The dataSources currently loaded
@@ -182,6 +183,19 @@ const actions = {
     const { data: dataSources } = await DataSourceService(
       this.$client
     ).fetchAll(page.id)
+
+    await Promise.all(
+      dataSources.map((dataSource) => dispatch('forceCreate', { dataSource }))
+    )
+
+    return dataSources
+  },
+  async fetchPublished({ dispatch, commit }, { page }) {
+    commit('CLEAR_ITEMS')
+
+    const { data: dataSources } = await PublishedBuilderService(
+      this.$client
+    ).fetchDataSources(page.id)
 
     await Promise.all(
       dataSources.map((dataSource) => dispatch('forceCreate', { dataSource }))

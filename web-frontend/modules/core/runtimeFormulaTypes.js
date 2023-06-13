@@ -122,7 +122,7 @@ export class RuntimeGet extends RuntimeFormulaFunction {
   }
 
   execute(context, args) {
-    return _.get(context, args[0])
+    return context.get(args[0])
   }
 }
 

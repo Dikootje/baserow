@@ -1,11 +1,15 @@
-from typing import Iterable, Optional, Union
+from typing import Any, Iterable, Optional, Union
 
 from django.db.models import QuerySet
 
-from baserow.contrib.builder.data_sources.exceptions import DataSourceDoesNotExist
+from baserow.contrib.builder.data_sources.exceptions import (
+    DataSourceDoesNotExist,
+    DataSourceImproperlyConfigured,
+)
 from baserow.contrib.builder.data_sources.models import DataSource
 from baserow.contrib.builder.pages.models import Page
 from baserow.core.db import specific_iterator
+from baserow.core.formula.data_ledger import DataLedger
 from baserow.core.services.handler import ServiceHandler
 from baserow.core.services.models import Service
 from baserow.core.services.registries import ServiceType
@@ -38,6 +42,31 @@ class DataSourceHandler:
             data_source = queryset.select_related(
                 "page", "page__builder", "page__builder__workspace", "service"
             ).get(id=data_source_id)
+        except DataSource.DoesNotExist:
+            raise DataSourceDoesNotExist()
+
+        return data_source
+
+    def get_data_source_by_name(
+        self, data_source_name: str, base_queryset: Optional[QuerySet] = None
+    ) -> DataSource:
+        """
+        Returns a data_source instance from the database.
+
+        :param data_source_name: The name of the data_source.
+        :param base_queryset: The base queryset to use to build the query.
+        :raises DataSourceDoesNotExist: If the data_source can't be found.
+        :return: The data_source instance.
+        """
+
+        queryset = (
+            base_queryset if base_queryset is not None else DataSource.objects.all()
+        )
+
+        try:
+            data_source = queryset.select_related(
+                "page", "page__builder", "page__builder__workspace", "service"
+            ).get(name=data_source_name)
         except DataSource.DoesNotExist:
             raise DataSourceDoesNotExist()
 
@@ -224,6 +253,26 @@ class DataSourceHandler:
         """
 
         data_source.delete()
+
+    def dispatch_data_source(
+        self, data_source: DataSource, data_ledger: DataLedger
+    ) -> Any:
+        """
+        Dispatch the service related to the data_source.
+
+        :param data_source: The data source to be dispatched.
+        :param data_ledger: The data ledger used to resolve formulas.
+        :raises DataSourceImproperlyConfigured: If the data source is
+          not properly configured.
+        :return: The result of dispatching the data source.
+        """
+
+        if not data_source.service:
+            raise DataSourceImproperlyConfigured("The service type is missing.")
+
+        service = data_source.service.specific
+
+        return self.service_handler.dispatch_service(service, data_ledger)
 
     def move_data_source(
         self, data_source: DataSourceForUpdate, before: Optional[DataSource] = None

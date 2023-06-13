@@ -64,6 +64,23 @@ export default {
 
     const [page, path, params] = found
 
+    Object.entries(params).forEach(([name, value]) => {
+      context.store.dispatch('pageParameter/setParameter', {
+        name,
+        value,
+      })
+    })
+
+    if (mode === 'public') {
+      context.store.dispatch('dataSource/fetchPublished', {
+        page,
+      })
+    } else {
+      context.store.dispatch('dataSource/fetch', {
+        page,
+      })
+    }
+
     return {
       builder,
       page,

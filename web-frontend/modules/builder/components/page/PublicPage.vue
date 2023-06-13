@@ -10,7 +10,7 @@
 
 <script>
 import PageContent from '@baserow/modules/builder/components/page/PageContent'
-import PublicBuilderService from '@baserow/modules/builder/services/publishedDomain.js'
+import PublicBuilderService from '@baserow/modules/builder/services/publishedBuilder'
 
 export default {
   components: { PageContent },
@@ -32,9 +32,9 @@ export default {
     return { elements: [] }
   },
   async fetch() {
-    const { data } = await PublicBuilderService(
-      this.$client
-    ).fetchPublicBuilderElements(this.page)
+    const { data } = await PublicBuilderService(this.$client).fetchElements(
+      this.page
+    )
 
     this.elements = data
   },

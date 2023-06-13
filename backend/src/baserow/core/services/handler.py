@@ -1,11 +1,15 @@
-from typing import Iterable, Optional, Union, cast
+from typing import Any, Iterable, Optional, Union, cast
 
 from django.db.models import QuerySet
 
 from baserow.contrib.builder.pages.models import Page
 from baserow.core.db import specific_iterator
+from baserow.core.formula.data_ledger import DataLedger
 from baserow.core.integrations.models import Integration
-from baserow.core.services.exceptions import ServiceDoesNotExist
+from baserow.core.services.exceptions import (
+    ServiceDoesNotExist,
+    ServiceImproperlyConfigured,
+)
 from baserow.core.services.models import Service
 from baserow.core.services.registries import ServiceType
 from baserow.core.utils import extract_allowed
@@ -111,15 +115,6 @@ class ServiceHandler:
 
         return service
 
-    def delete_service(self, service: Service):
-        """
-        Deletes an service.
-
-        :param service: The to-be-deleted service.
-        """
-
-        service.delete()
-
     def update_service(
         self, service_type: ServiceType, service: ServiceForUpdate, **kwargs
     ) -> Service:
@@ -143,3 +138,26 @@ class ServiceHandler:
         service.save()
 
         return service
+
+    def delete_service(self, service: Service):
+        """
+        Deletes an service.
+
+        :param service: The to-be-deleted service.
+        """
+
+        service.delete()
+
+    def dispatch_service(self, service: Service, data_ledger: DataLedger) -> Any:
+        """
+        Dispatch the given service.
+
+        :param service: The service to be dispatched.
+        :param data_ledger: The data ledger used to resolve formulas.
+        :return: The result of dispatching the service.
+        """
+
+        if service.integration is None:
+            raise ServiceImproperlyConfigured("The integration property is missing.")
+
+        return service.get_type().dispatch(service, data_ledger)

@@ -17,27 +17,25 @@
         </Dropdown>
       </div>
     </FormElement>
-    <FormElement class="control">
-      <label class="control__label">
-        {{ $t('headingElementForm.textTitle') }}
-      </label>
-      <div class="control__elements">
-        <input
-          v-model="values.value"
-          type="text"
-          class="input"
-          :placeholder="$t('elementForms.textInputPlaceholder')"
-        />
-      </div>
-    </FormElement>
+    <FormulaInput
+      v-model="values.value"
+      :label="$t('headingElementForm.textTitle')"
+      :placeholder="$t('elementForms.textInputPlaceholder')"
+      :error="
+        !$v.values.value.validFormula ? $t('elementForms.invalidFormula') : ''
+      "
+    />
   </form>
 </template>
 
 <script>
 import form from '@baserow/modules/core/mixins/form'
+import FormulaInput from '@baserow/modules/core/components/formula/FormulaInput'
+import { isValidFormula } from '@baserow/formula'
 
 export default {
   name: 'HeaderElementForm',
+  components: { FormulaInput },
   mixins: [form],
   props: {},
   data() {
@@ -50,6 +48,13 @@ export default {
         name: this.$t('headingElementForm.headingName', { level: level + 1 }),
         value: level + 1,
       })),
+    }
+  },
+  validations() {
+    return {
+      values: {
+        value: { validFormula: isValidFormula },
+      },
     }
   },
 }

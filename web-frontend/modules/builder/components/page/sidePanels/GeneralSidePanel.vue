@@ -5,6 +5,7 @@
     ref="elementForm"
     class="element-form"
     :builder="builder"
+    :page="page"
     :default-values="defaultValues"
     @values-changed="onChange($event)"
   />

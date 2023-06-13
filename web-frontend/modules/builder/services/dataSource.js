@@ -26,5 +26,14 @@ export default (client) => {
         before_id: beforeId,
       })
     },
+    dispatch(dataSourceId, params) {
+      // Using POST Http method here is not Restful but it the cleanest way to send
+      // data with the call without relying on GET parameter and serialization of
+      // complex object.
+      return client.post(
+        `builder/data-source/${dataSourceId}/dispatch/`,
+        params
+      )
+    },
   }
 }

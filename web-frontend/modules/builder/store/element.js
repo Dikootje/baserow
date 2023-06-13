@@ -15,6 +15,10 @@ const updateContext = {
 }
 
 const mutations = {
+  SET_ITEMS(state, { elements }) {
+    state.selected = null
+    state.elements = elements
+  },
   ADD_ITEM(state, { element, beforeId = null }) {
     if (beforeId === null) {
       state.elements.push(element)
@@ -190,15 +194,11 @@ const actions = {
     }
   },
   async fetch({ dispatch, commit }, { page }) {
-    commit('CLEAR_ITEMS')
-
     const { data: elements } = await ElementService(this.$client).fetchAll(
       page.id
     )
 
-    await Promise.all(
-      elements.map((element) => dispatch('forceCreate', { element }))
-    )
+    commit('SET_ITEMS', { elements })
 
     return elements
   },

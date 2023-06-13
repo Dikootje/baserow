@@ -14,6 +14,7 @@ from baserow.api.decorators import map_exceptions, validate_body
 from baserow.api.jobs.serializers import JobSerializer
 from baserow.api.schemas import CLIENT_SESSION_ID_SCHEMA_PARAMETER, get_error_schema
 from baserow.api.utils import DiscriminatorCustomFieldsMappingSerializer
+from baserow.contrib.builder.api.data_sources.serializers import DataSourceSerializer
 from baserow.contrib.builder.api.domains.errors import (
     ERROR_DOMAIN_DOES_NOT_EXIST,
     ERROR_DOMAIN_NOT_IN_BUILDER,
@@ -25,6 +26,7 @@ from baserow.contrib.builder.api.domains.serializers import (
     PublicBuilderSerializer,
 )
 from baserow.contrib.builder.api.pages.errors import ERROR_PAGE_DOES_NOT_EXIST
+from baserow.contrib.builder.data_sources.service import DataSourceService
 from baserow.contrib.builder.domains.exceptions import (
     DomainDoesNotExist,
     DomainNotInBuilder,
@@ -44,8 +46,9 @@ from baserow.contrib.builder.service import BuilderService
 from baserow.core.exceptions import ApplicationDoesNotExist
 from baserow.core.handler import CoreHandler
 from baserow.core.jobs.registries import job_type_registry
+from baserow.core.services.registries import service_type_registry
 
-from .serializers import PublicElementSerializer
+from .serializers import PublicDataSourceSerializer, PublicElementSerializer
 
 
 class DomainsView(APIView):
@@ -349,54 +352,6 @@ class PublicBuilderByIdView(APIView):
         return Response(PublicBuilderSerializer(builder).data)
 
 
-class PublicElementsView(APIView):
-    permission_classes = (AllowAny,)
-
-    @extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name="page_id",
-                location=OpenApiParameter.PATH,
-                type=OpenApiTypes.INT,
-                description="Returns the elements of the page related to the "
-                "provided Id.",
-            )
-        ],
-        tags=["Builder elements"],
-        operation_id="list_public_builder_page_elements",
-        description=(
-            "Lists all the elements of the page related to the provided parameter. "
-            "If the user is Anonymous, the page must belong to a published builder "
-            "instance to being accessible."
-        ),
-        responses={
-            200: DiscriminatorCustomFieldsMappingSerializer(
-                element_type_registry, PublicElementSerializer, many=True
-            ),
-            404: get_error_schema(["ERROR_PAGE_DOES_NOT_EXIST"]),
-        },
-    )
-    @map_exceptions(
-        {
-            PageDoesNotExist: ERROR_PAGE_DOES_NOT_EXIST,
-        }
-    )
-    def get(self, request, page_id):
-        """
-        Responds with a list of serialized elements that belongs to the given page id.
-        """
-
-        page = PageHandler().get_page(page_id)
-
-        elements = ElementService().get_elements(request.user, page)
-
-        data = [
-            element_type_registry.get_serializer(element, PublicElementSerializer).data
-            for element in elements
-        ]
-        return Response(data)
-
-
 class AsyncPublishDomainView(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -453,3 +408,104 @@ class AsyncPublishDomainView(APIView):
 
         serializer = job_type_registry.get_serializer(job, JobSerializer)
         return Response(serializer.data, status=HTTP_202_ACCEPTED)
+
+
+class PublicElementsView(APIView):
+    permission_classes = (AllowAny,)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="page_id",
+                location=OpenApiParameter.PATH,
+                type=OpenApiTypes.INT,
+                description="Returns the elements of the page related to the "
+                "provided Id.",
+            )
+        ],
+        tags=["Builder elements"],
+        operation_id="list_public_builder_page_elements",
+        description=(
+            "Lists all the elements of the page related to the provided parameter. "
+            "If the user is Anonymous, the page must belong to a published builder "
+            "instance to being accessible."
+        ),
+        responses={
+            200: DiscriminatorCustomFieldsMappingSerializer(
+                element_type_registry, PublicElementSerializer, many=True
+            ),
+            404: get_error_schema(["ERROR_PAGE_DOES_NOT_EXIST"]),
+        },
+    )
+    @map_exceptions(
+        {
+            PageDoesNotExist: ERROR_PAGE_DOES_NOT_EXIST,
+        }
+    )
+    def get(self, request, page_id):
+        """
+        Responds with a list of serialized elements that belongs to the given page id.
+        """
+
+        page = PageHandler().get_page(page_id)
+
+        elements = ElementService().get_elements(request.user, page)
+
+        data = [
+            element_type_registry.get_serializer(element, PublicElementSerializer).data
+            for element in elements
+        ]
+        return Response(data)
+
+
+class PublicDataSourcesView(APIView):
+    permission_classes = (AllowAny,)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="page_id",
+                location=OpenApiParameter.PATH,
+                type=OpenApiTypes.INT,
+                description="Returns only the data_sources of the page related to the "
+                "provided Id if the related builder is public.",
+            )
+        ],
+        tags=["Builder data sources"],
+        operation_id="list_public_builder_page_data_sources",
+        description=(
+            "Lists all the data_sources of the page related to the provided parameter "
+            "if the builder is public."
+        ),
+        responses={
+            200: DiscriminatorCustomFieldsMappingSerializer(
+                service_type_registry, DataSourceSerializer, many=True
+            ),
+            404: get_error_schema(["ERROR_PAGE_DOES_NOT_EXIST"]),
+        },
+    )
+    @map_exceptions(
+        {
+            PageDoesNotExist: ERROR_PAGE_DOES_NOT_EXIST,
+        }
+    )
+    def get(self, request, page_id):
+        """
+        Responds with a list of serialized data_sources that belong to the page if the
+        user has access to it.
+        """
+
+        page = PageHandler().get_page(page_id)
+
+        data_sources = DataSourceService().get_data_sources(request.user, page)
+
+        data = [
+            service_type_registry.get_serializer(
+                data_source.service,
+                PublicDataSourceSerializer,
+                context={"data_source": data_source},
+            ).data
+            for data_source in data_sources
+            if data_source.service and data_source.service.integration_id
+        ]
+        return Response(data)

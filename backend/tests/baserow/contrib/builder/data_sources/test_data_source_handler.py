@@ -128,6 +128,41 @@ def test_update_data_source_change_type(data_fixture):
 
 
 @pytest.mark.django_db
+def test_dispatch_data_source(data_fixture):
+    user = data_fixture.create_user()
+    table, fields, rows = data_fixture.build_table(
+        user=user,
+        columns=[
+            ("Name", "text"),
+            ("My Color", "text"),
+        ],
+        rows=[
+            ["BMW", "Blue"],
+            ["Audi", "Orange"],
+            ["Volkswagen", "White"],
+            ["Volkswagen", "Green"],
+        ],
+    )
+    builder = data_fixture.create_builder_application(user=user)
+    integration = data_fixture.create_local_baserow_integration(
+        user=user, application=builder
+    )
+    page = data_fixture.create_builder_page(user=user, builder=builder)
+    data_source = data_fixture.create_builder_local_baserow_get_row_data_source(
+        user=user, page=page, integration=integration, table=table, row_id="2"
+    )
+
+    result = DataSourceHandler().dispatch_data_source(data_source, {})
+
+    assert result == {
+        "id": rows[1].id,
+        "order": "1.00000000000000000000",
+        "Name": "Audi",
+        "My Color": "Orange",
+    }
+
+
+@pytest.mark.django_db
 def test_update_data_source_invalid_values(data_fixture):
     data_source = data_fixture.create_builder_local_baserow_get_row_data_source()
 

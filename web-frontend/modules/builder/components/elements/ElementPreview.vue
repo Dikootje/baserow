@@ -24,8 +24,9 @@
     <PageRootElement
       :element="element"
       :builder="builder"
-      :mode="'editing'"
-    ></PageRootElement>
+      :page="page"
+      mode="editing"
+    />
     <InsertElementButton
       v-if="active"
       class="element-preview__insert--bottom"
@@ -46,6 +47,10 @@ export default {
   inject: ['builder'],
   props: {
     element: {
+      type: Object,
+      required: true,
+    },
+    page: {
       type: Object,
       required: true,
     },
