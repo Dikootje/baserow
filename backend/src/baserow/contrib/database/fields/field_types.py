@@ -16,6 +16,7 @@ from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.core.files.storage import Storage, default_storage
 from django.db import OperationalError, models
+
 from django.db.models import (
     CharField,
     DateTimeField,
@@ -28,7 +29,7 @@ from django.db.models import (
     Subquery,
     Value,
 )
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, Collate
 from django.utils.timezone import make_aware
 
 import pytz
@@ -2794,7 +2795,10 @@ class SingleSelectFieldType(SelectOptionBaseFieldType):
         to the correct position.
         """
 
-        order = F(f"{field_name}__value")
+        name = F(f"{field_name}__value")
+        order = Collate(name, "en-x-icu")
+        order.name = name
+
         if order_direction == "ASC":
             order = order.asc(nulls_first=True)
         else:
@@ -3175,7 +3179,9 @@ class MultipleSelectFieldType(SelectOptionBaseFieldType):
         query = Coalesce(StringAgg(f"{field_name}__value", ","), Value(""))
         annotation = {sort_column_name: query}
 
-        order = F(sort_column_name)
+        order = Collate(sort_column_name, "en-x-icu")
+        order.name = sort_column_name
+
         if order_direction == "DESC":
             order = order.desc(nulls_first=True)
         else:
@@ -4528,7 +4534,9 @@ class MultipleCollaboratorsFieldType(FieldType):
         query = Coalesce(StringAgg(f"{field_name}__first_name", ""), Value(""))
         annotation = {sort_column_name: query}
 
-        order = F(sort_column_name)
+        order = Collate(sort_column_name, "en-x-icu")
+        order.name = sort_column_name
+
         if order_direction == "DESC":
             order = order.desc(nulls_first=True)
         else:

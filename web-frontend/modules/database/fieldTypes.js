@@ -668,8 +668,8 @@ export class TextFieldType extends FieldType {
       const stringA = a[name] === null ? '' : '' + a[name]
       const stringB = b[name] === null ? '' : '' + b[name]
       return order === 'ASC'
-        ? stringA.localeCompare(stringB)
-        : stringB.localeCompare(stringA)
+        ? stringA.localeCompare(stringB, 'en')
+        : stringB.localeCompare(stringA, 'en')
     }
   }
 
@@ -746,8 +746,8 @@ export class LongTextFieldType extends FieldType {
       const stringB = b[name] === null ? '' : '' + b[name]
 
       return order === 'ASC'
-        ? stringA.localeCompare(stringB)
-        : stringB.localeCompare(stringA)
+        ? stringA.localeCompare(stringB, 'en')
+        : stringB.localeCompare(stringA, 'en')
     }
   }
 
@@ -1773,8 +1773,8 @@ export class URLFieldType extends FieldType {
       const stringB = b[name] === null ? '' : '' + b[name]
 
       return order === 'ASC'
-        ? stringA.localeCompare(stringB)
-        : stringB.localeCompare(stringA)
+        ? stringA.localeCompare(stringB, 'en')
+        : stringB.localeCompare(stringA, 'en')
     }
   }
 
@@ -1862,8 +1862,8 @@ export class EmailFieldType extends FieldType {
       const stringB = b[name] === null ? '' : '' + b[name]
 
       return order === 'ASC'
-        ? stringA.localeCompare(stringB)
-        : stringB.localeCompare(stringA)
+        ? stringA.localeCompare(stringB, 'en')
+        : stringB.localeCompare(stringA, 'en')
     }
   }
 
@@ -2143,8 +2143,8 @@ export class SingleSelectFieldType extends FieldType {
       const stringB = b[name] === null ? '' : '' + b[name].value
 
       return order === 'ASC'
-        ? stringA.localeCompare(stringB)
-        : stringB.localeCompare(stringA)
+        ? stringA.localeCompare(stringB, 'en')
+        : stringB.localeCompare(stringA, 'en')
     }
   }
 
@@ -2335,8 +2335,8 @@ export class MultipleSelectFieldType extends FieldType {
         valuesB.length > 0 ? valuesB.map((obj) => obj.value).join('') : ''
 
       return order === 'ASC'
-        ? stringA.localeCompare(stringB)
-        : stringB.localeCompare(stringA)
+        ? stringA.localeCompare(stringB, 'en')
+        : stringB.localeCompare(stringA, 'en')
     }
   }
 
@@ -2564,8 +2564,8 @@ export class PhoneNumberFieldType extends FieldType {
       const stringB = b[name] === null ? '' : '' + b[name]
 
       return order === 'ASC'
-        ? stringA.localeCompare(stringB)
-        : stringB.localeCompare(stringA)
+        ? stringA.localeCompare(stringB, 'en')
+        : stringB.localeCompare(stringA, 'en')
     }
   }
 
@@ -2941,8 +2941,8 @@ export class MultipleCollaboratorsFieldType extends FieldType {
       }
 
       return order === 'ASC'
-        ? stringA.localeCompare(stringB)
-        : stringB.localeCompare(stringA)
+        ? stringA.localeCompare(stringB, 'en')
+        : stringB.localeCompare(stringA, 'en')
     }
   }
 

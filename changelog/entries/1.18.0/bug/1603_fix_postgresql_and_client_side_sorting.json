@@ -1,0 +1,7 @@
+{
+    "type": "bug",
+    "message": "Fix PostgreSQL and client side sorting.",
+    "issue_number": 1603,
+    "bullet_points": [],
+    "created_at": "2023-07-02"
+}
