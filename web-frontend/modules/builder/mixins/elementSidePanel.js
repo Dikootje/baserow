@@ -30,7 +30,7 @@ export default {
     async onChange(newValues) {
       const oldValues = this.element
 
-      if (!this.$refs.elementForm.isFormValid()) {
+      if (!this.$refs.panelForm.isFormValid()) {
         return
       }
 
@@ -43,7 +43,7 @@ export default {
           })
         } catch (error) {
           // Restore the previous saved values from the store
-          this.$refs.elementForm.reset()
+          this.$refs.panelForm.reset()
           notifyIf(error)
         }
       }

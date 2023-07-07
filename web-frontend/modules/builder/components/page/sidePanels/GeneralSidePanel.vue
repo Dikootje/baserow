@@ -2,7 +2,7 @@
   <component
     :is="elementType.formComponent"
     :key="element.id"
-    ref="elementForm"
+    ref="panelForm"
     class="element-form"
     :builder="builder"
     :page="page"

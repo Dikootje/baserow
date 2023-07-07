@@ -231,5 +231,12 @@
         "addDataSource": "Add new data source",
         "noDataSourceTitle": "You have not yet added a data",
         "noDataSourceMessage": "Data can be used to fetch from internal or external sources and display it on the page."
+    },
+    "styleSidePanel": {
+        "paddingTop": "Padding top",
+        "paddingBottom": "Padding bottom"
+    },
+    "styleForm": {
+        "paddingError": "The value must be an integer between 0 and 200."
     }
 }
