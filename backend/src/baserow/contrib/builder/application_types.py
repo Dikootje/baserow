@@ -23,10 +23,7 @@ from baserow.core.db import specific_iterator
 from baserow.core.integrations.models import Integration
 from baserow.core.integrations.registries import integration_type_registry
 from baserow.core.models import Application, Workspace
-from baserow.core.registries import (
-    ApplicationType,
-    ImportExportConfig,
-)
+from baserow.core.registries import ApplicationType, ImportExportConfig
 from baserow.core.services.registries import service_type_registry
 from baserow.core.utils import ChildProgressBuilder
 

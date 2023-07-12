@@ -26,9 +26,11 @@ class FunctionCollection(ABC):
 
 class BaserowPythonExecutor(BaserowFormulaVisitor):
     def __init__(
-        self, functions: FunctionCollection, context: Optional[Dict[str, Any]] = None
+        self,
+        functions: FunctionCollection,
+        data_ledger: Optional[Dict[str, Any]] = None,
     ):
-        self.context = context
+        self.data_ledger = data_ledger
 
     def visitRoot(self, ctx: BaserowFormula.RootContext):
         return ctx.expr().accept(self)

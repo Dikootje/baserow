@@ -49,6 +49,21 @@ def test_get_data_source_does_not_exist(data_fixture):
 
 
 @pytest.mark.django_db
+def test_get_data_source_by_name(data_fixture):
+    data_source = data_fixture.create_builder_local_baserow_get_row_data_source()
+    assert (
+        DataSourceHandler().get_data_source_by_name(data_source.name).id
+        == data_source.id
+    )
+
+
+@pytest.mark.django_db
+def test_get_data_source_by_name_does_not_exist(data_fixture):
+    with pytest.raises(DataSourceDoesNotExist):
+        assert DataSourceHandler().get_data_source_by_name("missing")
+
+
+@pytest.mark.django_db
 def test_get_data_sources(data_fixture):
     page = data_fixture.create_builder_page()
     data_source1 = data_fixture.create_builder_local_baserow_get_row_data_source(

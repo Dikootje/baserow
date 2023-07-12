@@ -10,6 +10,7 @@ const updateContext = {
   updateTimeout: null,
   promiseResolve: null,
   lastUpdatedValues: null,
+  valuesToUpdate: {},
 }
 
 const mutations = {
@@ -24,10 +25,12 @@ const mutations = {
     }
   },
   UPDATE_ITEM(state, { dataSource: dataSourceToUpdate, values }) {
-    state.dataSources.forEach((dataSource) => {
-      if (dataSource.id === dataSourceToUpdate.id) {
-        Object.assign(dataSource, values)
-      }
+    const index = state.dataSources.findIndex(
+      (dataSource) => dataSource.id === dataSourceToUpdate.id
+    )
+    state.dataSources.splice(index, 1, {
+      ...state.dataSources[index],
+      ...values,
     })
   },
   DELETE_ITEM(state, { dataSourceId }) {
@@ -106,36 +109,39 @@ const actions = {
     }
   },
 
-  async debouncedUpdate({ dispatch, getters }, { dataSourceId, values }) {
+  debouncedUpdate({ dispatch, getters }, { dataSourceId, values }) {
     const dataSourcesOfPage = getters.getDataSources
     const dataSource = dataSourcesOfPage.find(
       (dataSource) => dataSource.id === dataSourceId
     )
     const oldValues = {}
-    const newValues = {}
     Object.keys(values).forEach((name) => {
       if (Object.prototype.hasOwnProperty.call(dataSource, name)) {
         oldValues[name] = dataSource[name]
-        newValues[name] = values[name]
+        // Accumulate the changed values to send all the ongoing changes with the
+        // final request
+        updateContext.valuesToUpdate[name] = values[name]
       }
     })
-
-    await dispatch('forceUpdate', { dataSource, values: newValues })
 
     return new Promise((resolve, reject) => {
       const fire = async () => {
         try {
-          await DataSourceService(this.$client).update(dataSource.id, values)
+          const { data } = await DataSourceService(this.$client).update(
+            dataSource.id,
+            updateContext.valuesToUpdate
+          )
+          await dispatch('forceUpdate', { dataSource, values: data })
           resolve()
         } catch (error) {
           // Revert to old values on error
-
           await dispatch('forceUpdate', {
             dataSource,
             values: updateContext.lastUpdatedValues,
           })
           reject(error)
         }
+        updateContext.valuesToUpdate = {}
         updateContext.lastUpdatedValues = null
       }
 

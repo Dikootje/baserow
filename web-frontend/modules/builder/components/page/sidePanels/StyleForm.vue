@@ -17,7 +17,7 @@ import { required, integer, between } from 'vuelidate/lib/validators'
 import form from '@baserow/modules/core/mixins/form'
 
 export default {
-  name: 'StyleBoxForm',
+  name: 'StyleForm',
   mixins: [form],
   props: {
     styleBoxProperties: {

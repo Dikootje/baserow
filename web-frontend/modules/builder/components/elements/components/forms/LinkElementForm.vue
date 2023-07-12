@@ -236,11 +236,6 @@ export default {
         (pathParam) => pathParam.name === parameterName
       )?.type
     },
-    emitChange(newValues) {
-      if (this.isFormValid()) {
-        form.methods.emitChange.bind(this)(newValues)
-      }
-    },
     updatePageParameters() {
       this.values.page_parameters = (
         this.destinationPage?.path_params || []

@@ -303,7 +303,7 @@ class ImageElementType(ElementType):
     def get_sample_params(self):
         return {
             "image_source_type": ImageElement.IMAGE_SOURCE_TYPES.UPLOAD,
-            "image_file": None,
+            "image_file_id": None,
             "image_url": "https://test.com/image.png",
             "alt_text": "some alt text",
             "alignment": ALIGNMENTS.LEFT,

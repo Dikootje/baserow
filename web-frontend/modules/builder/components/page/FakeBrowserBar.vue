@@ -2,7 +2,7 @@
   <div class="fake-browser-bar">
     <div />
     <div class="fake-browser-bar__address-bar">
-      <template v-for="pathPart in splittedPath">
+      <template v-for="pathPart in splitPath">
         <input
           v-if="pathPart.type === 'variable'"
           :key="pathPart.key"
@@ -46,7 +46,7 @@ export default {
     ...mapGetters({
       pageParameters: 'pageParameter/getParameters',
     }),
-    splittedPath() {
+    splitPath() {
       return splitPath(this.page.path).map((pathPart, index) => ({
         ...pathPart,
         key: `${pathPart.value}-${index}`,

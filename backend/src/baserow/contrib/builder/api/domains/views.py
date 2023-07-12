@@ -33,7 +33,6 @@ from baserow.contrib.builder.domains.exceptions import (
 )
 from baserow.contrib.builder.domains.handler import DomainHandler
 from baserow.contrib.builder.domains.models import Domain
-from baserow.contrib.builder.domains.operations import PublishDomainOperationType
 from baserow.contrib.builder.domains.service import DomainService
 from baserow.contrib.builder.elements.registries import element_type_registry
 from baserow.contrib.builder.elements.service import ElementService
@@ -44,7 +43,6 @@ from baserow.contrib.builder.pages.exceptions import PageDoesNotExist
 from baserow.contrib.builder.pages.handler import PageHandler
 from baserow.contrib.builder.service import BuilderService
 from baserow.core.exceptions import ApplicationDoesNotExist
-from baserow.core.handler import CoreHandler
 from baserow.core.jobs.registries import job_type_registry
 from baserow.core.services.registries import service_type_registry
 
@@ -396,13 +394,6 @@ class AsyncPublishDomainView(APIView):
         """
 
         domain = DomainHandler().get_domain(domain_id)
-
-        CoreHandler().check_permissions(
-            request.user,
-            PublishDomainOperationType.type,
-            workspace=domain.builder.workspace,
-            context=domain,
-        )
 
         job = DomainService().async_publish(request.user, domain)
 

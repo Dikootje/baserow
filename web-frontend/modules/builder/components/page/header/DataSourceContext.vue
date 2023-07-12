@@ -75,7 +75,6 @@ export default {
     async shown() {
       this.state = 'loading'
       try {
-        await this.actionFetchDataSources({ page: this.page })
         await this.actionFetchIntegrations({ applicationId: this.builder.id })
       } catch (error) {
         notifyIf(error)
