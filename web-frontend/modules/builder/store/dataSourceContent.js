@@ -95,7 +95,7 @@ const actions = {
 
 const getters = {
   getDataSourceContents: (state) => {
-    return state.dataSourceContents
+    return state.contents
   },
 }
 
