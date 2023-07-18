@@ -221,5 +221,9 @@
         "addDataSource": "Add new data source",
         "noDataSourceTitle": "You have not yet added a data",
         "noDataSourceMessage": "Data can be used to fetch from internal or external sources and display it on the page."
+    },
+    "dataProviderTypes": {
+        "dataSource": "Data Source",
+        "pathParam": "Path Parameter"
     }
 }
