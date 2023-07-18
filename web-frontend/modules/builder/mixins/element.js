@@ -32,7 +32,11 @@ export default {
   methods: {
     getDataLedger() {
       const { builder, page, element, $registry } = this
-      return DataLedger($registry, { builder, page, element })
+      return DataLedger($registry.getAll('builderDataProvider'), {
+        builder,
+        page,
+        element,
+      })
     },
 
     resolveFormula(formula) {

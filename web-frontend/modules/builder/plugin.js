@@ -96,7 +96,7 @@ export default (context) => {
   app.$registry.registerNamespace('domain')
   app.$registry.registerNamespace('pageSettings')
   app.$registry.registerNamespace('pathParamType')
-  app.$registry.registerNamespace('BuilderDataProvider')
+  app.$registry.registerNamespace('builderDataProvider')
 
   app.$registry.register('application', new BuilderApplicationType(context))
   app.$registry.register('job', new DuplicatePageJobType(context))
@@ -161,11 +161,11 @@ export default (context) => {
   app.$registry.register('pageAction', new PreviewPageActionType(context))
 
   app.$registry.register(
-    'BuilderDataProvider',
+    'builderDataProvider',
     new DataSourceDataProviderType(context)
   )
   app.$registry.register(
-    'BuilderDataProvider',
+    'builderDataProvider',
     new PageParameterDataProviderType(context)
   )
 }

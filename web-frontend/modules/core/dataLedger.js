@@ -18,17 +18,15 @@ export class UnresolvablePathError extends Error {
 }
 
 class DataLedgerClass {
-  constructor($registry, ...args) {
-    this.$registry = $registry
+  constructor(dataProviders, ...args) {
+    this.dataProviders = dataProviders
     this.context = {}
 
     // Populate context with all dataProvider custom contexts
-    Object.values(this.$registry.getAll('BuilderDataProvider')).forEach(
-      (dataProvider) => {
-        const dataProviderContext = dataProvider.getContext(...args)
-        this.context[dataProvider.type] = dataProviderContext
-      }
-    )
+    Object.values(this.dataProviders).forEach((dataProvider) => {
+      const dataProviderContext = dataProvider.getContext(...args)
+      this.context[dataProvider.type] = dataProviderContext
+    })
   }
 
   /**
@@ -40,11 +38,11 @@ class DataLedgerClass {
    */
   get(path) {
     const [providerName, ...rest] = _.toPath(path)
-    let dataProviderType
 
-    try {
-      dataProviderType = this.$registry.get('BuilderDataProvider', providerName)
-    } catch (e) {
+    const dataProviderType = this.dataProviders[providerName]
+    console.log('fount', dataProviderType, providerName)
+
+    if (!dataProviderType) {
       throw new MissingDataProviderError(providerName)
     }
 

@@ -7,7 +7,6 @@ export class FunctionCollection {
   }
 }
 
-
 export default class JavascriptExecutor extends BaserowFormulaVisitor {
   constructor(functions, dataLedger = {}) {
     super()
@@ -60,7 +59,6 @@ export default class JavascriptExecutor extends BaserowFormulaVisitor {
       expr.accept(this)
     )
 
-<<<<<<< HEAD
     const formulaFunctionType = this.functions.get(functionName)
 
     formulaFunctionType.validateArgs(args)
@@ -68,15 +66,6 @@ export default class JavascriptExecutor extends BaserowFormulaVisitor {
     const argsParsed = formulaFunctionType.parseArgs(args)
 
     return formulaFunctionType.execute(this.context, argsParsed)
-=======
-    if (functionName === 'concat') {
-      return args.join('')
-    } else if (functionName === 'get') {
-      return this.dataLedger[args[0]]
-    } else {
-      throw new UnknownOperatorError(functionName)
-    }
->>>>>>> 26d769a42 (First feedbacks)
   }
 
   visitBinaryOp(ctx) {

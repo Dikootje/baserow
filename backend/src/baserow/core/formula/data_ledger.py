@@ -1,13 +1,13 @@
 from typing import TYPE_CHECKING, Any
 
 from baserow.core.utils import to_path
-from baserow.formula.types import BaseDataLedger
+from baserow.formula.types import BaseFormulaContext
 
 if TYPE_CHECKING:
     from baserow.core.formula.registries import DataProviderTypeRegistry
 
 
-class DataLedger(BaseDataLedger):
+class DataLedger(BaseFormulaContext):
     """
     The data ledger holds all the data useful for the formula resolution. It uses a
     Data provider registry to fulfill data queries. Each data provider is responsible

@@ -21,6 +21,7 @@ from baserow.contrib.integrations.local_baserow.models import (
 )
 from baserow.core.formula.data_ledger import DataLedger
 from baserow.core.formula.exceptions import DispatchContextError
+from baserow.core.formula.registries import formula_runtime_function_registry
 from baserow.core.formula.serializers import FormulaSerializerField
 from baserow.core.formula.validator import ensure_integer
 from baserow.core.handler import CoreHandler
@@ -172,7 +173,11 @@ class LocalBaserowGetRowUserServiceType(ServiceType):
             raise ServiceImproperlyConfigured("The table property is missing.")
 
         try:
-            row_id = ensure_integer(resolve_formula(service.row_id, data_ledger))
+            row_id = ensure_integer(
+                resolve_formula(
+                    service.row_id, formula_runtime_function_registry, data_ledger
+                )
+            )
         except ValidationError:
             raise ServiceImproperlyConfigured(
                 "The result of the row_id formula must be an integer or convertible "

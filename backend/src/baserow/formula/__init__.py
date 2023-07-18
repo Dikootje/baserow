@@ -7,7 +7,7 @@ from baserow.formula.parser.exceptions import (
 )
 from baserow.formula.parser.generated.BaserowFormula import BaserowFormula
 from baserow.formula.parser.generated.BaserowFormulaVisitor import BaserowFormulaVisitor
-from baserow.formula.types import BaseDataLedger
+from baserow.formula.types import BaseFormulaContext, FunctionCollection
 
 __all__ = [
     BaserowFormulaException,
@@ -22,7 +22,9 @@ from baserow.formula.parser.parser import get_parse_tree_for_formula
 from baserow.formula.parser.python_executor import BaserowPythonExecutor
 
 
-def resolve_formula(formula: str, data_ledger: BaseDataLedger[Any]) -> Any:
+def resolve_formula(
+    formula: str, functions: FunctionCollection, data_ledger: BaseFormulaContext
+) -> Any:
     """
     Helper to resolve a formula given the data_ledger.
 
@@ -33,4 +35,4 @@ def resolve_formula(formula: str, data_ledger: BaseDataLedger[Any]) -> Any:
     """
 
     tree = get_parse_tree_for_formula(formula)
-    return BaserowPythonExecutor(data_ledger).visit(tree)
+    return BaserowPythonExecutor(functions, data_ledger).visit(tree)
