@@ -8,6 +8,7 @@ import {
   InvalidFormulaArgumentType,
   InvalidNumberOfArguments,
 } from '@baserow/formula/parser/errors'
+import { uuid } from '@baserow/modules/core/utils/string'
 
 export class RuntimeFormulaFunction extends Registerable {
   /**
@@ -96,6 +97,21 @@ export class RuntimeFormulaFunction extends Registerable {
 
     return args.map((arg, index) => this.args[index].parse(arg))
   }
+
+  /**
+   * This function should return the component configuration used by TipTap to render
+   * the formula in the editor.
+   *
+   * @param args - The args that are being parsed
+   * @returns {object || Array} - The component configuration or a list of components
+   */
+  getFormulaComponent(args) {
+    return {
+      attrs: {
+        id: uuid(),
+      },
+    }
+  }
 }
 
 export class RuntimeConcat extends RuntimeFormulaFunction {
@@ -110,6 +126,10 @@ export class RuntimeConcat extends RuntimeFormulaFunction {
   validateNumberOfArgs(args) {
     return args.length >= 2
   }
+
+  getFormulaComponent(args) {
+    return _.flatten(args)
+  }
 }
 
 export class RuntimeGet extends RuntimeFormulaFunction {
@@ -123,6 +143,18 @@ export class RuntimeGet extends RuntimeFormulaFunction {
 
   execute(context, args) {
     return _.get(context, args[0])
+  }
+
+  getFormulaComponent(args) {
+    const [textNode] = args
+    const defaultConfiguration = super.getFormulaComponent(args)
+    const specificConfiguration = {
+      type: 'get-formula-component',
+      attrs: {
+        path: textNode.text,
+      },
+    }
+    return _.merge(specificConfiguration, defaultConfiguration)
   }
 }
 

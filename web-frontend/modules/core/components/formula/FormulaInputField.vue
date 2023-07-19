@@ -12,7 +12,9 @@ import _ from 'lodash'
 import { Paragraph } from '@tiptap/extension-paragraph'
 import { NoNewLineExt } from '@baserow/modules/core/components/tiptap/extensions/noNewLine'
 import { GetFormulaComponentExt } from '@baserow/modules/core/components/tiptap/extensions/getFormulaComponent'
-import { uuid } from '@baserow/modules/core/utils/string'
+import parseBaserowFormula from '@baserow/formula/parser/parser'
+import { ToTipTapVisitor } from '@baserow/modules/core/formula/toTipTapVisitor'
+import { RuntimeFunctionCollection } from '@baserow/modules/core/functionCollection'
 
 export default {
   name: 'FormulaInputField',
@@ -115,21 +117,12 @@ export default {
       this.$emit('input', this.toFormula(this.content))
     },
     toContent(formula) {
+      const tree = parseBaserowFormula(formula)
+      const functionCollection = new RuntimeFunctionCollection(this.$registry)
+      const content = new ToTipTapVisitor(functionCollection).visit(tree)
       return {
         type: 'doc',
-        content: [
-          {
-            type: 'text',
-            text: 'hello',
-          },
-          {
-            type: 'get-formula-component',
-            attrs: {
-              id: uuid(),
-              path: 'data_source.test.name',
-            },
-          },
-        ],
+        content,
       }
     },
     toFormula(content) {
