@@ -1,7 +1,6 @@
 <template>
   <nuxt-link
     class="notification-panel__notification-link"
-    event=""
     :to="url"
     @click.native="markAsReadAndHandleClick"
   >
@@ -9,6 +8,9 @@
       <i18n path="rowCommentMentionNotification.title" tag="span">
         <template #sender>
           <strong>{{ notification.sender.first_name }}</strong>
+        </template>
+        <template #row>
+          <strong>{{ notification.data.row_id }}</strong>
         </template>
         <template #table>
           <strong>{{ notification.data.table_name }}</strong>
@@ -22,7 +24,6 @@
 <script>
 import RichTextEditor from '@baserow/modules/core/components/editor/RichTextEditor.vue'
 import notificationContent from '@baserow/modules/core/mixins/notificationContent'
-import { openRowEditModal } from '@baserow/modules/database/utils/router'
 
 export default {
   name: 'RowCommentMentionNotification',
@@ -39,10 +40,22 @@ export default {
   computed: {
     params() {
       const data = this.notification.data
+      let viewId = null
+
+      if (
+        ['database-table-row', 'database-table'].includes(
+          this.$nuxt.$route.name
+        ) &&
+        this.$nuxt.$route.params.tableId === this.notification.data.table_id
+      ) {
+        viewId = this.$nuxt.$route.params.viewId
+      }
+
       return {
         databaseId: data.database_id,
         tableId: data.table_id,
         rowId: data.row_id,
+        viewId,
       }
     },
     url() {
@@ -53,11 +66,8 @@ export default {
     },
   },
   methods: {
-    async handleClick(evt) {
-      evt.preventDefault()
+    handleClick(evt) {
       this.$emit('close-panel')
-      const { $store, $router, $route } = this
-      await openRowEditModal({ $store, $router, $route }, this.params)
     },
   },
 }
