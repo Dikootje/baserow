@@ -99,6 +99,15 @@ export class RuntimeFormulaFunction extends Registerable {
   }
 
   /**
+   * The type name of the formula component that should be used to render the formula
+   * in the editor.
+   * @returns {string || null}
+   */
+  get formulaComponentType() {
+    return null
+  }
+
+  /**
    * This function should return the component configuration used by TipTap to render
    * the formula in the editor.
    *
@@ -107,6 +116,7 @@ export class RuntimeFormulaFunction extends Registerable {
    */
   getFormulaComponent(args) {
     return {
+      type: this.formulaComponentType,
       attrs: {
         id: uuid(),
       },
@@ -141,6 +151,10 @@ export class RuntimeGet extends RuntimeFormulaFunction {
     return [new TextBaserowRuntimeFormulaArgumentType()]
   }
 
+  get formulaComponentType() {
+    return 'get-formula-component'
+  }
+
   execute(context, args) {
     return _.get(context, args[0])
   }
@@ -149,12 +163,15 @@ export class RuntimeGet extends RuntimeFormulaFunction {
     const [textNode] = args
     const defaultConfiguration = super.getFormulaComponent(args)
     const specificConfiguration = {
-      type: 'get-formula-component',
       attrs: {
         path: textNode.text,
       },
     }
     return _.merge(specificConfiguration, defaultConfiguration)
+  }
+
+  fromNodeToFormula(node) {
+    return `get(${node.attrs.path})`
   }
 }
 

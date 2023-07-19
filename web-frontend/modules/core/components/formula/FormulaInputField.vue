@@ -15,6 +15,7 @@ import { GetFormulaComponentExt } from '@baserow/modules/core/components/tiptap/
 import parseBaserowFormula from '@baserow/formula/parser/parser'
 import { ToTipTapVisitor } from '@baserow/modules/core/formula/toTipTapVisitor'
 import { RuntimeFunctionCollection } from '@baserow/modules/core/functionCollection'
+import { FromTipTapVisitor } from '@baserow/modules/core/formula/fromTipTapVisitor'
 
 export default {
   name: 'FormulaInputField',
@@ -62,8 +63,8 @@ export default {
   },
   watch: {
     value(value) {
-      if (!_.isEqual(value, this.toFormula(this.editor.getJSON()))) {
-        // this.editor.commands.setContent(value, this.toContent(value))
+      if (!_.isEqual(value, this.toFormula(this.content.content))) {
+        this.content = this.toContent(value)
       }
     },
     content: {
@@ -114,9 +115,22 @@ export default {
       deleteObjectById(this.content, id)
     },
     onUpdate() {
-      this.$emit('input', this.toFormula(this.content))
+      let content = this.editor.getJSON().content
+      // TODO remove and make sure that no paragraph is rendered in the editor.
+      if (content[0].type === 'paragraph') {
+        content = content[0].content || []
+      }
+
+      this.$emit('input', this.toFormula(content))
     },
     toContent(formula) {
+      if (_.isEmpty(formula)) {
+        return {
+          type: 'doc',
+          content: [],
+        }
+      }
+
       const tree = parseBaserowFormula(formula)
       const functionCollection = new RuntimeFunctionCollection(this.$registry)
       const content = new ToTipTapVisitor(functionCollection).visit(tree)
@@ -126,7 +140,8 @@ export default {
       }
     },
     toFormula(content) {
-      return this.editor.getText()
+      const functionCollection = new RuntimeFunctionCollection(this.$registry)
+      return new FromTipTapVisitor(functionCollection).visit(content)
     },
   },
 }

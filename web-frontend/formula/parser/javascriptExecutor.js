@@ -5,6 +5,10 @@ export class FunctionCollection {
   get(name) {
     throw new Error('needs to be implemented')
   }
+
+  getAll() {
+    throw new Error('needs to be implemented')
+  }
 }
 
 export class JavascriptExecutor extends BaserowFormulaVisitor {
