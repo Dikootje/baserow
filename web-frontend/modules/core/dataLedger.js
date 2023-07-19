@@ -17,16 +17,33 @@ export class UnresolvablePathError extends Error {
   }
 }
 
-class DataLedgerClass {
-  constructor(dataProviders, ...args) {
+export class DataLedger {
+  constructor(dataProviders, applicationContext) {
     this.dataProviders = dataProviders
-    this.context = {}
+    this.applicationContext = applicationContext
+  }
 
-    // Populate context with all dataProvider custom contexts
-    Object.values(this.dataProviders).forEach((dataProvider) => {
-      const dataProviderContext = dataProvider.getContext(...args)
-      this.context[dataProvider.type] = dataProviderContext
-    })
+  async initAll() {
+    // First we initialize providers that doesn't need a backend context
+    await Promise.all(
+      Object.values(this.dataProviders)
+        .filter((provider) => !provider.needBackendContext)
+        .map((dataProvider) => dataProvider.init(this))
+    )
+    // Then we initialize those that need the backend context
+    await Promise.all(
+      Object.values(this.dataProviders)
+        .filter((provider) => provider.needBackendContext)
+        .map((dataProvider) => dataProvider.init(this))
+    )
+  }
+
+  getAllBackendContext() {
+    return Object.fromEntries(
+      Object.values(this.dataProviders).map((dataProvider) => {
+        return [dataProvider.type, dataProvider.getBackendContext(this)]
+      })
+    )
   }
 
   /**
@@ -40,10 +57,8 @@ class DataLedgerClass {
     const [providerName, ...rest] = _.toPath(path)
 
     const dataProviderType = this.dataProviders[providerName]
-    console.log('fount', dataProviderType, providerName)
-
     if (!dataProviderType) {
-      throw new MissingDataProviderError(providerName)
+      throw new MissingDataProviderError()
     }
 
     try {
@@ -53,16 +68,5 @@ class DataLedgerClass {
     }
   }
 }
-
-/**
- * This proxy allow the DataLedgerClass to act like a regular object.
- */
-const DataLedger = (...args) =>
-  new Proxy(new DataLedgerClass(...args), {
-    get(target, prop) {
-      const result = target.get(prop)
-      return result
-    },
-  })
 
 export default DataLedger

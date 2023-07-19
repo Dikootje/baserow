@@ -37,9 +37,19 @@ const actions = {
         dataSource.id,
         queryData
       )
+      if (!fetchContext[dataSource.id]) {
+        fetchContext[dataSource.id] = {
+          fetchTimeout: null,
+          lastDataSource: null,
+          lastQueryData: null,
+        }
+      }
       commit('SET_CONTENT', { dataSource, value: data })
     } catch (e) {
       commit('SET_CONTENT', { dataSource, value: null })
+    } finally {
+      fetchContext[dataSource.id].lastDataSource = clone(dataSource)
+      fetchContext[dataSource.id].lastQueryData = clone(queryData)
     }
   },
 
@@ -50,7 +60,10 @@ const actions = {
    * @param {object} dataSource the data source we want to dispatch
    * @param {object} data the query body
    */
-  smartFetchDataSourceContent({ dispatch }, { dataSource, data: queryData }) {
+  async smartFetchDataSourceContent(
+    { dispatch },
+    { dataSource, data: queryData }
+  ) {
     let firstFetch = false
     if (!fetchContext[dataSource.id]) {
       fetchContext[dataSource.id] = {
@@ -73,14 +86,12 @@ const actions = {
           dataSource,
           data: queryData,
         })
-        fetchContext[dataSource.id].lastDataSource = clone(dataSource)
-        fetchContext[dataSource.id].lastQueryData = clone(queryData)
       }
     }
 
     if (firstFetch) {
       // We execute the first call immediately to have the data ASAP
-      fetch()
+      await fetch()
     } else {
       // Then subsequent calls are debounced by 500ms
       clearTimeout(fetchContext[dataSource.id].fetchTimeout)

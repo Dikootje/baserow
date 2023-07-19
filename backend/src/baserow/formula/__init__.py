@@ -7,7 +7,7 @@ from baserow.formula.parser.exceptions import (
 )
 from baserow.formula.parser.generated.BaserowFormula import BaserowFormula
 from baserow.formula.parser.generated.BaserowFormulaVisitor import BaserowFormulaVisitor
-from baserow.formula.types import BaseFormulaContext, FunctionCollection
+from baserow.formula.types import FormulaContext, FunctionCollection
 
 __all__ = [
     BaserowFormulaException,
@@ -23,7 +23,7 @@ from baserow.formula.parser.python_executor import BaserowPythonExecutor
 
 
 def resolve_formula(
-    formula: str, functions: FunctionCollection, data_ledger: BaseFormulaContext
+    formula: str, functions: FunctionCollection, data_ledger: FormulaContext
 ) -> Any:
     """
     Helper to resolve a formula given the data_ledger.

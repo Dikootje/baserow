@@ -28,19 +28,34 @@ export default {
     isEditable() {
       return this.mode === 'editing'
     },
+    dataLedger() {
+      /**
+       * This proxy allow the DataLedgerClass to act like a regular object.
+       */
+      return new Proxy(
+        new DataLedger(this.$registry.getAll('builderDataProvider'), {
+          builder: this.builder,
+          page: this.page,
+          mode: this.mode,
+        }),
+        {
+          get(target, prop) {
+            return target.get(prop)
+          },
+        }
+      )
+    },
+    formulaFunctions() {
+      return {
+        get: (name) => {
+          return this.$registry.get('runtimeFormulaFunction', name)
+        },
+      }
+    },
   },
   methods: {
-    getDataLedger() {
-      const { builder, page, element, $registry } = this
-      return DataLedger($registry.getAll('builderDataProvider'), {
-        builder,
-        page,
-        element,
-      })
-    },
-
     resolveFormula(formula) {
-      return resolveFormula(formula, this.getDataLedger())
+      return resolveFormula(formula, this.formulaFunctions, this.dataLedger)
     },
   },
 }

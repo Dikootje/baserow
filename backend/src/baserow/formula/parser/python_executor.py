@@ -7,18 +7,14 @@ from baserow.formula.parser.exceptions import (
     FormulaFunctionTypeDoesNotExist,
     UnknownOperator,
 )
-from baserow.formula.types import (
-    BaseFormulaContext,
-    FunctionCollection,
-    FormulaFunction,
-)
+from baserow.formula.types import FormulaContext, FormulaFunction, FunctionCollection
 
 
 class BaserowPythonExecutor(BaserowFormulaVisitor):
     def __init__(
         self,
         functions: FunctionCollection,
-        context: BaseFormulaContext,
+        context: FormulaContext,
     ):
         self.context = context
         self.functions = functions

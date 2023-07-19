@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, List, Optional, TypeVar
 
+from baserow.core.formula.argument_types import BaserowRuntimeFormulaArgumentType
 from baserow.core.formula.data_ledger import DataLedger
-from baserow.formula.types import FunctionCollection
 from baserow.core.registry import Instance, Registry
 from baserow.formula.parser.exceptions import (
     FormulaFunctionTypeDoesNotExist,
@@ -10,13 +10,11 @@ from baserow.formula.parser.exceptions import (
     InvalidNumberOfArguments,
 )
 from baserow.formula.types import (
-    BaseFormulaContext,
-)
-from baserow.formula.types import (
     FormulaArg,
     FormulaArgs,
+    FormulaContext,
+    FunctionCollection,
 )
-from baserow.core.formula.argument_types import BaserowRuntimeFormulaArgumentType
 
 
 class RuntimeFormulaFunction(ABC, Instance):
@@ -52,7 +50,7 @@ class RuntimeFormulaFunction(ABC, Instance):
         return None if self.args is None else len(self.args)
 
     @abstractmethod
-    def execute(self, context: BaseFormulaContext, args: FormulaArgs) -> Any:
+    def execute(self, context: FormulaContext, args: FormulaArgs) -> Any:
         """
         This is the main function that will produce a result for the defined formula
 
@@ -143,16 +141,6 @@ class DataProviderType(
     context for the application builder is the request and the current service. For the
     workflow automation tool, it's the current node.
     """
-
-    @abstractmethod
-    def get_context(self, **kwargs) -> Any:
-        """
-        Extract data from the application context. This data can then be use by the
-        data provider to fulfill a data query from the formula.
-
-        :param kwargs: application context parameters.
-        :return: Any value that can be used lateron by the data provider.
-        """
 
     @abstractmethod
     def get_data_chunk(self, data_ledger: DataLedger, path: List[str]):

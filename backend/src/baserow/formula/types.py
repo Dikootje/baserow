@@ -5,7 +5,7 @@ FormulaArg = Any
 FormulaArgs = List[FormulaArg]
 
 
-class BaseFormulaContext(ABC):
+class FormulaContext(ABC):
     @abstractmethod
     def __getitem__(self, key: str) -> Any:
         """
@@ -35,5 +35,5 @@ class FormulaFunction(ABC):
         """
 
     @abstractmethod
-    def execute(context: BaseFormulaContext, args: FormulaArgs) -> Any:
+    def execute(context: FormulaContext, args: FormulaArgs) -> Any:
         """Executes the function"""

@@ -8,10 +8,10 @@ export class FunctionCollection {
 }
 
 export default class JavascriptExecutor extends BaserowFormulaVisitor {
-  constructor(functions, dataLedger = {}) {
+  constructor(functions, context = {}) {
     super()
     this.functions = functions
-    this.dataLedger = dataLedger
+    this.context = context
   }
 
   visitRoot(ctx) {

@@ -17,12 +17,16 @@ import { StoreItemLookupError } from '@baserow/modules/core/errors'
 import PageHeader from '@baserow/modules/builder/components/page/header/PageHeader'
 import PagePreview from '@baserow/modules/builder/components/page/PagePreview'
 import PageSidePanels from '@baserow/modules/builder/components/page/PageSidePanels'
+import DataLedger from '@baserow/modules/core/dataLedger'
 
 export default {
   name: 'PageEditor',
   components: { PagePreview, PageHeader, PageSidePanels },
   provide() {
-    return { builder: this.builder }
+    return {
+      builder: this.builder,
+      mode: 'editing',
+    }
   },
   /**
    * When the user leaves to another page we want to unselect the selected page. This
@@ -33,7 +37,7 @@ export default {
     next()
   },
   layout: 'app',
-  async asyncData({ store, params, error }) {
+  async asyncData({ store, params, error, $registry, ...rest }) {
     const builderId = parseInt(params.builderId)
     const pageId = parseInt(params.pageId)
 
@@ -48,14 +52,19 @@ export default {
       data.builder = builder
       data.page = page
 
-      page.path_params.forEach(({ name, type }) => {
-        store.dispatch('pageParameter/setParameter', {
-          name,
-          value: type === 'numeric' ? 1 : 'test',
-        })
-      })
-
       await store.dispatch('element/fetch', { page })
+
+      const dataLedger = new DataLedger(
+        $registry.getAll('builderDataProvider'),
+        {
+          builder,
+          page,
+          mode: 'editing',
+        }
+      )
+
+      // Initialize all data provider contents
+      await dataLedger.initAll()
     } catch (e) {
       // In case of a network error we want to fail hard.
       if (e.response === undefined && !(e instanceof StoreItemLookupError)) {

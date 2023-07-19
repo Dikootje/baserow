@@ -41,10 +41,10 @@ def test_invalid_formulas(test_data):
 def test_formula_function_does_not_exist():
     with pytest.raises(BaserowFormulaSyntaxError):
         tree = get_parse_tree_for_formula("notExistingFunction(1,2,3)")
-        BaserowPythonExecutor(formula_runtime_function_registry).visit(tree)
+        BaserowPythonExecutor(formula_runtime_function_registry, {}).visit(tree)
 
 
 def test_invalid_number_of_arguments():
     with pytest.raises(InvalidNumberOfArguments):
         tree = get_parse_tree_for_formula("get(1,2)")
-        BaserowPythonExecutor(formula_runtime_function_registry).visit(tree)
+        BaserowPythonExecutor(formula_runtime_function_registry, {}).visit(tree)

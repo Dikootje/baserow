@@ -1,9 +1,9 @@
-import { dataProviderType } from '@baserow/modules/core/dataProviderTypes'
+import { DataProviderType } from '@baserow/modules/core/dataProviderTypes'
 
 import { clone } from '@baserow/modules/core/utils/object'
 import _ from 'lodash'
 
-export class DataSourceDataProviderType extends dataProviderType {
+export class DataSourceDataProviderType extends DataProviderType {
   constructor(...args) {
     super(...args)
     this.debouncedFetches = {}
@@ -13,18 +13,34 @@ export class DataSourceDataProviderType extends dataProviderType {
     return 'data_source'
   }
 
+  get needBackendContext() {
+    return true
+  }
+
   get name() {
     return this.app.i18n.t('dataProviderType.dataSource')
   }
 
-  getContext({ page }) {
+  getBackendContext(dataLedger) {
     return {
-      page_id: page.id,
+      page_id: dataLedger.applicationContext.page.id,
     }
   }
 
+  async init(dataLedger) {
+    const dataSources = this.app.store.getters['dataSource/getDataSources']
+    await Promise.all(
+      dataSources.map((dataSource) =>
+        this.app.store.dispatch('dataSourceContent/fetchDataSourceContent', {
+          dataSource,
+          data: dataLedger.getAllBackendContext(),
+        })
+      )
+    )
+  }
+
   getDataChunk(dataLedger, [dataSourceName, ...rest]) {
-    // Load data sources for this page.
+    // Get the data sources for the current page.
     const dataSources = this.app.store.getters['dataSource/getDataSources']
 
     const dataSource = dataSources.find(({ name }) => name === dataSourceName)
@@ -33,9 +49,10 @@ export class DataSourceDataProviderType extends dataProviderType {
       return null
     }
 
+    // Update the dataSource content if needed
     this.app.store.dispatch('dataSourceContent/smartFetchDataSourceContent', {
       dataSource,
-      data: dataLedger.context,
+      data: dataLedger.getAllBackendContext(),
     })
 
     const dataSourceContents =
@@ -50,13 +67,24 @@ export class DataSourceDataProviderType extends dataProviderType {
   }
 }
 
-export class PageParameterDataProviderType extends dataProviderType {
+export class PageParameterDataProviderType extends DataProviderType {
   static getType() {
     return 'page_parameter'
   }
 
   get name() {
     return this.app.i18n.t('dataProviderType.pageParameter')
+  }
+
+  async init(dataLedger) {
+    await Promise.all(
+      dataLedger.applicationContext.page.path_params.map(({ name, type }) =>
+        this.app.store.dispatch('pageParameter/setParameter', {
+          name,
+          value: type === 'numeric' ? 1 : 'test',
+        })
+      )
+    )
   }
 
   getDataChunk(dataLedger, path) {
@@ -74,7 +102,7 @@ export class PageParameterDataProviderType extends dataProviderType {
     return parameters[prop]
   }
 
-  getContext() {
+  getBackendContext() {
     return clone(this.app.store.getters['pageParameter/getParameters'])
   }
 }

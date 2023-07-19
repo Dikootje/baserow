@@ -25,7 +25,7 @@
       :element="element"
       :builder="builder"
       :page="page"
-      mode="editing"
+      :mode="mode"
     />
     <InsertElementButton
       v-if="active"
@@ -44,7 +44,7 @@ import { PLACEMENTS } from '@baserow/modules/builder/enums'
 export default {
   name: 'ElementPreview',
   components: { ElementMenu, InsertElementButton, PageRootElement },
-  inject: ['builder'],
+  inject: ['builder', 'mode'],
   props: {
     element: {
       type: Object,

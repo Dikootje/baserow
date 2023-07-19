@@ -29,7 +29,7 @@ export default {
     resolvedValue() {
       try {
         return this.resolveFormula(this.element.value)
-      } catch {
+      } catch (e) {
         return ''
       }
     },

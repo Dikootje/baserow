@@ -9,9 +9,9 @@ import JavascriptExecutor from '@baserow/formula/parser/javascriptExecutor'
  *   `get('something')` expression
  * @returns the result of the formula in the given data ledger context.
  */
-export const resolveFormula = (formula, dataLedger) => {
+export const resolveFormula = (formula, functions, dataLedger) => {
   const tree = parseBaserowFormula(formula)
-  const result = new JavascriptExecutor(dataLedger).visit(tree)
+  const result = new JavascriptExecutor(functions, dataLedger).visit(tree)
   return result
 }
 

@@ -1,13 +1,13 @@
 from typing import TYPE_CHECKING, Any
 
 from baserow.core.utils import to_path
-from baserow.formula.types import BaseFormulaContext
+from baserow.formula.types import FormulaContext
 
 if TYPE_CHECKING:
     from baserow.core.formula.registries import DataProviderTypeRegistry
 
 
-class DataLedger(BaseFormulaContext):
+class DataLedger(FormulaContext):
     """
     The data ledger holds all the data useful for the formula resolution. It uses a
     Data provider registry to fulfill data queries. Each data provider is responsible
@@ -24,16 +24,8 @@ class DataLedger(BaseFormulaContext):
         :param kwargs: extra elements are given to the data providers to extract data.
         """
 
-        self.context = {}
         self.registry = registry
-
-        # Populate context with data provided by each data providers from global context
-        # (can be the request object, the current workflow node, ...)
-        # This context is then used by data providers to compute data for the
-        # formula resolver
-        for provider_type in registry.get_all():
-            provider_context = provider_type.get_context(**kwargs)
-            self.context[provider_type.type] = provider_context
+        self.application_context = {**kwargs}
 
     def __getitem__(self, key: str) -> Any:
         """
