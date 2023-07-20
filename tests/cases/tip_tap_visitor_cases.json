@@ -1,0 +1,40 @@
+[
+    {
+        "formula": "'hello'",
+        "content": [{ "type": "text", "text": "hello" }]
+    },
+    {
+        "formula": "concat('hello', 'there')",
+        "content": [
+            { "type": "text", "text": "hello" },
+            { "type": "text", "text": "there" }
+        ]
+    },
+    {
+        "formula": "concat(concat('hello', 'there'), 'friend :)')",
+        "content": [
+            { "type": "text", "text": "hello" },
+            { "type": "text", "text": "there" },
+            { "type": "text", "text": "friend :)" }
+        ]
+    },
+    {
+        "formula": "get('data_source.hello.there')",
+        "content": [
+            {
+                "type": "get-formula-component",
+                "attrs": { "path": "data_source.hello.there" }
+            }
+        ]
+    },
+    {
+        "formula": "concat(get('data_source.hello.there'), 'friend :)')",
+        "content": [
+            {
+                "type": "get-formula-component",
+                "attrs": { "path": "data_source.hello.there" }
+            },
+            { "type": "text", "text": "friend :)" }
+        ]
+    }
+]
