@@ -1,5 +1,5 @@
 <template>
-  <FormElement class="control">
+  <FormElement class="control" :class="{ 'control--horizontal': horizontal }">
     <label
       v-if="label"
       class="control__label"
@@ -45,6 +45,11 @@ export default {
       default: '',
     },
     smallLabel: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    horizontal: {
       type: Boolean,
       required: false,
       default: false,

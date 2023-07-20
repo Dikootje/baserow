@@ -82,6 +82,7 @@
             v-model="param.value"
             :page="page"
             :label="param.name"
+            horizontal
             :placeholder="$t('linkElementForm.paramPlaceholder')"
             :error="
               $v.values.page_parameters.$each[index].$dirty &&
