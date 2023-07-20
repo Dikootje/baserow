@@ -3,12 +3,10 @@
 </template>
 
 <script>
-import { Editor, EditorContent, generateHTML } from '@tiptap/vue-2'
+import { Editor, EditorContent, generateHTML, Node } from '@tiptap/vue-2'
 import { Placeholder } from '@tiptap/extension-placeholder'
 import { Text } from '@tiptap/extension-text'
-import { Document } from '@tiptap/extension-document'
 import _ from 'lodash'
-import { Paragraph } from '@tiptap/extension-paragraph'
 import { NoNewLineExt } from '@baserow/modules/core/components/tiptap/extensions/noNewLine'
 import { GetFormulaComponentExt } from '@baserow/modules/core/components/tiptap/extensions/getFormulaComponent'
 import parseBaserowFormula from '@baserow/formula/parser/parser'
@@ -44,13 +42,18 @@ export default {
       })
     },
     extensions() {
+      const TopNode = Node.create({
+        name: 'topNode',
+        topNode: true,
+        content: 'inline*',
+      })
+
+      const TextNode = Text.extend({ inline: true })
+
       return [
-        Document,
+        TopNode,
+        TextNode,
         GetFormulaComponentExt,
-        Text,
-        Paragraph.configure({
-          HTMLAttributes: { class: 'formula-input-field__paragraph' },
-        }),
         NoNewLineExt,
         this.placeHolderExt,
       ]
@@ -113,18 +116,12 @@ export default {
       deleteObjectById(this.content, id)
     },
     onUpdate() {
-      let content = this.editor.getJSON().content
-      // TODO remove and make sure that no paragraph is rendered in the editor.
-      if (content[0].type === 'paragraph') {
-        content = content[0].content || []
-      }
-
-      this.$emit('input', this.toFormula(content))
+      this.$emit('input', this.toFormula(this.editor.getJSON().content))
     },
     toContent(formula) {
       if (_.isEmpty(formula)) {
         return {
-          type: 'doc',
+          type: 'topNode',
           content: [],
         }
       }
@@ -133,7 +130,7 @@ export default {
       const functionCollection = new RuntimeFunctionCollection(this.$registry)
       const content = new ToTipTapVisitor(functionCollection).visit(tree)
       return {
-        type: 'doc',
+        type: 'topNode',
         content,
       }
     },
