@@ -74,7 +74,9 @@ export default {
     },
     content: {
       handler() {
-        this.editor?.commands.setContent(this.htmlContent, true)
+        this.editor?.commands.setContent(this.htmlContent, false, {
+          preserveWhitespace: 'full',
+        })
       },
       deep: true,
     },
@@ -90,6 +92,9 @@ export default {
         attributes: {
           class: 'formula_input_field__editor',
         },
+      },
+      parseOptions: {
+        preserveWhitespace: 'full',
       },
     })
   },
