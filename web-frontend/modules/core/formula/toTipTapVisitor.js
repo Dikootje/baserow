@@ -46,7 +46,6 @@ export class ToTipTapVisitor extends BaserowFormulaVisitor {
   }
 
   visitFunctionCall(ctx) {
-    // TODO
     const functionName = this.visitFuncName(ctx.func_name()).toLowerCase()
     const functionArgumentExpressions = ctx.expr()
 
