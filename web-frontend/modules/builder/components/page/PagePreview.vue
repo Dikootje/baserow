@@ -59,10 +59,8 @@ export default {
       page: 'page/getSelected',
       deviceTypeSelected: 'page/getDeviceTypeSelected',
       elementSelected: 'element/getSelected',
+      elements: 'element/getElements',
     }),
-    elements() {
-      return this.$store.getters['element/getElements']
-    },
     elementSelectedId() {
       return this.elementSelected?.id
     },

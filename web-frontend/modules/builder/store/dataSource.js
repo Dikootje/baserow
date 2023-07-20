@@ -184,12 +184,12 @@ const actions = {
     }
   },
   async fetch({ dispatch, commit }, { page }) {
-    commit('CLEAR_ITEMS')
-
+    dispatch('dataSourceContent/clearDataSourceContents', null, { root: true })
     const { data: dataSources } = await DataSourceService(
       this.$client
     ).fetchAll(page.id)
 
+    commit('CLEAR_ITEMS')
     await Promise.all(
       dataSources.map((dataSource) => dispatch('forceCreate', { dataSource }))
     )
@@ -197,12 +197,13 @@ const actions = {
     return dataSources
   },
   async fetchPublished({ dispatch, commit }, { page }) {
-    commit('CLEAR_ITEMS')
+    dispatch('dataSourceContent/clearDataSourceContents', null, { root: true })
 
     const { data: dataSources } = await PublishedBuilderService(
       this.$client
     ).fetchDataSources(page.id)
 
+    commit('CLEAR_ITEMS')
     await Promise.all(
       dataSources.map((dataSource) => dispatch('forceCreate', { dataSource }))
     )

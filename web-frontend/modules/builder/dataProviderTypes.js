@@ -77,14 +77,28 @@ export class PageParameterDataProviderType extends DataProviderType {
   }
 
   async init(dataLedger) {
-    await Promise.all(
-      dataLedger.applicationContext.page.path_params.map(({ name, type }) =>
-        this.app.store.dispatch('pageParameter/setParameter', {
-          name,
-          value: type === 'numeric' ? 1 : 'test',
-        })
+    const { page, mode, pageParamsValue } = dataLedger.applicationContext
+    if (mode === 'editing') {
+      // Generate fake values for the parameters
+      await Promise.all(
+        page.path_params.map(({ name, type }) =>
+          this.app.store.dispatch('pageParameter/setParameter', {
+            name,
+            value: type === 'numeric' ? 1 : 'test',
+          })
+        )
       )
-    )
+    } else {
+      // Read parameters from the application context
+      await Promise.all(
+        Object.entries(pageParamsValue).map(([name, value]) =>
+          this.app.store.dispatch('pageParameter/setParameter', {
+            name,
+            value,
+          })
+        )
+      )
+    }
   }
 
   getDataChunk(dataLedger, path) {

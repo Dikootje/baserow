@@ -67,7 +67,6 @@ export default {
   methods: {
     ...mapActions({
       actionFetchIntegrations: 'integration/fetch',
-      actionFetchDataSources: 'dataSource/fetch',
       actionCreateDataSource: 'dataSource/create',
       actionUpdateDataSource: 'dataSource/debouncedUpdate',
       actionDeleteDataSource: 'dataSource/delete',

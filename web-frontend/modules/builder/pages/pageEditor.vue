@@ -48,11 +48,16 @@ export default {
         builderId,
         pageId,
       })
-      await store.dispatch('workspace/selectById', builder.workspace.id)
       data.builder = builder
       data.page = page
 
+      await store.dispatch('workspace/selectById', builder.workspace.id)
+
       await store.dispatch('element/fetch', { page })
+
+      await store.dispatch('dataSource/fetch', {
+        page,
+      })
 
       const dataLedger = new DataLedger(
         $registry.getAll('builderDataProvider'),

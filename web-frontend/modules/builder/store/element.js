@@ -1,4 +1,5 @@
 import ElementService from '@baserow/modules/builder/services/element'
+import PublicBuilderService from '@baserow/modules/builder/services/publishedBuilder'
 
 const state = {
   // The elements of the currently selected page
@@ -193,10 +194,19 @@ const actions = {
       throw error
     }
   },
-  async fetch({ dispatch, commit }, { page }) {
+  async fetch({ commit }, { page }) {
     const { data: elements } = await ElementService(this.$client).fetchAll(
       page.id
     )
+
+    commit('SET_ITEMS', { elements })
+
+    return elements
+  },
+  async fetchPublished({ commit }, { page }) {
+    const { data: elements } = await PublicBuilderService(
+      this.$client
+    ).fetchElements(page)
 
     commit('SET_ITEMS', { elements })
 

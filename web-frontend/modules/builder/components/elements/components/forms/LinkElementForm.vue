@@ -48,7 +48,6 @@
         :label="$t('linkElementForm.url')"
         :placeholder="$t('linkElementForm.urlPlaceholder')"
         :error="
-          $v.values.navigate_to_url.$dirty &&
           !$v.values.navigate_to_url.validFormula
             ? $t('elementForms.invalidFormula')
             : ''
