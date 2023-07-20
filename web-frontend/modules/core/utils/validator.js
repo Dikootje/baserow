@@ -22,7 +22,7 @@ export const ensureInteger = (value) => {
  * @returns {string} The value as a string.
  */
 export const ensureString = (value) => {
-  if (!value) {
+  if (value === null || value === undefined || value === '') {
     return ''
   }
   return `${value}`

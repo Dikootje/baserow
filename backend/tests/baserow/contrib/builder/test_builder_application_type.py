@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 import pytest
 
 from baserow.contrib.builder.application_types import BuilderApplicationType
@@ -67,7 +65,7 @@ def test_builder_application_export(data_fixture):
                     {
                         "id": datasource1.id,
                         "name": "source 1",
-                        "order": Decimal("1.00000000000000000000"),
+                        "order": "1.00000000000000000000",
                         "service": {
                             "id": datasource1.service.id,
                             "integration_id": integration.id,
@@ -81,7 +79,7 @@ def test_builder_application_export(data_fixture):
                     {
                         "id": element1.id,
                         "type": "heading",
-                        "order": element1.order,
+                        "order": str(element1.order),
                         "style_padding_top": 10,
                         "style_padding_bottom": 10,
                         "value": element1.value,
@@ -90,9 +88,9 @@ def test_builder_application_export(data_fixture):
                     {
                         "id": element2.id,
                         "type": "paragraph",
+                        "order": str(element2.order),
                         "style_padding_top": 10,
                         "style_padding_bottom": 10,
-                        "order": element2.order,
                         "value": element2.value,
                     },
                 ],
@@ -107,7 +105,7 @@ def test_builder_application_export(data_fixture):
                     {
                         "id": datasource2.id,
                         "name": "source 2",
-                        "order": Decimal("1.00000000000000000000"),
+                        "order": "1.00000000000000000000",
                         "service": {
                             "id": datasource2.service.id,
                             "integration_id": integration.id,
@@ -119,7 +117,7 @@ def test_builder_application_export(data_fixture):
                     {
                         "id": datasource3.id,
                         "name": "source 3",
-                        "order": Decimal("2.00000000000000000000"),
+                        "order": "2.00000000000000000000",
                         "service": {
                             "id": datasource3.service.id,
                             "integration_id": integration.id,
@@ -132,9 +130,9 @@ def test_builder_application_export(data_fixture):
                     {
                         "id": element3.id,
                         "type": "heading",
+                        "order": str(element3.order),
                         "style_padding_top": 10,
                         "style_padding_bottom": 10,
-                        "order": element3.order,
                         "value": element3.value,
                         "level": element3.level,
                     },
@@ -146,7 +144,7 @@ def test_builder_application_export(data_fixture):
                 "authorized_user_username": user.username,
                 "id": integration.id,
                 "name": "test",
-                "order": Decimal("1.00000000000000000000"),
+                "order": "1.00000000000000000000",
                 "type": "local_baserow",
             },
         ],
@@ -184,13 +182,13 @@ IMPORT_REFERENCE = {
                 {
                     "id": 4,
                     "name": "source 0",
-                    "order": Decimal("1.00000000000000000000"),
+                    "order": "1.00000000000000000000",
                     "service": None,
                 },
                 {
                     "id": 5,
                     "name": "source 1",
-                    "order": Decimal("2.00000000000000000000"),
+                    "order": "2.00000000000000000000",
                     "service": {
                         "id": 17,
                         "integration_id": None,
@@ -219,7 +217,7 @@ IMPORT_REFERENCE = {
                 {
                     "id": 1,
                     "name": "source 2",
-                    "order": Decimal("1.00000000000000000000"),
+                    "order": "1.00000000000000000000",
                     "service": {
                         "id": 1,
                         "integration_id": 42,
@@ -231,7 +229,7 @@ IMPORT_REFERENCE = {
                 {
                     "id": 3,
                     "name": "source 3",
-                    "order": Decimal("2.00000000000000000000"),
+                    "order": "2.00000000000000000000",
                     "service": {
                         "id": 2,
                         "integration_id": 42,
@@ -247,7 +245,7 @@ IMPORT_REFERENCE = {
             "authorized_user_username": "test@baserow.io",
             "id": 42,
             "name": "test",
-            "order": Decimal("1.00000000000000000000"),
+            "order": "1.00000000000000000000",
             "type": "local_baserow",
         },
     ],

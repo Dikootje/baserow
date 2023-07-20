@@ -29,7 +29,7 @@ def test_export_element(data_fixture, element_type: ElementType):
 
     assert exported["id"] == element.id
     assert exported["type"] == element_type.type
-    assert exported["order"] == element.order
+    assert exported["order"] == str(element.order)
 
     for key, value in sample_params.items():
         assert exported[key] == value
