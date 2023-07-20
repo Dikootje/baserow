@@ -49,6 +49,6 @@ export class FromTipTapVisitor {
       (functionCurrent) => functionCurrent.formulaComponentType === node.type
     )
 
-    return formulaFunction.fromNodeToFormula(node)
+    return formulaFunction?.fromNodeToFormula(node)
   }
 }
