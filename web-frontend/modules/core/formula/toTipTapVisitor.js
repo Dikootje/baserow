@@ -60,7 +60,7 @@ export class ToTipTapVisitor extends BaserowFormulaVisitor {
 
     const formulaFunctionType = this.functions.get(functionName)
 
-    return formulaFunctionType.getFormulaComponent(args)
+    return formulaFunctionType.toNode(args)
   }
 
   visitBinaryOp(ctx) {
