@@ -1,6 +1,6 @@
 <template>
   <form @submit.prevent @keydown.enter.prevent>
-    <FormulaInput
+    <FormulaFormInput
       v-model="values.value"
       :label="$t('linkElementForm.text')"
       :placeholder="$t('linkElementForm.textPlaceholder')"
@@ -42,7 +42,7 @@
       </div>
     </FormElement>
     <FormElement v-if="navigateTo === 'custom'" class="control">
-      <FormulaInput
+      <FormulaFormInput
         v-model="values.navigate_to_url"
         :page="page"
         :label="$t('linkElementForm.url')"
@@ -78,7 +78,7 @@
           :key="param.name"
           class="link-element-form__param"
         >
-          <FormulaInput
+          <FormulaFormInput
             v-model="param.value"
             :page="page"
             :label="param.name"
@@ -144,12 +144,12 @@ import form from '@baserow/modules/core/mixins/form'
 import { LinkElementType } from '@baserow/modules/builder/elementTypes'
 import AlignmentSelector from '@baserow/modules/builder/components/elements/components/forms/settings/AlignmentSelector'
 import { ALIGNMENTS } from '@baserow/modules/builder/enums'
-import FormulaInput from '@baserow/modules/core/components/formula/FormulaInput'
+import FormulaFormInput from '@baserow/modules/core/components/formula/FormulaFormInput'
 import { isValidFormula } from '@baserow/formula'
 
 export default {
   name: 'LinkElementForm',
-  components: { AlignmentSelector, FormulaInput },
+  components: { AlignmentSelector, FormulaFormInput },
   mixins: [form],
   props: {
     builder: { type: Object, required: true },

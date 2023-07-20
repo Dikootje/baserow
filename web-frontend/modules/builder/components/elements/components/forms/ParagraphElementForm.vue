@@ -1,6 +1,6 @@
 <template>
   <form @submit.prevent @keydown.enter.prevent>
-    <FormulaInput
+    <FormulaFormInput
       v-model="values.value"
       :label="$t('paragraphElementForm.textTitle')"
       :placeholder="$t('elementForms.textInputPlaceholder')"
@@ -14,12 +14,12 @@
 <script>
 import form from '@baserow/modules/core/mixins/form'
 
-import FormulaInput from '@baserow/modules/core/components/formula/FormulaInput'
+import FormulaFormInput from '@baserow/modules/core/components/formula/FormulaFormInput'
 import { isValidFormula } from '@baserow/formula'
 
 export default {
   name: 'ParagraphElementForm',
-  components: { FormulaInput },
+  components: { FormulaFormInput },
   mixins: [form],
   props: {},
   data() {
