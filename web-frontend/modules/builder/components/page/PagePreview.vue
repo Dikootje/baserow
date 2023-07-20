@@ -1,6 +1,6 @@
 <template>
   <div class="page-preview__wrapper" @click.self="selectElement(null)">
-    <FakeBrowserBar :page="page" :style="{ maxWidth }" />
+    <PreviewNavigationBar :page="page" :style="{ maxWidth }" />
     <div ref="preview" class="page-preview" :style="{ maxWidth }">
       <div ref="previewScaled" class="page-preview__scaled">
         <ElementPreview
@@ -34,12 +34,12 @@ import { mapGetters, mapActions } from 'vuex'
 import ElementPreview from '@baserow/modules/builder/components/elements/ElementPreview'
 import { notifyIf } from '@baserow/modules/core/utils/error'
 import AddElementModal from '@baserow/modules/builder/components/elements/AddElementModal'
-import FakeBrowserBar from '@baserow/modules/builder/components/page/FakeBrowserBar'
+import PreviewNavigationBar from '@baserow/modules/builder/components/page/PreviewNavigationBar'
 import { PLACEMENTS } from '@baserow/modules/builder/enums'
 
 export default {
   name: 'PagePreview',
-  components: { AddElementModal, ElementPreview, FakeBrowserBar },
+  components: { AddElementModal, ElementPreview, PreviewNavigationBar },
   data() {
     return {
       // This value is set when the insertion of a new element is in progress to

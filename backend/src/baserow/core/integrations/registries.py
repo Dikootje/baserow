@@ -60,6 +60,9 @@ class IntegrationType(
         if prop_name == "type":
             return self.type
 
+        if prop_name == "order":
+            return str(integration.order)
+
         return getattr(integration, prop_name)
 
     def export_serialized(

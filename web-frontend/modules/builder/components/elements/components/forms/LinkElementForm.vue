@@ -55,10 +55,7 @@
         @blur="$v.values.navigate_to_url.$touch()"
       />
     </FormElement>
-    <FormElement
-      v-if="destinationPage"
-      class="control link-element-form__params"
-    >
+    <FormElement v-if="destinationPage" class="control">
       <template v-if="parametersInError">
         <Alert type="error" minimal>
           <div class="link-element-form__params-error">
@@ -75,7 +72,7 @@
           </div>
         </Alert>
       </template>
-      <div v-else class="link-element-form__params">
+      <div v-else>
         <div
           v-for="(param, index) in values.page_parameters"
           :key="param.name"

@@ -52,6 +52,9 @@ class ElementType(
         if prop_name == "type":
             return self.type
 
+        if prop_name == "order":
+            return str(element.order)
+
         return getattr(element, prop_name)
 
     def export_serialized(

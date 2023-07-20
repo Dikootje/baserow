@@ -95,7 +95,7 @@ class BuilderApplicationType(ApplicationType):
                     DataSourceDict(
                         id=data_source.id,
                         name=data_source.name,
-                        order=data_source.order,
+                        order=str(data_source.order),
                         service=serialized_service,
                     )
                 )
