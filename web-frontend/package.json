@@ -36,7 +36,6 @@
     "@tiptap/extension-placeholder": "^2.0.3",
     "@tiptap/extension-text": "^2.0.3",
     "@tiptap/pm": "^2.0.3",
-    "@tiptap/starter-kit": "^2.0.4",
     "@tiptap/suggestion": "^2.0.3",
     "@tiptap/vue-2": "^2.0.3",
     "antlr4": "4.9.3",

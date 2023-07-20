@@ -7,7 +7,6 @@ import { Editor, EditorContent, generateHTML } from '@tiptap/vue-2'
 import { Placeholder } from '@tiptap/extension-placeholder'
 import { Text } from '@tiptap/extension-text'
 import { Document } from '@tiptap/extension-document'
-import { StarterKit } from '@tiptap/starter-kit'
 import _ from 'lodash'
 import { Paragraph } from '@tiptap/extension-paragraph'
 import { NoNewLineExt } from '@baserow/modules/core/components/tiptap/extensions/noNewLine'
@@ -46,7 +45,6 @@ export default {
     },
     extensions() {
       return [
-        StarterKit,
         Document,
         GetFormulaComponentExt,
         Text,
