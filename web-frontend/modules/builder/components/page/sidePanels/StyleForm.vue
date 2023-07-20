@@ -1,55 +1,48 @@
 <template>
   <form @submit.prevent>
-    <FormInput
-      v-for="prop in styleBoxProperties"
-      :key="prop.name"
-      v-model="values[prop.name]"
-      :label="prop.label"
-      type="number"
-      :error="$v.values[prop.name].$error ? $t('styleForm.paddingError') : ''"
-      @blur="$v.values[prop.name].$touch()"
-    />
+    <StyleBoxForm v-model="topStyle" :label="$t('styleForm.boxTop')" />
+    <StyleBoxForm v-model="bottomStyle" :label="$t('styleForm.boxBottom')" />
   </form>
 </template>
 
 <script>
-import { required, integer, between } from 'vuelidate/lib/validators'
 import form from '@baserow/modules/core/mixins/form'
+import StyleBoxForm from '@baserow/modules/builder/components/page/sidePanels/StyleBoxForm'
 
 export default {
-  name: 'StyleForm',
+  components: { StyleBoxForm },
   mixins: [form],
-  props: {
-    styleBoxProperties: {
-      type: Array,
-      required: true,
-    },
-  },
+  props: {},
   data() {
     return {
-      allowedValues: this.styleBoxProperties.map(({ name }) => name),
-      values: Object.fromEntries(
-        this.styleBoxProperties.map(({ name }) => {
-          return [name, 0]
-        })
-      ),
+      allowedValues: ['style_padding_top', 'style_padding_bottom'],
+      values: {
+        style_padding_top: 0,
+        style_padding_bottom: 0,
+      },
     }
   },
-  validations() {
-    return {
-      values: Object.fromEntries(
-        this.styleBoxProperties.map(({ name }) => {
-          return [
-            name,
-            {
-              required,
-              integer,
-              between: between(0, 200),
-            },
-          ]
-        })
-      ),
-    }
+  computed: {
+    topStyle: {
+      get() {
+        return { padding: this.getDefaultValues().style_padding_top }
+      },
+      set(newValue) {
+        if (newValue.padding !== undefined) {
+          this.values.style_padding_top = newValue.padding
+        }
+      },
+    },
+    bottomStyle: {
+      get() {
+        return { padding: this.getDefaultValues().style_padding_bottom }
+      },
+      set(newValue) {
+        if (newValue.padding !== undefined) {
+          this.values.style_padding_bottom = newValue.padding
+        }
+      },
+    },
   },
 }
 </script>
