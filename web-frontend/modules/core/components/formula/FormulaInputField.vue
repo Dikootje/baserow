@@ -8,7 +8,6 @@ import { Placeholder } from '@tiptap/extension-placeholder'
 import { Text } from '@tiptap/extension-text'
 import _ from 'lodash'
 import { NoNewLineExt } from '@baserow/modules/core/components/tiptap/extensions/noNewLine'
-import { GetFormulaComponentExt } from '@baserow/modules/core/components/tiptap/extensions/getFormulaComponent'
 import parseBaserowFormula from '@baserow/formula/parser/parser'
 import { ToTipTapVisitor } from '@baserow/modules/core/formula/toTipTapVisitor'
 import { RuntimeFunctionCollection } from '@baserow/modules/core/functionCollection'
@@ -41,6 +40,11 @@ export default {
         placeholder: this.placeholder,
       })
     },
+    formulaComponents() {
+      return Object.values(this.$registry.getAll('runtime_formula_type'))
+        .map((type) => type.formulaComponent)
+        .filter((component) => component !== null)
+    },
     extensions() {
       const TopNode = Node.create({
         name: 'topNode',
@@ -53,9 +57,9 @@ export default {
       return [
         TopNode,
         TextNode,
-        GetFormulaComponentExt,
         NoNewLineExt,
         this.placeHolderExt,
+        ...this.formulaComponents,
       ]
     },
     htmlContent() {

@@ -9,6 +9,9 @@ import {
   InvalidNumberOfArguments,
 } from '@baserow/formula/parser/errors'
 import { uuid } from '@baserow/modules/core/utils/string'
+import { Node, VueNodeViewRenderer } from '@tiptap/vue-2'
+import GetFormulaComponent from '@baserow/modules/core/components/formula/GetFormulaComponent'
+import { mergeAttributes } from '@tiptap/core'
 
 export class RuntimeFormulaFunction extends Registerable {
   /**
@@ -108,6 +111,16 @@ export class RuntimeFormulaFunction extends Registerable {
   }
 
   /**
+   * The component configuration that should be used to render the formula in the
+   * editor.
+   *
+   * @returns {null}
+   */
+  get formulaComponent() {
+    return null
+  }
+
+  /**
    * This function returns one or many nodes that can be used to render the formula
    * in the editor.
    *
@@ -153,6 +166,37 @@ export class RuntimeGet extends RuntimeFormulaFunction {
 
   get formulaComponentType() {
     return 'get-formula-component'
+  }
+
+  get formulaComponent() {
+    return Node.create({
+      name: this.formulaComponentType,
+      group: 'inline',
+      inline: true,
+      addNodeView() {
+        return VueNodeViewRenderer(GetFormulaComponent)
+      },
+      addAttributes() {
+        return {
+          id: {
+            default: '',
+          },
+          path: {
+            default: '',
+          },
+        }
+      },
+      parseHTML() {
+        return [
+          {
+            tag: this.formulaComponentType,
+          },
+        ]
+      },
+      renderHTML({ HTMLAttributes }) {
+        return [this.formulaComponentType, mergeAttributes(HTMLAttributes)]
+      },
+    })
   }
 
   execute(context, args) {
