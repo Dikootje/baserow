@@ -176,7 +176,6 @@ export default {
       }
     },
     toFormula(content) {
-      console.log(content)
       const functionCollection = new RuntimeFunctionCollection(this.$registry)
       return new FromTipTapVisitor(functionCollection).visit(content || [])
     },
