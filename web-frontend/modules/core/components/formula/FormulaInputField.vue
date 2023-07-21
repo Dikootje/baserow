@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { Editor, EditorContent, generateHTML, Node } from '@tiptap/vue-2'
+import { Editor, EditorContent, generateHTML } from '@tiptap/vue-2'
 import { Placeholder } from '@tiptap/extension-placeholder'
 import { Document } from '@tiptap/extension-document'
 import { Paragraph } from '@tiptap/extension-paragraph'
@@ -14,7 +14,6 @@ import parseBaserowFormula from '@baserow/formula/parser/parser'
 import { ToTipTapVisitor } from '@baserow/modules/core/formula/toTipTapVisitor'
 import { RuntimeFunctionCollection } from '@baserow/modules/core/functionCollection'
 import { FromTipTapVisitor } from '@baserow/modules/core/formula/fromTipTapVisitor'
-import { mergeAttributes } from '@tiptap/core'
 
 export default {
   name: 'FormulaInputField',
