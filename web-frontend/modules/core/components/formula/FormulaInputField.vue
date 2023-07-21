@@ -1,5 +1,5 @@
 <template>
-  <EditorContent :editor="editor" @remove="remove" />
+  <EditorContent :class="classes" :editor="editor" @remove="remove" />
 </template>
 
 <script>
@@ -32,9 +32,15 @@ export default {
     return {
       editor: null,
       content: null,
+      isFocused: false,
     }
   },
   computed: {
+    classes() {
+      return {
+        'formula_input_field--focused': this.isFocused,
+      }
+    },
     placeHolderExt() {
       return Placeholder.configure({
         placeholder: this.placeholder,
@@ -87,6 +93,8 @@ export default {
       content: this.htmlContent,
       editable: true,
       onUpdate: this.onUpdate,
+      onFocus: this.onFocus,
+      onBlur: this.onBlur,
       extensions: this.extensions,
       editorProps: {
         attributes: {
@@ -126,6 +134,12 @@ export default {
     },
     onUpdate() {
       this.$emit('input', this.toFormula(this.editor.getJSON().content))
+    },
+    onFocus() {
+      this.isFocused = true
+    },
+    onBlur() {
+      this.isFocused = false
     },
     toContent(formula) {
       if (_.isEmpty(formula)) {
