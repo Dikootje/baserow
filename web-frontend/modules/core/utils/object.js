@@ -4,8 +4,6 @@
  * @param o
  * @return {object}
  */
-import _ from 'lodash'
-
 export function clone(o) {
   return JSON.parse(JSON.stringify(o))
 }
