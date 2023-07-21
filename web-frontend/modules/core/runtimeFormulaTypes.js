@@ -169,10 +169,12 @@ export class RuntimeGet extends RuntimeFormulaFunction {
   }
 
   get formulaComponent() {
+    const formulaComponentType = this.formulaComponentType
     return Node.create({
-      name: this.formulaComponentType,
+      name: formulaComponentType,
       group: 'inline',
       inline: true,
+      atom: true,
       addNodeView() {
         return VueNodeViewRenderer(GetFormulaComponent)
       },
@@ -189,12 +191,12 @@ export class RuntimeGet extends RuntimeFormulaFunction {
       parseHTML() {
         return [
           {
-            tag: this.formulaComponentType,
+            tag: formulaComponentType,
           },
         ]
       },
       renderHTML({ HTMLAttributes }) {
-        return [this.formulaComponentType, mergeAttributes(HTMLAttributes)]
+        return [formulaComponentType, mergeAttributes(HTMLAttributes)]
       },
     })
   }
