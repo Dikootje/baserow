@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { Editor, EditorContent, generateHTML } from '@tiptap/vue-2'
+import { Editor, EditorContent, generateHTML, Node } from '@tiptap/vue-2'
 import { Placeholder } from '@tiptap/extension-placeholder'
 import { Document } from '@tiptap/extension-document'
 import { Text } from '@tiptap/extension-text'
@@ -13,6 +13,7 @@ import parseBaserowFormula from '@baserow/formula/parser/parser'
 import { ToTipTapVisitor } from '@baserow/modules/core/formula/toTipTapVisitor'
 import { RuntimeFunctionCollection } from '@baserow/modules/core/functionCollection'
 import { FromTipTapVisitor } from '@baserow/modules/core/formula/fromTipTapVisitor'
+import { mergeAttributes } from '@tiptap/core'
 
 export default {
   name: 'FormulaInputField',
@@ -53,11 +54,23 @@ export default {
         .filter((component) => component !== null)
     },
     extensions() {
-      const DocumentNode = Document.extend({ content: 'inline*' })
+      const DocumentNode = Document.extend()
       const TextNode = Text.extend({ inline: true })
+      const WrapperNode = Node.create({
+        name: 'wrapper',
+        group: 'block',
+        content: 'inline*',
+        parseHTML() {
+          return [{ tag: 'span' }]
+        },
+        renderHTML({ HTMLAttributes }) {
+          return ['span', mergeAttributes(HTMLAttributes), 0]
+        },
+      })
 
       return [
         DocumentNode,
+        WrapperNode,
         TextNode,
         NoNewLineExt,
         this.placeHolderExt,
@@ -66,6 +79,9 @@ export default {
     },
     htmlContent() {
       return generateHTML(this.content, this.extensions)
+    },
+    wrapperContent() {
+      return this.editor.getJSON().content[0].content
     },
   },
   watch: {
@@ -129,7 +145,7 @@ export default {
       deleteObjectById(this.content, id)
     },
     onUpdate() {
-      this.$emit('input', this.toFormula(this.editor.getJSON().content))
+      this.$emit('input', this.toFormula(this.wrapperContent))
     },
     onFocus() {
       this.isFocused = true
@@ -141,7 +157,7 @@ export default {
       if (_.isEmpty(formula)) {
         return {
           type: 'doc',
-          content: [],
+          content: [{ type: 'wrapper', content: [] }],
         }
       }
 
@@ -151,7 +167,7 @@ export default {
 
       return {
         type: 'doc',
-        content,
+        content: [{ type: 'wrapper', content }],
       }
     },
     toFormula(content) {
