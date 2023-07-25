@@ -145,6 +145,10 @@ export default {
       }
 
       deleteObjectById(this.content, id)
+
+      this.$nextTick(() => {
+        this.onUpdate()
+      })
     },
     onUpdate() {
       this.$emit('input', this.toFormula(this.wrapperContent))
