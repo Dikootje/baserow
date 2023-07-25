@@ -6,7 +6,6 @@
 import { Editor, EditorContent, generateHTML } from '@tiptap/vue-2'
 import { Placeholder } from '@tiptap/extension-placeholder'
 import { Document } from '@tiptap/extension-document'
-import { Paragraph } from '@tiptap/extension-paragraph'
 import { Text } from '@tiptap/extension-text'
 import _ from 'lodash'
 import { NoNewLineExt } from '@baserow/modules/core/components/tiptap/extensions/noNewLine'
@@ -54,14 +53,11 @@ export default {
         .filter((component) => component !== null)
     },
     extensions() {
+      const DocumentNode = Document.extend({ content: 'inline*' })
       const TextNode = Text.extend({ inline: true })
-      const ParagraphNode = Paragraph.configure({
-        HTMLAttributes: { class: 'formula-input-field__paragraph' },
-      })
 
       return [
-        Document,
-        ParagraphNode,
+        DocumentNode,
         TextNode,
         NoNewLineExt,
         this.placeHolderExt,
@@ -70,12 +66,6 @@ export default {
     },
     htmlContent() {
       return generateHTML(this.content, this.extensions)
-    },
-    internalContent() {
-      // The content of the editor is stored in a nested structure. The first element
-      // is a wrapper paragraph that we can safely ignore.
-      const paragraph = this.editor.getJSON().content[0]
-      return paragraph.content
     },
   },
   watch: {
@@ -104,7 +94,7 @@ export default {
       extensions: this.extensions,
       editorProps: {
         attributes: {
-          class: 'formula_input_field__editor',
+          class: 'formula-input-field__editor',
         },
       },
       parseOptions: {
@@ -139,7 +129,7 @@ export default {
       deleteObjectById(this.content, id)
     },
     onUpdate() {
-      this.$emit('input', this.toFormula(this.internalContent))
+      this.$emit('input', this.toFormula(this.editor.getJSON().content))
     },
     onFocus() {
       this.isFocused = true
@@ -151,12 +141,7 @@ export default {
       if (_.isEmpty(formula)) {
         return {
           type: 'doc',
-          content: [
-            {
-              type: 'paragraph',
-              content: [],
-            },
-          ],
+          content: [],
         }
       }
 
@@ -166,12 +151,7 @@ export default {
 
       return {
         type: 'doc',
-        content: [
-          {
-            type: 'paragraph',
-            content,
-          },
-        ],
+        content,
       }
     },
     toFormula(content) {

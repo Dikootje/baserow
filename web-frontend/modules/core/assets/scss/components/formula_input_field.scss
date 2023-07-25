@@ -1,12 +1,7 @@
-.formula-input-field__paragraph {
+.formula-input-field__editor {
   display: flex;
   align-items: center;
   color: black;
-}
-
-.ProseMirror p.is-editor-empty:first-child::before {
-  position: absolute !important;
-  height: unset !important;
 }
 
 .formula_input_field--focused {
