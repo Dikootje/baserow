@@ -217,7 +217,7 @@ export class RuntimeGet extends RuntimeFormulaFunction {
   }
 
   fromNodeToFormula(node) {
-    return `get(${node.attrs.path})`
+    return `get('${node.attrs.path}')`
   }
 }
 
