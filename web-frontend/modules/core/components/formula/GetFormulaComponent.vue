@@ -1,19 +1,17 @@
 <template>
-  <NodeViewWrapper>
-    <div class="get-formula-component">
-      {{ pathParts.dataProvider }}
-      <template v-for="(part, index) in pathParts.parts">
-        <i :key="index" class="get-formula-component__caret fas fa-angle-right">
-        </i>
-        <span :key="index + part">{{ part }}</span>
-      </template>
-      <a
-        class="get-formula-component__remove"
-        @click="emit('remove', node.attrs.id)"
-      >
-        <i class="fas fa-times"></i>
-      </a>
-    </div>
+  <NodeViewWrapper as="span" class="get-formula-component">
+    {{ pathParts.dataProvider }}
+    <template v-for="(part, index) in pathParts.parts">
+      <i :key="index" class="get-formula-component__caret fas fa-angle-right">
+      </i>
+      <span :key="index + part">{{ part }}</span>
+    </template>
+    <a
+      class="get-formula-component__remove"
+      @click="emit('remove', node.attrs.id)"
+    >
+      <i class="fas fa-times"></i>
+    </a>
   </NodeViewWrapper>
 </template>
 
