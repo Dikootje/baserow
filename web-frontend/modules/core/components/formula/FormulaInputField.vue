@@ -86,15 +86,17 @@ export default {
   },
   watch: {
     value(value) {
-      if (!_.isEqual(value, this.toFormula(this.content.content))) {
+      if (!_.isEqual(value, this.toFormula(this.wrapperContent))) {
         this.content = this.toContent(value)
       }
     },
     content: {
       handler() {
-        this.editor?.commands.setContent(this.htmlContent, false, {
-          preserveWhitespace: 'full',
-        })
+        if (!_.isEqual(this.content, this.editor.getJSON())) {
+          this.editor?.commands.setContent(this.htmlContent, false, {
+            preserveWhitespace: 'full',
+          })
+        }
       },
       deep: true,
     },
