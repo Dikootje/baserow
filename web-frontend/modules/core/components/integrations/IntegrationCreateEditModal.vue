@@ -119,7 +119,6 @@ export default {
             integrationType: this.actualIntegrationType.type,
             values,
           })
-          console.log(newIntegration)
 
           this.$emit('created', newIntegration)
         } else {
