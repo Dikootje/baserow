@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
+from baserow.contrib.builder.exceptions import InvalidIntegrationAuthorizedUser
 from baserow.core.exceptions import PermissionException
 from baserow.core.integrations.exceptions import (
     IntegrationDoesNotExist,
@@ -374,4 +375,33 @@ def test_move_integration_trigger_order_recalculed(
 
     assert integration_orders_recalculated_mock.called_with(
         application=application, user=user
+    )
+
+
+@pytest.mark.django_db
+def test_validate_authorized_user_not_in_workspace(data_fixture):
+    user = data_fixture.create_user()
+    authorized_user = data_fixture.create_user()
+    application = data_fixture.create_builder_application(user=user)
+    with pytest.raises(InvalidIntegrationAuthorizedUser) as exc_info:
+        IntegrationService().validate_authorized_user(
+            application.workspace, authorized_user
+        )
+    assert (
+        exc_info.value.args[0] == f"The user {authorized_user.pk} does not belong "
+        "to the integration's workspace."
+    )
+
+
+@pytest.mark.django_db
+def test_validate_authorized_user_flagged_for_deletion(data_fixture):
+    authorized_user = data_fixture.create_user(to_be_deleted=True)
+    application = data_fixture.create_builder_application(user=authorized_user)
+    with pytest.raises(InvalidIntegrationAuthorizedUser) as exc_info:
+        IntegrationService().validate_authorized_user(
+            application.workspace, authorized_user
+        )
+    assert (
+        exc_info.value.args[0]
+        == f"The user {authorized_user.id} is flagged for deletion."
     )
