@@ -34,6 +34,8 @@ from baserow.api.utils import (
     type_from_data_or_registry,
     validate_data_custom_fields,
 )
+from baserow.contrib.builder.api.errors import ERROR_INTEGRATION_AUTHORIZED_USER_INVALID
+from baserow.contrib.builder.exceptions import InvalidIntegrationAuthorizedUser
 from baserow.core.exceptions import (
     ApplicationDoesNotExist,
     ApplicationOperationNotSupported,
@@ -134,6 +136,7 @@ class IntegrationsView(APIView):
         {
             ApplicationDoesNotExist: ERROR_APPLICATION_DOES_NOT_EXIST,
             ApplicationOperationNotSupported: ERROR_APPLICATION_OPERATION_NOT_SUPPORTED,
+            InvalidIntegrationAuthorizedUser: ERROR_INTEGRATION_AUTHORIZED_USER_INVALID,
         }
     )
     @validate_body_custom_fields(
@@ -200,6 +203,7 @@ class IntegrationView(APIView):
     @map_exceptions(
         {
             IntegrationDoesNotExist: ERROR_INTEGRATION_DOES_NOT_EXIST,
+            InvalidIntegrationAuthorizedUser: ERROR_INTEGRATION_AUTHORIZED_USER_INVALID,
         }
     )
     def patch(self, request, integration_id: int):

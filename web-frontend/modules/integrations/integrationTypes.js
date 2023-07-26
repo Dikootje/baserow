@@ -42,9 +42,9 @@ export class LocalBaserowIntegrationType extends IntegrationType {
   }
 
   getDefaultValues() {
-    const user = this.app.store.getters['auth/getUserObject']
+    const userId = this.app.store.getters['auth/getUserId']
     return {
-      authorized_user: { username: user.username, first_name: user.first_name },
+      authorized_user: userId,
     }
   }
 

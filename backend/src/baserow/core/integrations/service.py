@@ -1,7 +1,8 @@
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from django.contrib.auth.models import AbstractUser
 
+from baserow.contrib.builder.exceptions import InvalidIntegrationAuthorizedUser
 from baserow.core.exceptions import CannotCalculateIntermediateOrder
 from baserow.core.handler import CoreHandler
 from baserow.core.integrations.exceptions import IntegrationNotInSameApplication
@@ -25,6 +26,9 @@ from baserow.core.integrations.signals import (
 )
 from baserow.core.integrations.types import IntegrationForUpdate
 from baserow.core.models import Application
+
+if TYPE_CHECKING:
+    from baserow.core.models import Workspace
 
 
 class IntegrationService:
@@ -108,6 +112,8 @@ class IntegrationService:
             context=application,
         )
 
+        self.validate_authorized_user(application.workspace, kwargs["authorized_user"])
+
         prepared_values = integration_type.prepare_values(kwargs, user)
 
         try:
@@ -148,14 +154,17 @@ class IntegrationService:
         :return: The updated integration.
         """
 
+        workspace = integration.application.workspace
         CoreHandler().check_permissions(
             user,
             UpdateIntegrationOperationType.type,
-            workspace=integration.application.workspace,
+            workspace=workspace,
             context=integration,
         )
 
         prev_authorized_user_id = integration.authorized_user_id  # type: ignore
+        self.validate_authorized_user(workspace, kwargs["authorized_user"])
+
         prepared_values = integration.get_type().prepare_values(kwargs, user)
 
         integration = self.handler.update_integration(
@@ -248,3 +257,19 @@ class IntegrationService:
         self.handler.recalculate_full_orders(application)
 
         integration_orders_recalculated.send(self, application=application)
+
+    def validate_authorized_user(
+        self, workspace: "Workspace", authorized_user: AbstractUser
+    ) -> None:
+        try:
+            workspace.users.select_related("profile").get(id=authorized_user.id)
+        except workspace.users.model.DoesNotExist:
+            raise InvalidIntegrationAuthorizedUser(
+                f"The user {authorized_user.pk} does not belong "
+                "to the integration's workspace."
+            )
+
+        if authorized_user.profile.to_be_deleted:  # type: ignore
+            raise InvalidIntegrationAuthorizedUser(
+                f"The user {authorized_user.pk} is flagged for deletion."
+            )
