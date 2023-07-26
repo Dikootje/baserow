@@ -31,9 +31,12 @@ export class IntegrationType extends Registerable {
   }
 
   /**
-   * An optional warning to display when editing this integration
+   * An optional warning to display when creating or editing this integration.
+   @param {object} integration: The integration we may warn the user about.
+   @param {object} workspace The workspace record, in case it's needed.
+   @returns An optional warning.
    */
-  get warning() {
+  getWarning(integration, workspace) {
     return ''
   }
 

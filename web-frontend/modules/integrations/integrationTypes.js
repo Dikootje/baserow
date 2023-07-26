@@ -27,8 +27,18 @@ export class LocalBaserowIntegrationType extends IntegrationType {
     return LocalBaserowForm
   }
 
-  get warning() {
-    return this.app.i18n.t('integrationType.localBaserowWarning')
+  /**
+   * Displays a warning if the logged-in user is the integration authorized user.
+   * We'll recommend that they add a separate user just for the integration.
+   @param {object} integration: The integration we may warn the user about.
+   @param {object} workspace The workspace record, in case it's needed.
+   @returns An optional warning.
+   */
+  getWarning(integration, workspace) {
+    const user = this.app.store.getters['auth/getUserObject']
+    return integration && integration.authorized_user === user.id
+      ? this.app.i18n.t('integrationType.localBaserowWarning')
+      : ''
   }
 
   getDefaultValues() {

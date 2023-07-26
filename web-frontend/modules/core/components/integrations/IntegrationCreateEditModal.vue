@@ -9,13 +9,13 @@
     </h2>
     <div>
       <Alert
-        v-if="actualIntegrationType.warning"
+        v-if="integrationWarning.length"
         icon="exclamation"
         type="warning"
         :title="$t('integrationCreateEditModal.warningTitle')"
         simple
       >
-        {{ actualIntegrationType.warning }}
+        {{ integrationWarning }}
       </Alert>
       <IntegrationEditForm
         ref="form"
@@ -76,6 +76,12 @@ export default {
     return { loading: false }
   },
   computed: {
+    integrationWarning() {
+      return this.actualIntegrationType.getWarning(
+        this.integration,
+        this.workspace
+      )
+    },
     workspace() {
       return this.$store.getters['workspace/get'](this.application.workspace.id)
     },
