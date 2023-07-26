@@ -19,7 +19,7 @@ from baserow.contrib.integrations.local_baserow.models import (
     LocalBaserowGetRow,
     LocalBaserowListRows,
 )
-from baserow.core.formula.data_ledger import DataLedger
+from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.formula.exceptions import DispatchContextError
 from baserow.core.formula.registries import formula_runtime_function_registry
 from baserow.core.formula.serializers import FormulaSerializerField
@@ -71,12 +71,14 @@ class LocalBaserowListRowsUserServiceType(ServiceType):
 
         return super().prepare_values(values, user)
 
-    def dispatch(self, service: Service, data_ledger: DataLedger):
+    def dispatch(
+        self, service: Service, runtime_formula_context: RuntimeFormulaContext
+    ):
         """
         Returns a list of rows from the table stored in the service instance.
 
         :param service: the local baserow get row service.
-        :param data_ledger: the data ledger used for formula resolution.
+        :param runtime_formula_context: the data ledger used for formula resolution.
         :raise ServiceImproperlyConfigured: if the table property is missing.
         :return: The list of rows.
         """
@@ -153,13 +155,15 @@ class LocalBaserowGetRowUserServiceType(ServiceType):
 
         return super().prepare_values(values, user)
 
-    def dispatch(self, service: Service, data_ledger: DataLedger):
+    def dispatch(
+        self, service: Service, runtime_formula_context: RuntimeFormulaContext
+    ):
         """
         Returns the row targeted by the `row_id` formula from the table stored in the
         service instance.
 
         :param service: the local baserow get row service.
-        :param data_ledger: the data ledger used for formula resolution.
+        :param runtime_formula_context: the data ledger used for formula resolution.
         :raise ServiceImproperlyConfigured: if the table property is missing or if the
             formula can't be resolved.
         :raise DoesNotExist: if row id doesn't exist.
@@ -175,7 +179,9 @@ class LocalBaserowGetRowUserServiceType(ServiceType):
         try:
             row_id = ensure_integer(
                 resolve_formula(
-                    service.row_id, formula_runtime_function_registry, data_ledger
+                    service.row_id,
+                    formula_runtime_function_registry,
+                    runtime_formula_context,
                 )
             )
         except ValidationError:

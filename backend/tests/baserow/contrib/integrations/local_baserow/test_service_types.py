@@ -77,9 +77,9 @@ def test_dispatch_local_baserow_list_rows_service(data_fixture):
         table=table,
     )
 
-    data_ledger = {}
+    runtime_formula_context = {}
 
-    result = ServiceHandler().dispatch_service(service, data_ledger)
+    result = ServiceHandler().dispatch_service(service, runtime_formula_context)
 
     assert [dict(r) for r in result] == [
         {
@@ -123,11 +123,11 @@ def test_dispatch_local_baserow_list_rows_service_permission_denied(
         table=table,
     )
 
-    data_ledger = {}
+    runtime_formula_context = {}
     with stub_check_permissions(raise_permission_denied=True), pytest.raises(
         PermissionException
     ):
-        ServiceHandler().dispatch_service(service, data_ledger)
+        ServiceHandler().dispatch_service(service, runtime_formula_context)
 
 
 @pytest.mark.django_db
@@ -228,9 +228,9 @@ def test_dispatch_local_baserow_get_row_service(data_fixture):
         integration=integration, table=table, row_id="get('test')"
     )
 
-    data_ledger = {"test": 2}
+    runtime_formula_context = {"test": 2}
 
-    result = ServiceHandler().dispatch_service(service, data_ledger)
+    result = ServiceHandler().dispatch_service(service, runtime_formula_context)
 
     assert result == {
         "id": rows[1].id,
@@ -265,12 +265,12 @@ def test_dispatch_local_baserow_get_row_service_permission_denied(
         integration=integration, table=table, row_id="get('test')"
     )
 
-    data_ledger = {"test": 2}
+    runtime_formula_context = {"test": 2}
 
     with stub_check_permissions(raise_permission_denied=True), pytest.raises(
         PermissionException
     ):
-        ServiceHandler().dispatch_service(service, data_ledger)
+        ServiceHandler().dispatch_service(service, runtime_formula_context)
 
 
 @pytest.mark.django_db
@@ -303,17 +303,17 @@ def test_dispatch_local_baserow_get_row_service_validation_error(data_fixture):
         integration=integration, table=table, row_id="get('test')"
     )
 
-    data_ledger = {"test": "str"}
+    runtime_formula_context = {"test": "str"}
 
     with pytest.raises(ServiceImproperlyConfigured):
-        ServiceHandler().dispatch_service(service, data_ledger)
+        ServiceHandler().dispatch_service(service, runtime_formula_context)
 
     service = data_fixture.create_local_baserow_get_row_service(
         integration=integration, table=table, row_id="wrong formula"
     )
 
     with pytest.raises(ServiceImproperlyConfigured):
-        ServiceHandler().dispatch_service(service, data_ledger)
+        ServiceHandler().dispatch_service(service, runtime_formula_context)
 
 
 @pytest.mark.django_db
@@ -339,7 +339,7 @@ def test_dispatch_local_baserow_get_row_service_row_not_exists(data_fixture):
         integration=integration, table=table, row_id="get('test')"
     )
 
-    data_ledger = {"test": "999"}
+    runtime_formula_context = {"test": "999"}
 
     with pytest.raises(DoesNotExist):
-        ServiceHandler().dispatch_service(service, data_ledger)
+        ServiceHandler().dispatch_service(service, runtime_formula_context)

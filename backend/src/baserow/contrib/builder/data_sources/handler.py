@@ -9,7 +9,7 @@ from baserow.contrib.builder.data_sources.exceptions import (
 from baserow.contrib.builder.data_sources.models import DataSource
 from baserow.contrib.builder.pages.models import Page
 from baserow.core.db import specific_iterator
-from baserow.core.formula.data_ledger import DataLedger
+from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.services.handler import ServiceHandler
 from baserow.core.services.models import Service
 from baserow.core.services.registries import ServiceType
@@ -255,13 +255,13 @@ class DataSourceHandler:
         data_source.delete()
 
     def dispatch_data_source(
-        self, data_source: DataSource, data_ledger: DataLedger
+        self, data_source: DataSource, runtime_formula_context: RuntimeFormulaContext
     ) -> Any:
         """
         Dispatch the service related to the data_source.
 
         :param data_source: The data source to be dispatched.
-        :param data_ledger: The data ledger used to resolve formulas.
+        :param runtime_formula_context: The data ledger used to resolve formulas.
         :raises DataSourceImproperlyConfigured: If the data source is
           not properly configured.
         :return: The result of dispatching the data source.
@@ -272,7 +272,7 @@ class DataSourceHandler:
 
         service = data_source.service.specific
 
-        return self.service_handler.dispatch_service(service, data_ledger)
+        return self.service_handler.dispatch_service(service, runtime_formula_context)
 
     def move_data_source(
         self, data_source: DataSourceForUpdate, before: Optional[DataSource] = None

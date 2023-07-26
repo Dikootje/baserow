@@ -21,23 +21,23 @@ export class DataProviderType extends Registerable {
    * Initialize the data needed by the data provider if necessary. Used during the
    * page init phase to collect all the data for the first display.
    */
-  async init(dataLedger) {}
+  async init(RuntimeFormulaContext) {}
 
   /**
    * Should return the context needed to be send to the backend for each dataProvider
    * to be able to solve the formulas on the backend.
    * @returns An object if the dataProvider wants to send something to the backend.
    */
-  getBackendContext(dataLedger) {
+  getBackendContext(RuntimeFormulaContext) {
     return null
   }
 
   /**
    * Returns the actual data.
-   * @param {object} dataLedger the data ledger instance.
+   * @param {object} RuntimeFormulaContext the data ledger instance.
    * @param {Array<str>} path the path of the data we want to get
    */
-  getDataChunk(dataLedger, path) {
+  getDataChunk(RuntimeFormulaContext, path) {
     throw new Error('.getDataChunk() must be set on the dataProviderType.')
   }
 

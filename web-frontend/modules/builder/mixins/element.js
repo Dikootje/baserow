@@ -1,4 +1,4 @@
-import DataLedger from '@baserow/modules/core/dataLedger'
+import RuntimeFormulaContext from '@baserow/modules/core/runtimeFormulaContext'
 import { resolveFormula } from '@baserow/formula'
 
 export default {
@@ -28,16 +28,19 @@ export default {
     isEditable() {
       return this.mode === 'editing'
     },
-    dataLedger() {
+    RuntimeFormulaContext() {
       /**
-       * This proxy allow the DataLedgerClass to act like a regular object.
+       * This proxy allow the RuntimeFormulaContextClass to act like a regular object.
        */
       return new Proxy(
-        new DataLedger(this.$registry.getAll('builderDataProvider'), {
-          builder: this.builder,
-          page: this.page,
-          mode: this.mode,
-        }),
+        new RuntimeFormulaContext(
+          this.$registry.getAll('builderDataProvider'),
+          {
+            builder: this.builder,
+            page: this.page,
+            mode: this.mode,
+          }
+        ),
         {
           get(target, prop) {
             return target.get(prop)
@@ -55,7 +58,11 @@ export default {
   },
   methods: {
     resolveFormula(formula) {
-      return resolveFormula(formula, this.formulaFunctions, this.dataLedger)
+      return resolveFormula(
+        formula,
+        this.formulaFunctions,
+        this.RuntimeFormulaContext
+      )
     },
   },
 }

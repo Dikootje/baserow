@@ -17,7 +17,7 @@ export class UnresolvablePathError extends Error {
   }
 }
 
-export class DataLedger {
+export class RuntimeFormulaContext {
   constructor(dataProviders, applicationContext) {
     this.dataProviders = dataProviders
     this.applicationContext = applicationContext
@@ -69,4 +69,4 @@ export class DataLedger {
   }
 }
 
-export default DataLedger
+export default RuntimeFormulaContext

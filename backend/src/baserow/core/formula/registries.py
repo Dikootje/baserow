@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, List, Optional, TypeVar
 
 from baserow.core.formula.argument_types import BaserowRuntimeFormulaArgumentType
-from baserow.core.formula.data_ledger import DataLedger
+from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.registry import Instance, Registry
 from baserow.formula.parser.exceptions import (
     FormulaFunctionTypeDoesNotExist,
@@ -143,7 +143,9 @@ class DataProviderType(
     """
 
     @abstractmethod
-    def get_data_chunk(self, data_ledger: DataLedger, path: List[str]):
+    def get_data_chunk(
+        self, runtime_formula_context: RuntimeFormulaContext, path: List[str]
+    ):
         """
         Returns data designated by the path parameter. Usually use some of the
         context created by the get_context method and stored in the data ledger.

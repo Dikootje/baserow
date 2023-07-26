@@ -5,7 +5,7 @@ from baserow.contrib.builder.data_sources.models import DataSource
 from baserow.contrib.builder.pages.exceptions import PageDoesNotExist
 from baserow.contrib.builder.pages.handler import PageHandler
 from baserow.contrib.builder.pages.models import Page
-from baserow.core.formula.data_ledger import DataLedger
+from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.formula.exceptions import DispatchContextError
 from baserow.core.formula.registries import DataProviderType
 from baserow.core.services.handler import ServiceHandler
@@ -21,14 +21,14 @@ class PageParameterDataProviderType(DataProviderType):
     type = "page_parameter"
 
     def get_data_chunk(
-        self, data_ledger: DataLedger, path: List[str]
+        self, runtime_formula_context: RuntimeFormulaContext, path: List[str]
     ) -> Union[int, str]:
         """
         When a page parameter is read, returns the value previously saved from the
         request object.
         """
 
-        if "request" not in data_ledger.application_context:
+        if "request" not in runtime_formula_context.application_context:
             return None
 
         if len(path) != 1:
@@ -37,7 +37,7 @@ class PageParameterDataProviderType(DataProviderType):
         first_part = path[0]
 
         return (
-            data_ledger.application_context["request"]
+            runtime_formula_context.application_context["request"]
             .data.get("page_parameter", {})
             .get(first_part, None)
         )
@@ -50,24 +50,26 @@ class DataSourceDataProviderType(DataProviderType):
 
     type = "data_source"
 
-    def get_data_chunk(self, data_ledger: DataLedger, path: List[str]):
+    def get_data_chunk(
+        self, runtime_formula_context: RuntimeFormulaContext, path: List[str]
+    ):
         """Load a data chunk from a datasource of the page in context."""
 
         data_source_name, *rest = path
 
-        if "request" not in data_ledger.application_context:
+        if "request" not in runtime_formula_context.application_context:
             return None
-        if "service" not in data_ledger.application_context:
+        if "service" not in runtime_formula_context.application_context:
             return None
 
         page_id = (
-            data_ledger.application_context["request"]
+            runtime_formula_context.application_context["request"]
             .data.get("data_source", {})
             .get("page_id", None)
         )
         print(page_id)
         base_queryset = Page.objects.filter(
-            datasource__service=data_ledger.application_context["service"]
+            datasource__service=runtime_formula_context.application_context["service"]
         )
 
         try:
@@ -82,7 +84,7 @@ class DataSourceDataProviderType(DataProviderType):
         )
 
         service_dispatch = ServiceHandler().dispatch_service(
-            data_source.service.specific, data_ledger
+            data_source.service.specific, runtime_formula_context
         )
 
         return get_nested_value_from_dict(service_dispatch, rest)

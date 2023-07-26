@@ -25,7 +25,7 @@ from baserow.contrib.builder.data_sources.signals import (
 from baserow.contrib.builder.data_sources.types import DataSourceForUpdate
 from baserow.contrib.builder.pages.models import Page
 from baserow.core.exceptions import CannotCalculateIntermediateOrder
-from baserow.core.formula.data_ledger import DataLedger
+from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.handler import CoreHandler
 from baserow.core.services.registries import ServiceType
 
@@ -215,14 +215,17 @@ class DataSourceService:
         )
 
     def dispatch_data_source(
-        self, user, data_source: DataSource, data_ledger: DataLedger
+        self,
+        user,
+        data_source: DataSource,
+        runtime_formula_context: RuntimeFormulaContext,
     ) -> Any:
         """
         Dispatch the service related to the data_source if the user has the permission.
 
         :param user: The current user.
         :param data_source: The data source to be dispatched.
-        :param data_ledger: The data ledger used to resolve formulas.
+        :param runtime_formula_context: The data ledger used to resolve formulas.
         :return: The result of dispatching the data source.
         """
 
@@ -233,7 +236,7 @@ class DataSourceService:
             context=data_source,
         )
 
-        return self.handler.dispatch_data_source(data_source, data_ledger)
+        return self.handler.dispatch_data_source(data_source, runtime_formula_context)
 
     def move_data_source(
         self,

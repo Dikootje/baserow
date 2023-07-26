@@ -21,25 +21,25 @@ export class DataSourceDataProviderType extends DataProviderType {
     return this.app.i18n.t('dataProviderType.dataSource')
   }
 
-  getBackendContext(dataLedger) {
+  getBackendContext(RuntimeFormulaContext) {
     return {
-      page_id: dataLedger.applicationContext.page.id,
+      page_id: RuntimeFormulaContext.applicationContext.page.id,
     }
   }
 
-  async init(dataLedger) {
+  async init(RuntimeFormulaContext) {
     const dataSources = this.app.store.getters['dataSource/getDataSources']
     await Promise.all(
       dataSources.map((dataSource) =>
         this.app.store.dispatch('dataSourceContent/fetchDataSourceContent', {
           dataSource,
-          data: dataLedger.getAllBackendContext(),
+          data: RuntimeFormulaContext.getAllBackendContext(),
         })
       )
     )
   }
 
-  getDataChunk(dataLedger, [dataSourceName, ...rest]) {
+  getDataChunk(RuntimeFormulaContext, [dataSourceName, ...rest]) {
     // Get the data sources for the current page.
     const dataSources = this.app.store.getters['dataSource/getDataSources']
 
@@ -52,7 +52,7 @@ export class DataSourceDataProviderType extends DataProviderType {
     // Update the dataSource content if needed
     this.app.store.dispatch('dataSourceContent/smartFetchDataSourceContent', {
       dataSource,
-      data: dataLedger.getAllBackendContext(),
+      data: RuntimeFormulaContext.getAllBackendContext(),
     })
 
     const dataSourceContents =
@@ -76,8 +76,9 @@ export class PageParameterDataProviderType extends DataProviderType {
     return this.app.i18n.t('dataProviderType.pageParameter')
   }
 
-  async init(dataLedger) {
-    const { page, mode, pageParamsValue } = dataLedger.applicationContext
+  async init(RuntimeFormulaContext) {
+    const { page, mode, pageParamsValue } =
+      RuntimeFormulaContext.applicationContext
     if (mode === 'editing') {
       // Generate fake values for the parameters
       await Promise.all(
@@ -101,7 +102,7 @@ export class PageParameterDataProviderType extends DataProviderType {
     }
   }
 
-  getDataChunk(dataLedger, path) {
+  getDataChunk(RuntimeFormulaContext, path) {
     if (path.length !== 1) {
       return null
     }

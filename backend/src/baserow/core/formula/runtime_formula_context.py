@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from baserow.core.formula.registries import DataProviderTypeRegistry
 
 
-class DataLedger(FormulaContext):
+class RuntimeFormulaContext(FormulaContext):
     """
     The data ledger holds all the data useful for the formula resolution. It uses a
     Data provider registry to fulfill data queries. Each data provider is responsible

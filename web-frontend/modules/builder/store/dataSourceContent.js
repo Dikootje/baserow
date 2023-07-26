@@ -102,9 +102,6 @@ const actions = {
     }
   },
 
-  setDataSourceContent({ commit }, { dataSource, value }) {
-    commit('SET_CONTENT', { dataSource, value })
-  },
   clearDataSourceContents({ commit }) {
     commit('CLEAR_CONTENTS')
   },

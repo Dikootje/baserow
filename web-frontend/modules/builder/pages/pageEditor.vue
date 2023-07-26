@@ -17,7 +17,7 @@ import { StoreItemLookupError } from '@baserow/modules/core/errors'
 import PageHeader from '@baserow/modules/builder/components/page/header/PageHeader'
 import PagePreview from '@baserow/modules/builder/components/page/PagePreview'
 import PageSidePanels from '@baserow/modules/builder/components/page/PageSidePanels'
-import DataLedger from '@baserow/modules/core/dataLedger'
+import RuntimeFormulaContext from '@baserow/modules/core/runtimeFormulaContext'
 
 export default {
   name: 'PageEditor',
@@ -59,7 +59,7 @@ export default {
         page,
       })
 
-      const dataLedger = new DataLedger(
+      const runtimeFormulaContext = new RuntimeFormulaContext(
         $registry.getAll('builderDataProvider'),
         {
           builder,
@@ -69,7 +69,7 @@ export default {
       )
 
       // Initialize all data provider contents
-      await dataLedger.initAll()
+      await runtimeFormulaContext.initAll()
     } catch (e) {
       // In case of a network error we want to fail hard.
       if (e.response === undefined && !(e instanceof StoreItemLookupError)) {

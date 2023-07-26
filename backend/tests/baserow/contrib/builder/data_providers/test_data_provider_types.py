@@ -9,7 +9,7 @@ from baserow.contrib.builder.data_providers.data_provider_types import (
 from baserow.contrib.builder.data_providers.registries import (
     builder_data_provider_type_registry,
 )
-from baserow.core.formula.data_ledger import DataLedger
+from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 
 
 def test_page_parameter_data_provider_get_data_chunk():
@@ -18,13 +18,19 @@ def test_page_parameter_data_provider_get_data_chunk():
     fake_request = MagicMock()
     fake_request.data = {"page_parameter": {"id": 42}}
 
-    data_ledger = MagicMock()
-    data_ledger.application_context = {"request": fake_request}
+    runtime_formula_context = MagicMock()
+    runtime_formula_context.application_context = {"request": fake_request}
 
-    assert page_parameter_provider.get_data_chunk(data_ledger, ["id"]) == 42
-    assert page_parameter_provider.get_data_chunk(data_ledger, []) is None
-    assert page_parameter_provider.get_data_chunk(data_ledger, ["id", "test"]) is None
-    assert page_parameter_provider.get_data_chunk(data_ledger, ["test"]) is None
+    assert page_parameter_provider.get_data_chunk(runtime_formula_context, ["id"]) == 42
+    assert page_parameter_provider.get_data_chunk(runtime_formula_context, []) is None
+    assert (
+        page_parameter_provider.get_data_chunk(runtime_formula_context, ["id", "test"])
+        is None
+    )
+    assert (
+        page_parameter_provider.get_data_chunk(runtime_formula_context, ["test"])
+        is None
+    )
 
 
 @pytest.mark.django_db
@@ -62,14 +68,16 @@ def test_data_source_data_provider_get_data_chunk(data_fixture):
     fake_request = MagicMock()
     fake_request.data = {"data_source": {"page_id": page.id}}
 
-    data_ledger = MagicMock()
-    data_ledger.application_context = {
+    runtime_formula_context = MagicMock()
+    runtime_formula_context.application_context = {
         "request": fake_request,
         "service": data_source.service,
     }
 
     assert (
-        data_source_provider.get_data_chunk(data_ledger, ["Item", "My Color"])
+        data_source_provider.get_data_chunk(
+            runtime_formula_context, ["Item", "My Color"]
+        )
         == "Orange"
     )
 
@@ -112,14 +120,16 @@ def test_data_source_data_provider_get_data_chunk_with_formula(data_fixture):
         "page_parameter": {"id": 2},
     }
 
-    data_ledger = DataLedger(
+    runtime_formula_context = RuntimeFormulaContext(
         builder_data_provider_type_registry,
         service=data_source.service,
         request=fake_request,
     )
 
     assert (
-        data_source_provider.get_data_chunk(data_ledger, ["Item", "My Color"])
+        data_source_provider.get_data_chunk(
+            runtime_formula_context, ["Item", "My Color"]
+        )
         == "Orange"
     )
 
@@ -184,13 +194,15 @@ def test_data_source_data_provider_get_data_chunk_with_formula_using_datasource(
         "page_parameter": {"id": 2},
     }
 
-    data_ledger = DataLedger(
+    runtime_formula_context = RuntimeFormulaContext(
         builder_data_provider_type_registry,
         service=data_source.service,
         request=fake_request,
     )
 
     assert (
-        data_source_provider.get_data_chunk(data_ledger, ["Item", "My Color"])
+        data_source_provider.get_data_chunk(
+            runtime_formula_context, ["Item", "My Color"]
+        )
         == "Orange"
     )

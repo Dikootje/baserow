@@ -3,7 +3,7 @@ from typing import Any, Dict, Type, TypeVar
 
 from django.contrib.auth.models import AbstractUser
 
-from baserow.core.formula.data_ledger import DataLedger
+from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.integrations.handler import IntegrationHandler
 from baserow.core.integrations.models import Integration
 from baserow.core.registry import (
@@ -60,12 +60,14 @@ class ServiceType(
         return values
 
     @abstractmethod
-    def dispatch(self, service: ServiceSubClass, data_ledger: DataLedger) -> Any:
+    def dispatch(
+        self, service: ServiceSubClass, runtime_formula_context: RuntimeFormulaContext
+    ) -> Any:
         """
         Executes what the service is done for and returns the expected result.
 
         :param service: The service instance to dispatch with.
-        :param data_ledger: The data_ledger instance used to resolve formulas (if any).
+        :param runtime_formula_context: The runtime_formula_context instance used to resolve formulas (if any).
         :return: The service dispatch result if any.
         """
 

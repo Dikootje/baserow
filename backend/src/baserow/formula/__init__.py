@@ -23,16 +23,16 @@ from baserow.formula.parser.python_executor import BaserowPythonExecutor
 
 
 def resolve_formula(
-    formula: str, functions: FunctionCollection, data_ledger: FormulaContext
+    formula: str, functions: FunctionCollection, runtime_formula_context: FormulaContext
 ) -> Any:
     """
-    Helper to resolve a formula given the data_ledger.
+    Helper to resolve a formula given the runtime_formula_context.
 
     :param formula: the formula itself.
-    :param data_ledger: A dict like object that contains the data that can be accessed
+    :param runtime_formula_context: A dict like object that contains the data that can be accessed
         in from the formulas.
     :return: the formula result.
     """
 
     tree = get_parse_tree_for_formula(formula)
-    return BaserowPythonExecutor(functions, data_ledger).visit(tree)
+    return BaserowPythonExecutor(functions, runtime_formula_context).visit(tree)

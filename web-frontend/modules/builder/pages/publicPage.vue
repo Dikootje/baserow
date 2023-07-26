@@ -10,7 +10,7 @@
 <script>
 import PageContent from '@baserow/modules/builder/components/page/PageContent'
 import { resolveApplicationRoute } from '@baserow/modules/builder/utils/routing'
-import DataLedger from '@baserow/modules/core/dataLedger'
+import RuntimeFormulaContext from '@baserow/modules/core/runtimeFormulaContext'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -78,7 +78,7 @@ export default {
       page,
     })
 
-    const dataLedger = new DataLedger(
+    const runtimeFormulaContext = new RuntimeFormulaContext(
       context.$registry.getAll('builderDataProvider'),
       {
         builder,
@@ -89,7 +89,7 @@ export default {
     )
 
     // Initialize all data provider contents
-    await dataLedger.initAll()
+    await runtimeFormulaContext.initAll()
 
     return {
       builder,

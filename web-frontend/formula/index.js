@@ -5,13 +5,15 @@ import JavascriptExecutor from '@baserow/formula/parser/javascriptExecutor'
  * Resolves a formula in the context of the given data ledger.
  *
  * @param {str} formula the input formula.
- * @param {object} dataLedger the context given to the formula when we meet the
+ * @param {object} RuntimeFormulaContext the context given to the formula when we meet the
  *   `get('something')` expression
  * @returns the result of the formula in the given data ledger context.
  */
-export const resolveFormula = (formula, functions, dataLedger) => {
+export const resolveFormula = (formula, functions, RuntimeFormulaContext) => {
   const tree = parseBaserowFormula(formula)
-  const result = new JavascriptExecutor(functions, dataLedger).visit(tree)
+  const result = new JavascriptExecutor(functions, RuntimeFormulaContext).visit(
+    tree
+  )
   return result
 }
 

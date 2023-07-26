@@ -4,7 +4,7 @@ from django.db.models import QuerySet
 
 from baserow.contrib.builder.pages.models import Page
 from baserow.core.db import specific_iterator
-from baserow.core.formula.data_ledger import DataLedger
+from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.integrations.models import Integration
 from baserow.core.services.exceptions import (
     ServiceDoesNotExist,
@@ -148,16 +148,18 @@ class ServiceHandler:
 
         service.delete()
 
-    def dispatch_service(self, service: Service, data_ledger: DataLedger) -> Any:
+    def dispatch_service(
+        self, service: Service, runtime_formula_context: RuntimeFormulaContext
+    ) -> Any:
         """
         Dispatch the given service.
 
         :param service: The service to be dispatched.
-        :param data_ledger: The data ledger used to resolve formulas.
+        :param runtime_formula_context: The data ledger used to resolve formulas.
         :return: The result of dispatching the service.
         """
 
         if service.integration is None:
             raise ServiceImproperlyConfigured("The integration property is missing.")
 
-        return service.get_type().dispatch(service, data_ledger)
+        return service.get_type().dispatch(service, runtime_formula_context)

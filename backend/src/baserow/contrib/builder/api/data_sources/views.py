@@ -47,7 +47,7 @@ from baserow.contrib.builder.data_sources.handler import DataSourceHandler
 from baserow.contrib.builder.data_sources.service import DataSourceService
 from baserow.contrib.builder.pages.exceptions import PageDoesNotExist
 from baserow.contrib.builder.pages.handler import PageHandler
-from baserow.core.formula.data_ledger import DataLedger
+from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.formula.exceptions import DispatchContextError
 from baserow.core.services.exceptions import DoesNotExist, ServiceImproperlyConfigured
 from baserow.core.services.registries import service_type_registry
@@ -380,14 +380,14 @@ class DispatchDataSourceView(APIView):
 
         data_source = DataSourceHandler().get_data_source(data_source_id)
 
-        data_ledger = DataLedger(
+        runtime_formula_context = RuntimeFormulaContext(
             builder_data_provider_type_registry,
             service=data_source.service,
             request=request,
         )
 
         response = DataSourceService().dispatch_data_source(
-            request.user, data_source, data_ledger
+            request.user, data_source, runtime_formula_context
         )
 
         return Response(response)
