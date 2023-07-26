@@ -47,8 +47,8 @@ from baserow.contrib.builder.data_sources.handler import DataSourceHandler
 from baserow.contrib.builder.data_sources.service import DataSourceService
 from baserow.contrib.builder.pages.exceptions import PageDoesNotExist
 from baserow.contrib.builder.pages.handler import PageHandler
-from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.formula.exceptions import DispatchContextError
+from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.services.exceptions import DoesNotExist, ServiceImproperlyConfigured
 from baserow.core.services.registries import service_type_registry
 

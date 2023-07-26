@@ -19,9 +19,9 @@ from baserow.contrib.integrations.local_baserow.models import (
     LocalBaserowGetRow,
     LocalBaserowListRows,
 )
-from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.formula.exceptions import DispatchContextError
 from baserow.core.formula.registries import formula_runtime_function_registry
+from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.formula.serializers import FormulaSerializerField
 from baserow.core.formula.validator import ensure_integer
 from baserow.core.handler import CoreHandler

@@ -67,7 +67,8 @@ class ServiceType(
         Executes what the service is done for and returns the expected result.
 
         :param service: The service instance to dispatch with.
-        :param runtime_formula_context: The runtime_formula_context instance used to resolve formulas (if any).
+        :param runtime_formula_context: The runtime_formula_context instance used to
+            resolve formulas (if any).
         :return: The service dispatch result if any.
         """
 

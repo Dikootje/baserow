@@ -5,9 +5,9 @@ from baserow.contrib.builder.data_sources.models import DataSource
 from baserow.contrib.builder.pages.exceptions import PageDoesNotExist
 from baserow.contrib.builder.pages.handler import PageHandler
 from baserow.contrib.builder.pages.models import Page
-from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.formula.exceptions import DispatchContextError
 from baserow.core.formula.registries import DataProviderType
+from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.services.handler import ServiceHandler
 from baserow.core.utils import get_nested_value_from_dict
 

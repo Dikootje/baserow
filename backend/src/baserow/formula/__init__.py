@@ -29,8 +29,8 @@ def resolve_formula(
     Helper to resolve a formula given the runtime_formula_context.
 
     :param formula: the formula itself.
-    :param runtime_formula_context: A dict like object that contains the data that can be accessed
-        in from the formulas.
+    :param runtime_formula_context: A dict like object that contains the data that can
+        be accessed in from the formulas.
     :return: the formula result.
     """
 
