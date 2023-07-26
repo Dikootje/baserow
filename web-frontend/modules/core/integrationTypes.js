@@ -16,9 +16,10 @@ export class IntegrationType extends Registerable {
    * Return a summary describing the integration in one sentence.
    *
    * @param {object} integration The integration we want the summary for.
+   * @param {object} workspace The workspace we want the summary for.
    * @returns A string description.
    */
-  getSummary(integration) {
+  getSummary(integration, workspace) {
     return this.name
   }
 
@@ -47,5 +48,16 @@ export class IntegrationType extends Registerable {
 
   getOrder() {
     return 0
+  }
+
+  /**
+   * Retrieves the authorized user profile.
+   * @param {object} integration The integration we pluck out the auth user from.
+   * @param {object} workspace The workspace the auth user belongs to.
+   */
+  getAuthorizedUser(integration, workspace) {
+    return workspace.users.find(
+      (user) => user.id === integration.authorized_user
+    )
   }
 }

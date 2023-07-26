@@ -72,7 +72,11 @@
         ></CreatePageModal>
       </template>
     </SidebarApplication>
-    <BuilderSettingsModal ref="builderSettingsModal" :builder="application" />
+    <BuilderSettingsModal
+      ref="builderSettingsModal"
+      :builder="application"
+      :workspace="workspace"
+    />
   </div>
 </template>
 

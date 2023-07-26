@@ -1,18 +1,39 @@
 <template>
   <div>
     <FormElement class="control">
-      <label class="control__label">
-        {{ $t('localBaserowForm.user') }}
-      </label>
-      <div class="local-baserow-form__user">
-        <Presentation
-          :title="values.authorized_user.first_name"
-          :subtitle="values.authorized_user.username"
-          :initials="values.authorized_user.first_name | nameAbbreviation"
-          avatar-color="primary"
-        />
-        <div>{{ $t('localBaserowForm.userMessage') }}</div>
-      </div>
+      <label class="control__label">{{
+        $t('localBaserowForm.chooseAuthorizedUserLabel')
+      }}</label>
+      <Dropdown
+        v-model="values.authorized_user"
+        class="local-baserow-form__authorized_user-dropdown"
+        :placeholder="$t('localBaserowForm.chooseAuthorizedUserPlaceholder')"
+      >
+        <DropdownItem
+          v-for="user in workspace_users"
+          :key="user.id"
+          :name="user.name"
+          :value="user.id"
+        >
+          {{ user.name }}
+          <Badge
+            v-if="user.permissions !== 'ADMIN'"
+            warning
+            class="margin-left-1"
+            >{{ user.permissions }}</Badge
+          >
+        </DropdownItem>
+        <template #emptyState>{{
+          $t('localBaserowForm.noValidUsers')
+        }}</template>
+      </Dropdown>
+      <p v-if="values.authorized_user" class="margin-top-2">
+        {{
+          $t('localBaserowForm.authorizedUserConfirmation', {
+            name: getAuthorizedUserDisplayName,
+          })
+        }}
+      </p>
     </FormElement>
   </div>
 </template>
@@ -27,14 +48,32 @@ export default {
       type: Object,
       required: true,
     },
+    workspace: {
+      type: Object,
+      required: true,
+    },
   },
   data() {
     return {
+      workspace_users: [],
       values: {
-        authorized_user: {},
+        authorized_user: null,
       },
       allowedValues: ['authorized_user'],
     }
+  },
+  computed: {
+    getAuthorizedUserDisplayName() {
+      const authorizedUser = this.workspace_users.find(
+        (user) => user.id === this.values.authorized_user
+      )
+      return authorizedUser ? authorizedUser.name : ''
+    },
+  },
+  created() {
+    this.workspace_users = this.workspace.users.filter(
+      (user) => user.to_be_deleted === false
+    )
   },
 }
 </script>

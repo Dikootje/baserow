@@ -242,6 +242,7 @@ def validate_body_custom_fields(
     type_attribute_name="type",
     partial=False,
     allow_empty_type=False,
+    return_validated: bool = False,
 ):
     """
     This decorator can validate the request data dynamically using the generated
@@ -260,6 +261,7 @@ def validate_body_custom_fields(
     :type type_attribute_name: str
     :param partial: Whether the data is a partial update.
     :type partial: bool
+    :param return_validated: Returns validated_data from DRF serializer
     :raises RequestBodyValidationException: When the `type` is not provided.
     :raises ValueError: When the `data` attribute is already in the kwargs. This
         decorator tries to add the `data` attribute, but cannot do that if it is
@@ -292,6 +294,7 @@ def validate_body_custom_fields(
                 base_serializer_class=base_serializer_class,
                 type_attribute_name=type_attribute_name,
                 partial=partial,
+                return_validated=return_validated,
                 allow_empty_type=allow_empty_type,
             )
             return func(*args, **kwargs)

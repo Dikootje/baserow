@@ -139,6 +139,7 @@ class IntegrationsView(APIView):
     @validate_body_custom_fields(
         integration_type_registry,
         base_serializer_class=CreateIntegrationSerializer,
+        return_validated=True,
     )
     def post(self, request, data: Dict, application_id: int):
         """Creates a new integration."""
@@ -150,6 +151,7 @@ class IntegrationsView(APIView):
         before = IntegrationHandler().get_integration(before_id) if before_id else None
 
         integration_type = integration_type_registry.get(type_name)
+
         integration = IntegrationService().create_integration(
             request.user, integration_type, application, before=before, **data
         )
@@ -209,11 +211,13 @@ class IntegrationView(APIView):
         integration_type = type_from_data_or_registry(
             request.data, integration_type_registry, integration
         )
+
         data = validate_data_custom_fields(
             integration_type.type,
             integration_type_registry,
             request.data,
             base_serializer_class=UpdateIntegrationSerializer,
+            return_validated=True,
         )
 
         integration_updated = IntegrationService().update_integration(

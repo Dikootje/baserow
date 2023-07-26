@@ -1,9 +1,9 @@
 from typing import Any, Dict
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AbstractUser
 
-from baserow.api.user.serializers import SubjectUserSerializer
+from rest_framework import serializers
+
 from baserow.contrib.integrations.local_baserow.models import LocalBaserowIntegration
 from baserow.core.integrations.models import Integration
 from baserow.core.integrations.registries import IntegrationType
@@ -24,24 +24,17 @@ class LocalBaserowIntegrationType(IntegrationType):
     allowed_fields = ["authorized_user"]
 
     serializer_field_overrides = {
-        "authorized_user": SubjectUserSerializer(read_only=True),
+        "authorized_user": serializers.IntegerField(
+            source="authorized_user_id", help_text="The authorized user's primary key."
+        ),
     }
 
     request_serializer_field_names = []
     request_serializer_field_overrides = {}
 
-    def prepare_values(
-        self, values: Dict[str, Any], user: AbstractUser
-    ) -> Dict[str, Any]:
-        """Add the logged in user by default"""
-
-        values["authorized_user"] = user
-
-        return super().prepare_values(values, user)
-
     def get_property_for_serialization(self, integration: Integration, prop_name: str):
         """
-        Replace the authorized user property with it's username. Better when loading the
+        Replace the authorized user property with its username. Better when loading the
         data later.
         """
 

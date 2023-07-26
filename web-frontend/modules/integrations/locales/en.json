@@ -10,7 +10,10 @@
     },
     "localBaserowForm": {
         "user": "User",
-        "userMessage": "By creating this connection, you’re authorizing the application to use your account to make changes in your local Baserow workspace."
+        "noValidUsers": "This workspace does not have any valid users to use.",
+        "chooseAuthorizedUserLabel": "Integration authentication user",
+        "chooseAuthorizedUserPlaceholder": "Select a user to authenticate with...",
+        "authorizedUserConfirmation": "By creating this integration, you're authorizing the application to use {name}'s account to make changes in their local Baserow workspace."
     },
     "localBaserowGetRowForm": {
         "tableFieldLabel": "Table",

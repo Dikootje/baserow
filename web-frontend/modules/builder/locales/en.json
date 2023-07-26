@@ -221,7 +221,7 @@
     "dataSourceForm": {
         "namePlaceholder": "Source name",
         "addIntegration": "Add new integration",
-        "noIntegrations": "you don't have any integration yet",
+        "noIntegrations": "You don't have any integrations yet",
         "selectTypeFirst": "Select the service first",
         "servicePlaceholder": "Select a service",
         "integrationPlaceholder": "Select an integration",

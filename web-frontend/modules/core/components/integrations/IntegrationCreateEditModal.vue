@@ -20,6 +20,7 @@
       <IntegrationEditForm
         ref="form"
         :application="application"
+        :workspace="workspace"
         :default-values="create ? getDefaultIntegrationValues() : integration"
         :integration-type="actualIntegrationType"
         @submitted="submit"
@@ -75,6 +76,9 @@ export default {
     return { loading: false }
   },
   computed: {
+    workspace() {
+      return this.$store.getters['workspace/get'](this.application.workspace.id)
+    },
     actualIntegrationType() {
       if (this.create) {
         return this.integrationType
@@ -109,6 +113,8 @@ export default {
             integrationType: this.actualIntegrationType.type,
             values,
           })
+          console.log(newIntegration)
+
           this.$emit('created', newIntegration)
         } else {
           await this.actionUpdateIntegration({

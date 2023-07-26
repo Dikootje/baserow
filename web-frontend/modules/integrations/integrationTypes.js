@@ -15,10 +15,11 @@ export class LocalBaserowIntegrationType extends IntegrationType {
     return localBaserowIntegration
   }
 
-  getSummary(integration) {
+  getSummary(integration, workspace) {
+    const authorizedUser = this.getAuthorizedUser(integration, workspace)
     return this.app.i18n.t('integrationType.localBaserowSummary', {
-      name: integration.authorized_user.first_name,
-      username: integration.authorized_user.username,
+      name: authorizedUser.name,
+      username: authorizedUser.email,
     })
   }
 

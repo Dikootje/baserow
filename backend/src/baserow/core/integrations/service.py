@@ -16,6 +16,7 @@ from baserow.core.integrations.operations import (
 )
 from baserow.core.integrations.registries import IntegrationType
 from baserow.core.integrations.signals import (
+    integration_authorized_user_updated,
     integration_created,
     integration_deleted,
     integration_moved,
@@ -143,7 +144,6 @@ class IntegrationService:
 
         :param user: The user trying to update the integration.
         :param integration: The integration that should be updated.
-        :param values: The values that should be set on the integration.
         :param kwargs: Additional attributes of the integration.
         :return: The updated integration.
         """
@@ -155,6 +155,7 @@ class IntegrationService:
             context=integration,
         )
 
+        prev_authorized_user_id = integration.authorized_user_id  # type: ignore
         prepared_values = integration.get_type().prepare_values(kwargs, user)
 
         integration = self.handler.update_integration(
@@ -162,6 +163,14 @@ class IntegrationService:
         )
 
         integration_updated.send(self, integration=integration, user=user)
+
+        if prev_authorized_user_id != integration.authorized_user_id:
+            integration_authorized_user_updated.send(
+                self,
+                integration=integration,
+                prev_authorized_user_id=prev_authorized_user_id,
+                new_authorized_user_id=integration.authorized_user_id,
+            )
 
         return integration
 

@@ -16,6 +16,7 @@
     <component
       :is="integrationType.formComponent"
       :application="application"
+      :workspace="workspace"
       :default-values="defaultValues"
     />
   </form>
@@ -29,6 +30,10 @@ export default {
   mixins: [form],
   props: {
     application: {
+      type: Object,
+      required: true,
+    },
+    workspace: {
       type: Object,
       required: true,
     },

@@ -18,7 +18,9 @@
           <Presentation
             :image="getIntegrationType(integration).image"
             :title="integration.name"
-            :subtitle="getIntegrationType(integration).getSummary(integration)"
+            :subtitle="
+              getIntegrationType(integration).getSummary(integration, workspace)
+            "
             avatar-color="ghost"
             style="flex: 1"
           />
@@ -69,6 +71,9 @@ export default {
     return { state: null }
   },
   computed: {
+    workspace() {
+      return this.$store.getters['workspace/get'](this.builder.workspace.id)
+    },
     integrationTypes() {
       return this.$registry.getOrderedList('integration')
     },

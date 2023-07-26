@@ -1,5 +1,6 @@
 from typing import Iterable, Optional, Union, cast
 
+from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
 
 from baserow.core.db import specific_iterator

@@ -1,9 +1,11 @@
+from django.contrib.auth.models import User
 from django.utils.functional import lazy
 
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from baserow.api.user.serializers import SubjectUserSerializer, UserSerializer
 from baserow.core.integrations.models import Integration
 from baserow.core.integrations.registries import integration_type_registry
 
@@ -47,18 +49,30 @@ class CreateIntegrationSerializer(serializers.ModelSerializer):
         help_text="If provided, creates the integration before the integration with "
         "the given id.",
     )
+    authorized_user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        help_text="The user which this integration will use for its "
+        "authorization checks.",
+    )
 
     class Meta:
         model = Integration
-        fields = ("before_id", "type", "name")
+        fields = ("before_id", "type", "name", "authorized_user")
 
 
 class UpdateIntegrationSerializer(serializers.ModelSerializer):
+    authorized_user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        help_text="The user which this integration will use for its "
+        "authorization checks.",
+    )
+
     class Meta:
         model = Integration
-        fields = ("name",)
+        fields = ("name", "authorized_user")
         extra_kwargs = {
             "name": {"required": False},
+            "authorized_user": {"required": False},
         }
 
 

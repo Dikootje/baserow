@@ -4,7 +4,7 @@
     :class="{
       'badge--primary': primary,
       'badge--success': success,
-      'badge-warning': warning,
+      'badge--warning': warning,
       'badge--error': error,
     }"
   >
