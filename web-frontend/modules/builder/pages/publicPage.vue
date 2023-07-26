@@ -72,7 +72,7 @@ export default {
 
     const [page, path, params] = found
 
-    await context.store.dispatch('element/fetchPublished', { page })
+    await context.store.dispatch('element/clearAll')
 
     await context.store.dispatch('dataSource/fetchPublished', {
       page,
@@ -90,6 +90,8 @@ export default {
 
     // Initialize all data provider contents
     await runtimeFormulaContext.initAll()
+
+    await context.store.dispatch('element/fetchPublished', { page })
 
     return {
       builder,

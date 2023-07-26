@@ -44,6 +44,7 @@ export default {
     const data = { panelWidth: 360 }
 
     try {
+      await store.dispatch('element/clearAll')
       const { builder, page } = await store.dispatch('page/selectById', {
         builderId,
         pageId,
@@ -52,8 +53,6 @@ export default {
       data.page = page
 
       await store.dispatch('workspace/selectById', builder.workspace.id)
-
-      await store.dispatch('element/fetch', { page })
 
       await store.dispatch('dataSource/fetch', {
         page,
@@ -70,6 +69,8 @@ export default {
 
       // Initialize all data provider contents
       await runtimeFormulaContext.initAll()
+
+      await store.dispatch('element/fetch', { page })
     } catch (e) {
       // In case of a network error we want to fail hard.
       if (e.response === undefined && !(e instanceof StoreItemLookupError)) {

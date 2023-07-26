@@ -104,12 +104,15 @@ export default {
 
       if (hasDifference) {
         try {
-          await this.actionUpdateDataSource({
+          const updated = await this.actionUpdateDataSource({
             dataSourceId: dataSource.id,
             values: clone(newValues),
           })
+          if (updated) {
+            this.$refs[`dataSourceForm_${dataSource.id}`][0].reset()
+          }
         } catch (error) {
-          // Restore the previous saved values from the store
+          // Restore the previously saved values from the store
           this.$refs[`dataSourceForm_${dataSource.id}`][0].reset()
           notifyIf(error)
         }

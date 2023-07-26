@@ -55,6 +55,9 @@ const mutations = {
 }
 
 const actions = {
+  clearAll({ commit }) {
+    commit('CLEAR_ITEMS')
+  },
   forceCreate({ commit }, { element, beforeId = null }) {
     commit('ADD_ITEM', { element, beforeId })
   },

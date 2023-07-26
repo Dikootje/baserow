@@ -132,7 +132,7 @@ const actions = {
             updateContext.valuesToUpdate
           )
           await dispatch('forceUpdate', { dataSource, values: data })
-          resolve()
+          resolve(true)
         } catch (error) {
           // Revert to old values on error
           await dispatch('forceUpdate', {
@@ -146,7 +146,7 @@ const actions = {
       }
 
       if (updateContext.promiseResolve) {
-        updateContext.promiseResolve()
+        updateContext.promiseResolve(false)
         updateContext.promiseResolve = null
       }
 

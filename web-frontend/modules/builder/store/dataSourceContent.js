@@ -35,19 +35,25 @@ const actions = {
    * @param {object} data the query body
    */
   async fetchDataSourceContent({ commit }, { dataSource, data: queryData }) {
-    try {
-      if (!fetchContext[dataSource.id]) {
-        fetchContext[dataSource.id] = {
-          fetchTimeout: null,
-          lastDataSource: null,
-          lastQueryData: null,
-        }
+    if (!fetchContext[dataSource.id]) {
+      fetchContext[dataSource.id] = {
+        fetchTimeout: null,
+        lastDataSource: null,
+        lastQueryData: null,
       }
-      const { data } = await DataSourceService(this.app.$client).dispatch(
-        dataSource.id,
-        queryData
-      )
-      commit('SET_CONTENT', { dataSource, value: data })
+    }
+    const serviceType = this.app.$registry.get('service', dataSource.type)
+
+    try {
+      if (serviceType.isValid(dataSource)) {
+        const { data } = await DataSourceService(this.app.$client).dispatch(
+          dataSource.id,
+          queryData
+        )
+        commit('SET_CONTENT', { dataSource, value: data })
+      } else {
+        commit('SET_CONTENT', { dataSource, value: null })
+      }
     } catch (e) {
       commit('SET_CONTENT', { dataSource, value: null })
     } finally {
