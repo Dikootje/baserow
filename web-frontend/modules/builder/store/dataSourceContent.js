@@ -36,10 +36,6 @@ const actions = {
    */
   async fetchDataSourceContent({ commit }, { dataSource, data: queryData }) {
     try {
-      const { data } = await DataSourceService(this.app.$client).dispatch(
-        dataSource.id,
-        queryData
-      )
       if (!fetchContext[dataSource.id]) {
         fetchContext[dataSource.id] = {
           fetchTimeout: null,
@@ -47,6 +43,10 @@ const actions = {
           lastQueryData: null,
         }
       }
+      const { data } = await DataSourceService(this.app.$client).dispatch(
+        dataSource.id,
+        queryData
+      )
       commit('SET_CONTENT', { dataSource, value: data })
     } catch (e) {
       commit('SET_CONTENT', { dataSource, value: null })

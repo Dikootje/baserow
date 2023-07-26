@@ -29,7 +29,12 @@
         </div>
       </template>
 
-      <Button type="link" prepend-icon="plus" @click="createDataSource()">
+      <Button
+        type="link"
+        prepend-icon="plus"
+        :loading="creationInProgress"
+        @click="createDataSource()"
+      >
         {{ $t('dataSourceContext.addDataSource') }}
       </Button>
     </template>
@@ -56,7 +61,7 @@ export default {
     },
   },
   data() {
-    return { state: null }
+    return { state: null, creationInProgress: false }
   },
   computed: {
     ...mapGetters({
@@ -81,6 +86,7 @@ export default {
       this.state = 'loaded'
     },
     async createDataSource() {
+      this.creationInProgress = true
       try {
         await this.actionCreateDataSource({
           pageId: this.page.id,
@@ -89,6 +95,7 @@ export default {
       } catch (error) {
         notifyIf(error)
       }
+      this.creationInProgress = false
     },
     async updateDataSource(dataSource, newValues) {
       const hasDifference = Object.entries(newValues).some(
