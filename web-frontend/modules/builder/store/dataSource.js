@@ -210,19 +210,6 @@ const actions = {
 
     return dataSources
   },
-  async fetchPublished({ dispatch, commit }, { page }) {
-    commit('CLEAR_ITEMS')
-
-    const { data: dataSources } = await PublishedBuilderService(
-      this.$client
-    ).fetchDataSources(page.id)
-
-    await Promise.all(
-      dataSources.map((dataSource) => dispatch('forceCreate', { dataSource }))
-    )
-
-    return dataSources
-  },
   async move({ dispatch }, { dataSourceId, beforeDataSourceId }) {
     await dispatch('forceMove', {
       dataSourceId,

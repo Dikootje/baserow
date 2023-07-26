@@ -98,15 +98,6 @@ const actions = {
       { root: true }
     )
 
-    // Fetch page data sources
-    await dispatch(
-      'dataSource/fetch',
-      { page },
-      {
-        root: true,
-      }
-    )
-
     return { builder, page }
   },
   unselect({ commit }) {
