@@ -5,7 +5,6 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from baserow.api.user.serializers import SubjectUserSerializer, UserSerializer
 from baserow.core.integrations.models import Integration
 from baserow.core.integrations.registries import integration_type_registry
 
