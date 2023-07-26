@@ -35,7 +35,7 @@ def test_create_integration(integration_created_mock, data_fixture, integration_
     )
 
     integration = IntegrationService().create_integration(
-        user, integration_type, application=application
+        user, integration_type, application=application, authorized_user=user
     )
 
     last_integration = Integration.objects.last()
@@ -64,6 +64,7 @@ def test_create_integration_before(data_fixture):
         integration_type,
         application=application,
         before=integration3,
+        authorized_user=user,
     )
 
     integrations = Integration.objects.all()
@@ -98,6 +99,7 @@ def test_get_unique_orders_before_integration_triggering_full_application_order_
         integration_type,
         application=application,
         before=integration_3,
+        authorized_user=user,
     )
 
     integration_1.refresh_from_db()
@@ -264,6 +266,9 @@ def test_update_integration_changing_authorized_user(
     user = data_fixture.create_user()
     integration = data_fixture.create_local_baserow_integration(user=user)
     new_user = data_fixture.create_user()
+    data_fixture.create_user_workspace(
+        user=new_user, workspace=integration.application.workspace
+    )
 
     integration_updated = IntegrationService().update_integration(
         user, integration, value="newValue", authorized_user=new_user

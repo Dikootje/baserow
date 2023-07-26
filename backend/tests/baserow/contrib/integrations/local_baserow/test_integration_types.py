@@ -12,7 +12,7 @@ def test_create_local_baserow_integration_with_user(data_fixture):
     integration_type = integration_type_registry.get("local_baserow")
 
     integration = IntegrationService().create_integration(
-        user, integration_type, application=application
+        user, integration_type, application=application, authorized_user=user
     )
 
     assert integration.authorized_user.id == user.id

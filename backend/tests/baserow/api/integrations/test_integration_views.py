@@ -53,7 +53,7 @@ def test_create_integration(api_client, data_fixture):
     url = reverse("api:integrations:list", kwargs={"application_id": application.id})
     response = api_client.post(
         url,
-        {"type": "local_baserow", "name": "test"},
+        {"type": "local_baserow", "name": "test", "authorized_user": user.id},
         format="json",
         HTTP_AUTHORIZATION=f"JWT {token}",
     )
@@ -61,22 +61,7 @@ def test_create_integration(api_client, data_fixture):
     response_json = response.json()
     assert response.status_code == HTTP_200_OK
     assert response_json["type"] == "local_baserow"
-    assert response_json["authorized_user"]["username"] == user.username
-
-    response = api_client.post(
-        url,
-        {
-            "type": "local_baserow",
-            "name": "test",
-            "authorized_user_id": 17,
-        },
-        format="json",
-        HTTP_AUTHORIZATION=f"JWT {token}",
-    )
-
-    response_json = response.json()
-    assert response.status_code == HTTP_200_OK
-    assert response_json["authorized_user"]["username"] == user.username
+    assert response_json["authorized_user"] == user.id
 
 
 @pytest.mark.django_db
@@ -90,7 +75,7 @@ def test_create_integration_permission_denied(
     with stub_check_permissions(raise_permission_denied=True):
         response = api_client.post(
             url,
-            {"type": "local_baserow", "name": "test"},
+            {"type": "local_baserow", "name": "test", "authorized_user": user.id},
             format="json",
             HTTP_AUTHORIZATION=f"JWT {token}",
         )
@@ -106,7 +91,7 @@ def test_create_integration_application_does_not_exist(api_client, data_fixture)
     url = reverse("api:integrations:list", kwargs={"application_id": 0})
     response = api_client.post(
         url,
-        {"type": "local_baserow", "name": "test"},
+        {"type": "local_baserow", "name": "test", "authorized_user": user.id},
         format="json",
         HTTP_AUTHORIZATION=f"JWT {token}",
     )
@@ -122,7 +107,7 @@ def test_create_integration_bad_application_type(api_client, data_fixture):
     url = reverse("api:integrations:list", kwargs={"application_id": application.id})
     response = api_client.post(
         url,
-        {"type": "local_baserow", "name": "test"},
+        {"type": "local_baserow", "name": "test", "authorized_user": user.id},
         format="json",
         HTTP_AUTHORIZATION=f"JWT {token}",
     )
@@ -148,7 +133,7 @@ def test_update_integration(api_client, data_fixture):
     )
 
     assert response.status_code == HTTP_200_OK
-    assert response.json()["authorized_user"]["username"] == user.username
+    assert response.json()["authorized_user"] == user.id
 
 
 @pytest.mark.django_db

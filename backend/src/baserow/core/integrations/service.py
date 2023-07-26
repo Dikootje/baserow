@@ -163,7 +163,9 @@ class IntegrationService:
         )
 
         prev_authorized_user_id = integration.authorized_user_id  # type: ignore
-        self.validate_authorized_user(workspace, kwargs["authorized_user"])
+        new_authorized_user = kwargs.get("authorized_user", None)
+        if new_authorized_user and new_authorized_user.id != prev_authorized_user_id:
+            self.validate_authorized_user(workspace, new_authorized_user)
 
         prepared_values = integration.get_type().prepare_values(kwargs, user)
 

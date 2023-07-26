@@ -1,6 +1,7 @@
 from typing import Any, Dict
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 
 from rest_framework import serializers
 
@@ -31,6 +32,16 @@ class LocalBaserowIntegrationType(IntegrationType):
 
     request_serializer_field_names = []
     request_serializer_field_overrides = {}
+
+    def prepare_values(
+        self, values: Dict[str, Any], user: AbstractUser
+    ) -> Dict[str, Any]:
+        """If no authorized_user is provided, then use the logged-in user."""
+
+        if "authorized_user" not in values:
+            values["authorized_user"] = user
+
+        return super().prepare_values(values, user)
 
     def get_property_for_serialization(self, integration: Integration, prop_name: str):
         """

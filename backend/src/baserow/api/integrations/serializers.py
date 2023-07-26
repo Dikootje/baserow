@@ -61,6 +61,7 @@ class CreateIntegrationSerializer(serializers.ModelSerializer):
 
 class UpdateIntegrationSerializer(serializers.ModelSerializer):
     authorized_user = serializers.PrimaryKeyRelatedField(
+        required=False,
         queryset=User.objects.all(),
         help_text="The user which this integration will use for its "
         "authorization checks.",
