@@ -49,9 +49,7 @@ class CreateIntegrationSerializer(serializers.ModelSerializer):
         "the given id.",
     )
     authorized_user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.filter(
-            is_superuser=False, is_staff=False, profile__to_be_deleted=False
-        ),
+        queryset=User.objects.filter(profile__to_be_deleted=False),
         help_text="The user which this integration will use for its "
         "authorization checks.",
     )
@@ -64,9 +62,7 @@ class CreateIntegrationSerializer(serializers.ModelSerializer):
 class UpdateIntegrationSerializer(serializers.ModelSerializer):
     authorized_user = serializers.PrimaryKeyRelatedField(
         required=False,
-        queryset=User.objects.filter(
-            is_superuser=False, is_staff=False, profile__to_be_deleted=False
-        ),
+        queryset=User.objects.filter(profile__to_be_deleted=False),
         help_text="The user which this integration will use for its "
         "authorization checks.",
     )
