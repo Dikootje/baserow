@@ -23,11 +23,7 @@
       </ul>
     </template>
     <template v-if="settingSelected" #content>
-      <component
-        :is="settingSelected.component"
-        :builder="builder"
-        :workspace="workspace"
-      ></component>
+      <component :is="settingSelected.component" :builder="builder"></component>
     </template>
   </Modal>
 </template>
@@ -40,10 +36,6 @@ export default {
   mixins: [modal],
   props: {
     builder: {
-      type: Object,
-      required: true,
-    },
-    workspace: {
       type: Object,
       required: true,
     },
