@@ -124,6 +124,7 @@ class UpdateUserActionType(ActionType):
         user: AbstractUser,
         first_name: Optional[str] = None,
         language: Optional[str] = None,
+        email_notifications_frequency: Optional[str] = None,
         **kwargs: Any
     ) -> AbstractUser:
         """
@@ -132,10 +133,16 @@ class UpdateUserActionType(ActionType):
         :param user: The user that will be updated.
         :param first_name: The first name of the user.
         :param language: The language of the user.
+        :param email_notifications_frequency: The frequency of email notifications.
         :return: The updated user.
         """
 
-        user = UserHandler().update_user(user, first_name=first_name, language=language)
+        user = UserHandler().update_user(
+            user,
+            first_name=first_name,
+            language=language,
+            email_notifications_frequency=email_notifications_frequency,
+        )
 
         cls.register_action(
             user=user,

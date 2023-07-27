@@ -7,6 +7,8 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils.translation import gettext as _
 
+from baserow.core.notifications.registries import notification_type_registry
+
 
 class BaseEmailMessage(EmailMultiAlternatives):
     """
@@ -104,5 +106,43 @@ class WorkspaceInvitationEmail(BaseEmailMessage):
         context = super().get_context()
         context.update(
             invitation=self.invitation, public_accept_url=self.public_accept_url
+        )
+        return context
+
+
+class NotificationEmail(BaseEmailMessage):
+    template_name = "baserow/core/notifications_summary.html"
+    MAX_NOTIFICATIONS_PER_EMAIL = 10
+
+    def __init__(self, to, notifications, *args, **kwargs):
+        limit = self.MAX_NOTIFICATIONS_PER_EMAIL
+        self.notifications = notifications[:limit]
+        self.total_count = len(notifications)
+        self.unlisted_new = (
+            len(notifications) - limit if len(notifications) > limit else None
+        )
+        super().__init__(to=to, *args, **kwargs)
+
+    def get_subject(self):
+        count = len(self.notifications)
+        return _("You have %(count)d new notifications - Baserow") % {"count": count}
+
+    def get_context(self):
+        context = super().get_context()
+        rendered_notifications = []
+        for notification in self.notifications:
+            notification_type = notification_type_registry.get(notification.type)
+            rendered_notifications.append(
+                {
+                    "title": notification_type.render_title(notification, context),
+                    "description": notification_type.render_description(
+                        notification, context
+                    ),
+                }
+            )
+        context.update(
+            notifications=rendered_notifications,
+            total_count=self.total_count,
+            unlisted_new=self.unlisted_new,
         )
         return context

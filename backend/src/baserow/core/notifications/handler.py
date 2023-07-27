@@ -1,24 +1,32 @@
 from typing import Any, Dict, List, Optional, Union
 
 from django.contrib.auth.models import AbstractUser
-from django.db.models import Count, OuterRef, Q, QuerySet, Subquery
+from django.db import transaction
+from django.db.models import Count, F, OuterRef, Prefetch, Q, QuerySet, Subquery
 from django.db.models.functions import Coalesce
+from django.utils import translation
 
 from opentelemetry import trace
 
-from baserow.core.models import Workspace
-from baserow.core.notifications.tasks import send_queued_notifications_to_users
+from baserow.core.emails import NotificationEmail
+from baserow.core.models import User, UserProfile, Workspace
 from baserow.core.telemetry.utils import baserow_trace
-from baserow.core.utils import grouper, transaction_on_commit_if_not_already
+from baserow.core.utils import (
+    atomic_if_not_already,
+    grouper,
+    transaction_on_commit_if_not_already,
+)
 
 from .exceptions import NotificationDoesNotExist
 from .models import Notification, NotificationRecipient
+from .registries import notification_type_registry
 from .signals import (
     all_notifications_cleared,
     all_notifications_marked_as_read,
     notification_created,
     notification_marked_as_read,
 )
+from .tasks import send_queued_notifications_to_users
 
 tracer = trace.get_tracer(__name__)
 
@@ -548,6 +556,76 @@ class NotificationHandler:
             notification_recipients=notification_recipients,
         )
         return notification_recipients
+
+    @classmethod
+    @baserow_trace(tracer)
+    def send_notifications_to_user_by_email(
+        cls, user: AbstractUser, new_user_notifications: List[NotificationRecipient]
+    ):
+        email_notifications = [
+            nr.notification
+            for nr in new_user_notifications
+            if notification_type_registry.get(
+                nr.notification.type
+            ).include_in_notifications_email
+        ]
+
+        with translation.override(user.profile.language), atomic_if_not_already():
+            email = NotificationEmail(
+                to=[user.email],
+                notifications=email_notifications,
+            )
+            transaction.on_commit(lambda: email.send())
+
+            NotificationRecipient.objects.filter(
+                id__in=[nr.id for nr in new_user_notifications]
+            ).update(sent_by_email=True)
+
+    @classmethod
+    @baserow_trace(tracer)
+    def send_email_notifications_to_users_with_frequency(
+        cls, notifications_frequency: UserProfile.EmailNotificationFrequencyOptions
+    ):
+        """
+        Sends email notifications to users with the given frequency.
+
+        :param notifications_frequency: The frequency of the notifications to send.
+        """
+
+        # To prevent self-mentions or self-assignments from triggering email
+        # notifications, we set `sent_by_email=True` for these types of
+        # notifications.
+        NotificationRecipient.objects.filter(
+            recipient=F("notification__sender")
+        ).update(sent_by_email=True)
+
+        users_to_notify = (
+            User.objects.prefetch_related(
+                Prefetch(
+                    "notificationrecipient_set",
+                    queryset=NotificationRecipient.objects.filter(
+                        broadcast=False,
+                        read=False,
+                        cleared=False,
+                        queued=False,
+                        sent_by_email=False,
+                    ).select_related("notification"),
+                    to_attr="unsent_notifications",
+                )
+            )
+            .filter(
+                profile__email_notifications_frequency=notifications_frequency,
+                notificationrecipient__read=False,
+                notificationrecipient__cleared=False,
+                notificationrecipient__queued=False,
+                notificationrecipient__sent_by_email=False,
+            )
+            .distinct()
+            .select_related("profile")
+        )
+
+        for user in users_to_notify:
+            cls.send_notifications_to_user_by_email(user, user.unsent_notifications)
 
 
 class UserNotificationsGrouper:

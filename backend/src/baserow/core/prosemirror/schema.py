@@ -29,12 +29,12 @@ nodes = {
             "span",
             {
                 "class": "mention",
-                "data-id": node.attrs["id"],
+                "data-id": str(node.attrs["id"]),
                 "data-label": node.attrs["label"],
                 "data-type": "mention",
                 "contenteditable": "false",
             },
-            "@" + node.attrs["name"],
+            "@" + node.attrs["label"],
         ],
         "parseDOM": [
             {

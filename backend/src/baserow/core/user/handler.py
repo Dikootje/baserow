@@ -240,6 +240,7 @@ class UserHandler(metaclass=baserow_trace_methods(tracer)):
         user: AbstractUser,
         first_name: Optional[str] = None,
         language: Optional[str] = None,
+        email_notifications_frequency: Optional[str] = None,
     ) -> AbstractUser:
         """
         Updates the user's account editable properties. Handles the scenario
@@ -248,6 +249,7 @@ class UserHandler(metaclass=baserow_trace_methods(tracer)):
         :param user: The user instance to update.
         :param first_name: The new user first name.
         :param language: The language selected by the user.
+        :param email_notifications_frequency: The frequency of email notifications.
         :return: The user object.
         """
 
@@ -255,9 +257,18 @@ class UserHandler(metaclass=baserow_trace_methods(tracer)):
             user.first_name = first_name
             user.save()
 
+        profile_fields_to_update = []
+
         if language is not None:
             user.profile.language = language
-            user.profile.save()
+            profile_fields_to_update.append("language")
+
+        if email_notifications_frequency is not None:
+            user.profile.email_notifications_frequency = email_notifications_frequency
+            profile_fields_to_update.append("email_notifications_frequency")
+
+        if profile_fields_to_update:
+            user.profile.save(update_fields=profile_fields_to_update)
 
         user_updated.send(self, performed_by=user, user=user)
 

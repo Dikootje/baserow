@@ -95,6 +95,13 @@ class NotificationRecipient(models.Model):
             "set to False and the user will be able to fetch it via API."
         ),
     )
+    sent_by_email = models.BooleanField(
+        default=False,
+        help_text=(
+            "If True, then the notification has been sent by email to the user. "
+            "This field is only used for direct notifications."
+        ),
+    )
     # The following fields are copies of the notification fields needed to
     # speed up queries.
     created_on = models.DateTimeField(

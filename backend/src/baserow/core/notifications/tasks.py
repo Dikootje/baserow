@@ -1,13 +1,15 @@
 from collections import defaultdict
+from datetime import timedelta
 
-from django.contrib.auth import get_user_model
 from django.db import transaction
+
+from celery.exceptions import SoftTimeLimitExceeded
+from celery.schedules import crontab
 
 from baserow.api.notifications.serializers import NotificationRecipientSerializer
 from baserow.config.celery import app
+from baserow.core.models import UserProfile
 from baserow.ws.tasks import broadcast_to_users
-
-User = get_user_model()
 
 
 @app.task(bind=True)
@@ -72,3 +74,76 @@ def send_queued_notifications_to_users(self):
         transaction.on_commit(broadcast_all_notifications_at_once_to_user)
 
         queued_notificationrecipients.update(queued=False)
+
+
+@app.task(bind=True, queue="export", soft_time_limit=50)
+def send_instant_notifications_by_email_to_users(self):
+    """
+    This tasks send the emails to users that have set the notification setting
+    to immediate. This task will run every minute and with a soft time limit
+    set to 50 seconds we should
+    """
+
+    from .handler import NotificationHandler
+
+    NotificationHandler.send_email_notifications_to_users_with_frequency(
+        UserProfile.EmailNotificationFrequencyOptions.INSTANT.value
+    )
+
+
+@app.task(bind=True, queue="export")
+def send_daily_notification_by_email_to_users(self):
+    """
+    This tasks send the emails to users that have set the notification setting
+    to daily. Since this task is scheduled once a week and we cannot know in
+    advance how long this task will take to complete, we catch the
+    SoftTimeLimitExceeded to reschedule the job and continue later.
+    """
+
+    from .handler import NotificationHandler
+
+    try:
+        NotificationHandler.send_email_notifications_to_users_with_frequency(
+            UserProfile.EmailNotificationFrequencyOptions.DAILY.value
+        )
+    except SoftTimeLimitExceeded:
+        # In this case we want to retry the task later because we didn't complete
+        # all the work and this task won't be scheduled again until tomorrow.
+        self.retry(countdown=timedelta(minutes=5).total_seconds())
+
+
+@app.task(bind=True, queue="export")
+def send_weekly_notifications_by_email_to_users(self):
+    """
+    This tasks send the emails to users that have set the notification setting
+    to weekly. Since this task is scheduled once a week and we cannot know in
+    advance how long this task will take to complete, we catch the
+    SoftTimeLimitExceeded to reschedule the job and continue later.
+    """
+
+    from .handler import NotificationHandler
+
+    try:
+        NotificationHandler.send_email_notifications_to_users_with_frequency(
+            UserProfile.EmailNotificationFrequencyOptions.DAILY.value
+        )
+    except SoftTimeLimitExceeded:
+        # In this case we want to retry the task later because we didn't complete
+        # all the work and this task won't be scheduled again until tomorrow.
+        self.retry(countdown=timedelta(minutes=5).total_seconds())
+
+
+@app.on_after_finalize.connect
+def setup_periodic_action_tasks(sender, **kwargs):
+    sender.add_periodic_task(
+        timedelta(seconds=60),
+        send_instant_notifications_by_email_to_users.s(),
+    )
+    sender.add_periodic_task(
+        crontab(hour=0, minute=0),
+        send_daily_notification_by_email_to_users.s(),
+    )
+    sender.add_periodic_task(
+        crontab(hour=0, minute=0, day_of_week=1),
+        send_weekly_notifications_by_email_to_users.s(),
+    )

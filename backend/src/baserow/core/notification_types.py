@@ -1,10 +1,14 @@
 from dataclasses import asdict, dataclass
 
 from django.dispatch import receiver
+from django.utils.translation import gettext as _
 
 from baserow.core.notifications.exceptions import NotificationDoesNotExist
 from baserow.core.notifications.handler import NotificationHandler
-from baserow.core.notifications.registries import NotificationType
+from baserow.core.notifications.registries import (
+    EmailRendererNotificationTypeMixin,
+    NotificationType,
+)
 
 from .signals import (
     workspace_invitation_accepted,
@@ -62,7 +66,9 @@ def handle_workspace_invitation_created(
         )
 
 
-class WorkspaceInvitationAcceptedNotificationType(NotificationType):
+class WorkspaceInvitationAcceptedNotificationType(
+    EmailRendererNotificationTypeMixin, NotificationType
+):
     type = "workspace_invitation_accepted"
 
     @classmethod
@@ -79,6 +85,19 @@ class WorkspaceInvitationAcceptedNotificationType(NotificationType):
             workspace=invitation.workspace,
         )
 
+    @classmethod
+    def render_title(cls, notification, context):
+        return _(
+            "%(user)s accepted your invitation to collaborate to %(workspace_name)s"
+        ) % {
+            "user": notification.sender.first_name,
+            "workspace_name": notification.data["invited_to_workspace_name"],
+        }
+
+    @classmethod
+    def render_description(cls, notification, context):
+        return None
+
 
 @receiver(workspace_invitation_accepted)
 def handle_workspace_invitation_accepted(sender, invitation, user, **kwargs):
@@ -88,7 +107,9 @@ def handle_workspace_invitation_accepted(sender, invitation, user, **kwargs):
     )
 
 
-class WorkspaceInvitationRejectedNotificationType(NotificationType):
+class WorkspaceInvitationRejectedNotificationType(
+    EmailRendererNotificationTypeMixin, NotificationType
+):
     type = "workspace_invitation_rejected"
 
     @classmethod
@@ -104,6 +125,19 @@ class WorkspaceInvitationRejectedNotificationType(NotificationType):
             ),
             workspace=invitation.workspace,
         )
+
+    @classmethod
+    def render_title(cls, notification, context):
+        return _(
+            "%(user)s rejected your invitation to collaborate to %(workspace_name)s"
+        ) % {
+            "user": notification.sender.first_name,
+            "workspace_name": notification.data["invited_to_workspace_name"],
+        }
+
+    @classmethod
+    def render_description(cls, notification, context):
+        return None
 
 
 @receiver(workspace_invitation_rejected)

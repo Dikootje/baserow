@@ -122,6 +122,12 @@ class UserProfile(models.Model):
     default user model.
     """
 
+    class EmailNotificationFrequencyOptions(models.TextChoices):
+        INSTANT = "instant", "instant"
+        DAILY = "daily", "daily"
+        WEEKLY = "weekly", "weekly"
+        NEVER = "never", "never"
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     language = models.TextField(
         max_length=10,
@@ -140,6 +146,11 @@ class UserProfile(models.Model):
         default=None,
         blank=True,
         help_text="An optional per user concurrency limit.",
+    )
+    email_notifications_frequency = models.TextField(
+        max_length=16,
+        choices=EmailNotificationFrequencyOptions.choices,
+        default=EmailNotificationFrequencyOptions.INSTANT,
     )
 
 

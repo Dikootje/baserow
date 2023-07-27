@@ -1,9 +1,17 @@
+import re
 from dataclasses import asdict, dataclass
 
 from django.dispatch import receiver
+from django.utils.translation import gettext as _
+
+from prosemirror.model import DOMSerializer, Node
 
 from baserow.core.notifications.handler import NotificationHandler
-from baserow.core.notifications.registries import NotificationType
+from baserow.core.notifications.registries import (
+    EmailRendererNotificationTypeMixin,
+    NotificationType,
+)
+from baserow.core.prosemirror.schema import schema as baserow_prosemirror_schema
 
 from .signals import row_comment_created, row_comment_updated
 
@@ -31,7 +39,9 @@ class RowCommentMentionNotificationData:
         )
 
 
-class RowCommentMentionNotificationType(NotificationType):
+class RowCommentMentionNotificationType(
+    EmailRendererNotificationTypeMixin, NotificationType
+):
     type = "row_comment_mention"
 
     @classmethod
@@ -54,6 +64,25 @@ class RowCommentMentionNotificationType(NotificationType):
             sender=row_comment.user,
             workspace=row_comment.table.database.workspace,
         )
+
+    @classmethod
+    def render_title(cls, notification, context):
+        return _("%(user)s mentioned you in row %(row_id)s in %(table_name)s") % {
+            "user": notification.sender.first_name,
+            "row_id": notification.data["row_id"],
+            "table_name": notification.data["table_name"],
+        }
+
+    @classmethod
+    def render_description(cls, notification, context):
+        prosemirror_serializer = DOMSerializer.from_schema(baserow_prosemirror_schema)
+        prosemirror_doc = Node.from_json(
+            baserow_prosemirror_schema, notification.data["message"]
+        )
+        html = str(prosemirror_serializer.serialize_fragment(prosemirror_doc.content))
+        # Remove all HTML tags from the string so we can render it as plain text.
+        text = re.sub("<[^<]+?>", "", html)
+        return text
 
 
 @receiver(row_comment_created)

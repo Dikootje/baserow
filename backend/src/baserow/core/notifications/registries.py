@@ -1,3 +1,5 @@
+from abc import ABCMeta, abstractclassmethod
+
 from baserow.core.exceptions import (
     InstanceTypeAlreadyRegistered,
     InstanceTypeDoesNotExist,
@@ -15,6 +17,28 @@ from .models import Notification
 
 class NotificationType(MapAPIExceptionsInstanceMixin, Instance):
     model_class = Notification
+    include_in_notifications_email = False
+
+
+class EmailRendererNotificationTypeMixin(metaclass=ABCMeta):
+    """
+    A mixin for notification types that can be sent by email, which provides the
+    `get_email_renderer` method.
+    """
+
+    include_in_notifications_email = True
+
+    @abstractclassmethod
+    def render_title(cls, notification, context):
+        """
+        Renders the translatable string for the title of the notification.
+        """
+
+    @abstractclassmethod
+    def render_description(cls, notification, context):
+        """
+        Renders the translatable string for the description of the notification.
+        """
 
 
 class NotificationTypeDoesNotExist(InstanceTypeDoesNotExist):
