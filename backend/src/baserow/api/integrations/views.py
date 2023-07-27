@@ -34,7 +34,7 @@ from baserow.api.utils import (
     type_from_data_or_registry,
     validate_data_custom_fields,
 )
-from baserow.contrib.builder.api.errors import ERROR_INTEGRATION_AUTHORIZED_USER_INVALID
+from baserow.contrib.builder.errors import ERROR_INTEGRATION_AUTHORIZED_USER_INVALID
 from baserow.contrib.builder.exceptions import InvalidIntegrationAuthorizedUser
 from baserow.core.exceptions import (
     ApplicationDoesNotExist,

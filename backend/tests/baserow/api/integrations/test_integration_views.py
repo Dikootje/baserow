@@ -117,6 +117,28 @@ def test_create_integration_bad_application_type(api_client, data_fixture):
 
 
 @pytest.mark.django_db
+def test_create_integration_invalid_authorized_user(api_client, data_fixture):
+    user, token = data_fixture.create_user_and_token()
+    authorized_user = data_fixture.create_user()
+    application = data_fixture.create_builder_application(user=user)
+
+    url = reverse("api:integrations:list", kwargs={"application_id": application.id})
+    response = api_client.post(
+        url,
+        {
+            "type": "local_baserow",
+            "name": "test",
+            "authorized_user": authorized_user.id,
+        },
+        format="json",
+        HTTP_AUTHORIZATION=f"JWT {token}",
+    )
+
+    assert response.status_code == HTTP_400_BAD_REQUEST
+    assert response.json()["error"] == "ERROR_INTEGRATION_AUTHORIZED_USER_INVALID"
+
+
+@pytest.mark.django_db
 def test_update_integration(api_client, data_fixture):
     user, token = data_fixture.create_user_and_token()
     application = data_fixture.create_builder_application(user=user)
@@ -169,6 +191,27 @@ def test_update_integration_does_not_exist(api_client, data_fixture):
     )
     assert response.status_code == HTTP_404_NOT_FOUND
     assert response.json()["error"] == "ERROR_INTEGRATION_DOES_NOT_EXIST"
+
+
+@pytest.mark.django_db
+def test_update_integration_invalid_authorized_user(api_client, data_fixture):
+    user, token = data_fixture.create_user_and_token()
+    authorized_user = data_fixture.create_user()
+    application = data_fixture.create_builder_application(user=user)
+    integration1 = data_fixture.create_local_baserow_integration(
+        application=application
+    )
+
+    url = reverse("api:integrations:item", kwargs={"integration_id": integration1.id})
+    response = api_client.patch(
+        url,
+        {"authorized_user": authorized_user.id},
+        format="json",
+        HTTP_AUTHORIZATION=f"JWT {token}",
+    )
+
+    assert response.status_code == HTTP_400_BAD_REQUEST
+    assert response.json()["error"] == "ERROR_INTEGRATION_AUTHORIZED_USER_INVALID"
 
 
 @pytest.mark.django_db
