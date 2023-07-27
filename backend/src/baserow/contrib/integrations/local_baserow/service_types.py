@@ -78,7 +78,7 @@ class LocalBaserowListRowsUserServiceType(ServiceType):
         Returns a list of rows from the table stored in the service instance.
 
         :param service: the local baserow get row service.
-        :param runtime_formula_context: the data ledger used for formula resolution.
+        :param runtime_formula_context: the context used for formula resolution.
         :raise ServiceImproperlyConfigured: if the table property is missing.
         :return: The list of rows.
         """
@@ -163,7 +163,7 @@ class LocalBaserowGetRowUserServiceType(ServiceType):
         service instance.
 
         :param service: the local baserow get row service.
-        :param runtime_formula_context: the data ledger used for formula resolution.
+        :param runtime_formula_context: the context used for formula resolution.
         :raise ServiceImproperlyConfigured: if the table property is missing or if the
             formula can't be resolved.
         :raise DoesNotExist: if row id doesn't exist.

@@ -155,7 +155,7 @@ class ServiceHandler:
         Dispatch the given service.
 
         :param service: The service to be dispatched.
-        :param runtime_formula_context: The data ledger used to resolve formulas.
+        :param runtime_formula_context: The context used to resolve formulas.
         :return: The result of dispatching the service.
         """
 

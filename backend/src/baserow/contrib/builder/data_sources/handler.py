@@ -261,7 +261,7 @@ class DataSourceHandler:
         Dispatch the service related to the data_source.
 
         :param data_source: The data source to be dispatched.
-        :param runtime_formula_context: The data ledger used to resolve formulas.
+        :param runtime_formula_context: The context used to resolve formulas.
         :raises DataSourceImproperlyConfigured: If the data source is
           not properly configured.
         :return: The result of dispatching the data source.

@@ -25,4 +25,4 @@ def formula_exception_handler(e):
 
 
 class DispatchContextError(Exception):
-    """Raised an error related to data ledger context is raised."""
+    """Raised an error related to the formula context is raised."""

@@ -28,7 +28,7 @@ export default {
     isEditable() {
       return this.mode === 'editing'
     },
-    RuntimeFormulaContext() {
+    runtimeFormulaContext() {
       /**
        * This proxy allow the RuntimeFormulaContextClass to act like a regular object.
        */
@@ -61,7 +61,7 @@ export default {
       return resolveFormula(
         formula,
         this.formulaFunctions,
-        this.RuntimeFormulaContext
+        this.runtimeFormulaContext
       )
     },
   },

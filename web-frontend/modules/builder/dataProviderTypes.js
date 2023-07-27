@@ -21,25 +21,25 @@ export class DataSourceDataProviderType extends DataProviderType {
     return this.app.i18n.t('dataProviderType.dataSource')
   }
 
-  getBackendContext(RuntimeFormulaContext) {
+  getBackendContext(runtimeFormulaContext) {
     return {
-      page_id: RuntimeFormulaContext.applicationContext.page.id,
+      page_id: runtimeFormulaContext.applicationContext.page.id,
     }
   }
 
-  async init(RuntimeFormulaContext) {
+  async init(runtimeFormulaContext) {
     const dataSources = this.app.store.getters['dataSource/getDataSources']
     await Promise.all(
       dataSources.map((dataSource) =>
         this.app.store.dispatch('dataSourceContent/fetchDataSourceContent', {
           dataSource,
-          data: RuntimeFormulaContext.getAllBackendContext(),
+          data: runtimeFormulaContext.getAllBackendContext(),
         })
       )
     )
   }
 
-  getDataChunk(RuntimeFormulaContext, [dataSourceName, ...rest]) {
+  getDataChunk(runtimeFormulaContext, [dataSourceName, ...rest]) {
     // Get the data sources for the current page.
     const dataSources = this.app.store.getters['dataSource/getDataSources']
 
@@ -52,7 +52,7 @@ export class DataSourceDataProviderType extends DataProviderType {
     // Update the dataSource content if needed
     this.app.store.dispatch('dataSourceContent/smartFetchDataSourceContent', {
       dataSource,
-      data: RuntimeFormulaContext.getAllBackendContext(),
+      data: runtimeFormulaContext.getAllBackendContext(),
     })
 
     const dataSourceContents =
@@ -76,9 +76,9 @@ export class PageParameterDataProviderType extends DataProviderType {
     return this.app.i18n.t('dataProviderType.pageParameter')
   }
 
-  async init(RuntimeFormulaContext) {
+  async init(runtimeFormulaContext) {
     const { page, mode, pageParamsValue } =
-      RuntimeFormulaContext.applicationContext
+      runtimeFormulaContext.applicationContext
     if (mode === 'editing') {
       // Generate fake values for the parameters
       await Promise.all(
@@ -102,7 +102,7 @@ export class PageParameterDataProviderType extends DataProviderType {
     }
   }
 
-  getDataChunk(RuntimeFormulaContext, path) {
+  getDataChunk(runtimeFormulaContext, path) {
     if (path.length !== 1) {
       return null
     }

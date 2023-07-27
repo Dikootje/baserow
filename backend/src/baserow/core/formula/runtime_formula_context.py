@@ -9,9 +9,9 @@ if TYPE_CHECKING:
 
 class RuntimeFormulaContext(FormulaContext):
     """
-    The data ledger holds all the data useful for the formula resolution. It uses a
-    Data provider registry to fulfill data queries. Each data provider is responsible
-    for a slice of data.
+    The runtime formula context holds all the data useful for the formula resolution.
+    It uses a Data provider registry to fulfill data queries. Each data provider
+    is responsible for a slice of data.
     """
 
     def __init__(self, registry: "DataProviderTypeRegistry", **kwargs):
@@ -20,7 +20,7 @@ class RuntimeFormulaContext(FormulaContext):
         constructor.
 
         :param registry: The registry that registers the available data providers that
-            can be used by this data ledger instance.
+            can be used by this formula context instance.
         :param kwargs: extra elements are given to the data providers to extract data.
         """
 

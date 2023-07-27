@@ -2,12 +2,12 @@ import parseBaserowFormula from '@baserow/formula/parser/parser'
 import JavascriptExecutor from '@baserow/formula/parser/javascriptExecutor'
 
 /**
- * Resolves a formula in the context of the given data ledger.
+ * Resolves a formula in the context of the given context.
  *
  * @param {str} formula the input formula.
  * @param {object} RuntimeFormulaContext the context given to the formula when we meet the
  *   `get('something')` expression
- * @returns the result of the formula in the given data ledger context.
+ * @returns the result of the formula in the given context.
  */
 export const resolveFormula = (formula, functions, RuntimeFormulaContext) => {
   const tree = parseBaserowFormula(formula)

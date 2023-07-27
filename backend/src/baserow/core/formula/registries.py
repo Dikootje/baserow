@@ -148,7 +148,7 @@ class DataProviderType(
     ):
         """
         Returns data designated by the path parameter. Usually use some of the
-        context created by the get_context method and stored in the data ledger.
+        context created by the get_context method and stored in the context.
         """
 
 

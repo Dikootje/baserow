@@ -225,7 +225,7 @@ class DataSourceService:
 
         :param user: The current user.
         :param data_source: The data source to be dispatched.
-        :param runtime_formula_context: The data ledger used to resolve formulas.
+        :param runtime_formula_context: The context used to resolve formulas.
         :return: The result of dispatching the data source.
         """
 
