@@ -13,7 +13,7 @@
         "noValidUsers": "This workspace does not have any valid users to use.",
         "chooseAuthorizedUserLabel": "Integration authentication user",
         "chooseAuthorizedUserPlaceholder": "Select a user to authenticate with...",
-        "authorizedUserConfirmation": "By creating this integration, you're authorizing the application to use {name}'s account to make changes in their local Baserow workspace."
+        "authorizedUserConfirmation": "By saving this integration, you're authorizing the application to use {name}'s account to make changes in their local Baserow workspace."
     },
     "localBaserowGetRowForm": {
         "tableFieldLabel": "Table",
