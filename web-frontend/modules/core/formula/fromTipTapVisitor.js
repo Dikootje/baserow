@@ -31,10 +31,10 @@ export class FromTipTapVisitor {
       return this.visit(content[0])
     }
 
-    let result = `concat(${this.visit(content[0])} , ${this.visit(content[1])})`
+    let result = `concat(${this.visit(content[0])}, ${this.visit(content[1])})`
 
     for (let i = 2; i < content.length; i++) {
-      result = `concat(${result} , ${this.visit(content[i])})`
+      result = `concat(${result}, ${this.visit(content[i])})`
     }
 
     return result
