@@ -5,11 +5,13 @@
         {{ $t('paragraphElementForm.textTitle') }}
       </label>
       <div class="control__elements">
-        <FormulaInputField
+        <textarea
           v-model="values.value"
           :placeholder="$t('elementForms.textInputPlaceholder')"
           class="input paragraph-element-form__value"
-        ></FormulaInputField>
+          type="text"
+          rows="12"
+        ></textarea>
       </div>
     </FormElement>
   </form>
@@ -17,11 +19,9 @@
 
 <script>
 import form from '@baserow/modules/core/mixins/form'
-import FormulaInputField from '@baserow/modules/core/components/formula/FormulaInputField'
 
 export default {
   name: 'ParagraphElementForm',
-  components: { FormulaInputField },
   mixins: [form],
   props: {},
   data() {
