@@ -110,11 +110,6 @@ export default {
       onFocus: this.onFocus,
       onBlur: this.onBlur,
       extensions: this.extensions,
-      editorProps: {
-        attributes: {
-          class: 'formula-input-field__editor',
-        },
-      },
       parseOptions: {
         preserveWhitespace: 'full',
       },

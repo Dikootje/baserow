@@ -1,11 +1,6 @@
-.formula-input-field__editor {
-  color: black;
-}
-
 .formula_input_field--focused {
   border-color: $color-primary-500;
 }
-
 
 .ProseMirror span.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
