@@ -110,7 +110,7 @@ class WorkspaceInvitationEmail(BaseEmailMessage):
         return context
 
 
-class NotificationEmail(BaseEmailMessage):
+class NotificationsSummaryEmail(BaseEmailMessage):
     template_name = "baserow/core/notifications_summary.html"
     MAX_NOTIFICATIONS_PER_EMAIL = 10
 

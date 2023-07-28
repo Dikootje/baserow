@@ -865,6 +865,17 @@ else:
 EMAIL_NOTIFICATIONS_ENABLED = str_to_bool(
     os.getenv("BASEROW_EMAIL_NOTIFICATIONS_ENABLED", "true")
 )
+EMAIL_NOTIFICATIONS_LIMITS = {
+    "instant": int(os.getenv("BASEROW_EMAIL_NOTIFICATIONS_LIMIT_INSTANT", 50)),
+    "daily": int(os.getenv("BASEROW_EMAIL_NOTIFICATIONS_LIMIT_DAILY", 1000)),
+    "weekly": int(os.getenv("BASEROW_EMAIL_NOTIFICATIONS_LIMIT_WEEKLY", 5000)),
+}
+
+MAX_EMAILS_PER_MINUTE = int(os.getenv("BASEROW_MAX_EMAILS_PER_MINUTE", 50))
+CELERY_EMAIL_TASK_CONFIG = {
+    "queue": "email",
+    "rate_limit": f"{MAX_EMAILS_PER_MINUTE}/m",  # * CELERY_EMAIL_CHUNK_SIZE (default: 10)
+}
 
 # Configurable thumbnails that are going to be generated when a user uploads an image
 # file.

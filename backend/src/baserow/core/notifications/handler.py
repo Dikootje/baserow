@@ -1,14 +1,17 @@
 from typing import Any, Dict, List, Optional, Union
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.mail import get_connection as get_mail_connection
 from django.db import transaction
-from django.db.models import Count, F, OuterRef, Prefetch, Q, QuerySet, Subquery
+from django.db.models import Count, OuterRef, Prefetch, Q, QuerySet, Subquery
 from django.db.models.functions import Coalesce
 from django.utils import translation
 
+from loguru import logger
 from opentelemetry import trace
 
-from baserow.core.emails import NotificationEmail
+from baserow.core.emails import NotificationsSummaryEmail
 from baserow.core.models import User, UserProfile, Workspace
 from baserow.core.telemetry.utils import baserow_trace
 from baserow.core.utils import (
@@ -17,7 +20,7 @@ from baserow.core.utils import (
     transaction_on_commit_if_not_already,
 )
 
-from .exceptions import NotificationDoesNotExist
+from .exceptions import EmailNotificationsLimitReached, NotificationDoesNotExist
 from .models import Notification, NotificationRecipient
 from .registries import notification_type_registry
 from .signals import (
@@ -559,10 +562,21 @@ class NotificationHandler:
 
     @classmethod
     @baserow_trace(tracer)
-    def send_notifications_to_user_by_email(
+    def construct_email_notification_for_user(
         cls, user: AbstractUser, new_user_notifications: List[NotificationRecipient]
-    ):
-        email_notifications = [
+    ) -> Optional[NotificationsSummaryEmail]:
+        """
+        Constructs an email notification for the given user containing the given
+        notifications. Only the notification types that are configured to be
+        included in the email will be included.
+
+        :param user: The user to construct the email for.
+        :param new_user_notifications: The notification recipient objects to
+            include in the email.
+        :return: The constructed email or None if no email should be sent.
+        """
+
+        notifications_to_send_by_email = [
             nr.notification
             for nr in new_user_notifications
             if notification_type_registry.get(
@@ -570,55 +584,113 @@ class NotificationHandler:
             ).include_in_notifications_email
         ]
 
-        with atomic_if_not_already(), translation.override(user.profile.language):
-            email = NotificationEmail(
-                to=[user.email],
-                notifications=email_notifications,
-            )
-            transaction.on_commit(lambda: email.send())
+        if not notifications_to_send_by_email:
+            return None
 
-            NotificationRecipient.objects.filter(
-                id__in=[nr.id for nr in new_user_notifications]
-            ).update(sent_by_email=True)
+        with translation.override(user.profile.language):
+            return NotificationsSummaryEmail(
+                to=[user.email],
+                notifications=notifications_to_send_by_email,
+            )
 
     @classmethod
     @baserow_trace(tracer)
     def send_email_notifications_to_users_with_frequency(
-        cls, notifications_frequency: UserProfile.EmailNotificationFrequencyOptions
-    ):
+        cls,
+        notifications_frequency: UserProfile.EmailNotificationFrequencyOptions,
+        max_emails: Optional[int] = None,
+    ) -> int:
         """
-        Sends email notifications to users with the given frequency.
+        Sends email notifications to users with the given frequency up to the
+        given limit defined by the `max_emails` parameter. A single email
+        notification will be sent to each user containing all the notification
+        types with the `include_in_notifications_email` set to True.
 
-        :param notifications_frequency: The frequency of the notifications to send.
+        :param notifications_frequency: The frequency of the notifications to
+            send.
+        :param max_emails: The maximum number of emails that can be sent in a
+            single function call. None will use the default limit for the given
+            frequency. 0 will send all the emails without raising any exception.
+        :raise EmailNotificationLimitExceeded: If the number of emails that
+            would be sent is greater than the max_emails.
+        :return: The number of emails that were sent.
         """
 
-        unsent_notifications_prefetch = Prefetch(
+        if max_emails is None:
+            max_emails = settings.EMAIL_NOTIFICATIONS_LIMITS[notifications_frequency]
+
+        unsent_notifications_q = {
+            "broadcast": False,
+            "read": False,
+            "cleared": False,
+            "queued": False,
+            "sent_by_email": False,
+        }
+
+        unsent_user_notifications_prefetch = Prefetch(
             "notificationrecipient_set",
             queryset=NotificationRecipient.objects.filter(
-                broadcast=False,
-                read=False,
-                cleared=False,
-                queued=False,
-                sent_by_email=False,
+                **unsent_notifications_q
             ).select_related("notification"),
             to_attr="unsent_notifications",
         )
 
-        users_annotated_with_notifications_to_send = (
-            User.objects.prefetch_related(unsent_notifications_prefetch)
+        users_to_notify_with_notifications = (
+            User.objects.prefetch_related(unsent_user_notifications_prefetch)
             .filter(
                 profile__email_notifications_frequency=notifications_frequency,
-                notificationrecipient__read=False,
-                notificationrecipient__cleared=False,
-                notificationrecipient__queued=False,
-                notificationrecipient__sent_by_email=False,
+                **{
+                    f"notificationrecipient__{k}": v
+                    for k, v in unsent_notifications_q.items()
+                },
             )
             .select_related("profile")
             .distinct()
         )
 
-        for user in users_annotated_with_notifications_to_send:
-            cls.send_notifications_to_user_by_email(user, user.unsent_notifications)
+        emails: List[NotificationsSummaryEmail] = []
+        notified_user_ids: List[int] = []
+        raise_exception = False
+        for user in users_to_notify_with_notifications:
+            email = cls.construct_email_notification_for_user(
+                user, user.unsent_notifications
+            )
+            notified_user_ids.append(user.id)
+
+            if email is not None:
+                if max_emails and len(emails) == max_emails:
+                    raise_exception = True
+                    break
+                emails.append(email)
+                logger.debug(
+                    f"Queued notification summary email for user {user.email} ({user.id}) "
+                    f"with {len(user.unsent_notifications)} new notifications."
+                )
+
+        if not emails:
+            return 0
+
+        with atomic_if_not_already():
+            updated = NotificationRecipient.objects.filter(
+                recipient_id__in=notified_user_ids, **unsent_notifications_q
+            ).update(sent_by_email=True)
+            logger.debug(
+                f"Marked {updated} notifications as sent by email for {len(emails)} different users."
+            )
+
+            transaction.on_commit(
+                lambda: get_mail_connection(fail_silently=False).send_messages(emails)
+            )
+
+        if raise_exception:
+            err_msg = (
+                f"Reached the maximum number of {max_emails} email notifications "
+                f"for frequency {notifications_frequency}."
+            )
+            logger.error(err_msg)
+            raise EmailNotificationsLimitReached(err_msg)
+
+        return len(emails)
 
 
 class UserNotificationsGrouper:
