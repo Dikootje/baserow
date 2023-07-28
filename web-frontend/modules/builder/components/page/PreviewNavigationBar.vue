@@ -1,13 +1,13 @@
 <template>
-  <div class="fake-browser-bar">
+  <div class="preview-navigation-bar">
     <div />
-    <div class="fake-browser-bar__address-bar">
+    <div class="preview-navigation-bar__address-bar">
       <template v-for="pathPart in splitPath">
         <input
           v-if="pathPart.type === 'variable'"
           :key="pathPart.key"
-          class="fake-browser-bar__address-bar-parameter"
-          :class="`fake-browser-bar__address-bar-parameter--${
+          class="preview-navigation-bar__address-bar-parameter"
+          :class="`preview-navigation-bar__address-bar-parameter--${
             paramTypeMap[pathPart.value]
           }`"
           :value="pageParameters[pathPart.value]"
@@ -21,7 +21,7 @@
         <div
           v-else
           :key="pathPart.key"
-          class="fake-browser-bar__address-bar-path"
+          class="preview-navigation-bar__address-bar-path"
         >
           {{ pathPart.value }}
         </div>
