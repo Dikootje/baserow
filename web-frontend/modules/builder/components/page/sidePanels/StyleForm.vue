@@ -1,7 +1,10 @@
 <template>
   <form @submit.prevent>
-    <StyleBoxForm v-model="topStyle" :label="$t('styleForm.boxTop')" />
-    <StyleBoxForm v-model="bottomStyle" :label="$t('styleForm.boxBottom')" />
+    <StyleBoxForm v-model="boxStyles.top" :label="$t('styleForm.boxTop')" />
+    <StyleBoxForm
+      v-model="boxStyles.bottom"
+      :label="$t('styleForm.boxBottom')"
+    />
   </form>
 </template>
 
@@ -20,28 +23,29 @@ export default {
         style_padding_top: 0,
         style_padding_bottom: 0,
       },
+      boxStyles: Object.fromEntries(
+        ['top', 'bottom'].map((pos) => [pos, this.getBoxStyleValue(pos)])
+      ),
     }
   },
-  computed: {
-    topStyle: {
-      get() {
-        return { padding: this.getDefaultValues().style_padding_top }
-      },
-      set(newValue) {
-        if (newValue.padding !== undefined) {
-          this.values.style_padding_top = newValue.padding
-        }
+  watch: {
+    boxStyles: {
+      deep: true,
+      handler(newValue) {
+        Object.entries(newValue).forEach(([prop, value]) => {
+          this.setBoxStyleValue(prop, value)
+        })
       },
     },
-    bottomStyle: {
-      get() {
-        return { padding: this.getDefaultValues().style_padding_bottom }
-      },
-      set(newValue) {
-        if (newValue.padding !== undefined) {
-          this.values.style_padding_bottom = newValue.padding
-        }
-      },
+  },
+  methods: {
+    getBoxStyleValue(pos) {
+      return { padding: this.defaultValues[`style_padding_${pos}`] }
+    },
+    setBoxStyleValue(pos, newValue) {
+      if (newValue.padding !== undefined) {
+        this.values[`style_padding_${pos}`] = newValue.padding
+      }
     },
   },
 }

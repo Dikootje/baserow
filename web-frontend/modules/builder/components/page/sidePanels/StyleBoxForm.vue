@@ -42,6 +42,10 @@ export default {
     return { values: { padding: 0 } }
   },
   computed: {
+    /**
+     * Returns only one error because we don't have the space to write one error per
+     * field as the style fields are on the same line.
+     */
     error() {
       if (this.$v.values.padding.$error) {
         return this.$t('styleBoxForm.paddingError')
