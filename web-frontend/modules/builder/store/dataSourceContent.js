@@ -35,6 +35,10 @@ const actions = {
    * @param {object} data the query body
    */
   async fetchDataSourceContent({ commit }, { dataSource, data: queryData }) {
+    if (!dataSource.type) {
+      return
+    }
+
     if (!fetchContext[dataSource.id]) {
       fetchContext[dataSource.id] = {
         fetchTimeout: null,
@@ -42,6 +46,7 @@ const actions = {
         lastQueryData: null,
       }
     }
+
     const serviceType = this.app.$registry.get('service', dataSource.type)
 
     try {

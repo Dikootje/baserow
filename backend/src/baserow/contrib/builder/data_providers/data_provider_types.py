@@ -67,7 +67,7 @@ class DataSourceDataProviderType(DataProviderType):
             .data.get("data_source", {})
             .get("page_id", None)
         )
-        print(page_id)
+
         base_queryset = Page.objects.filter(
             datasource__service=runtime_formula_context.application_context["service"]
         )

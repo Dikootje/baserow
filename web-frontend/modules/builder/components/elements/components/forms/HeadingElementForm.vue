@@ -17,7 +17,7 @@
         </Dropdown>
       </div>
     </FormElement>
-    <FormulaFormInput
+    <FormulaInputGroup
       v-model="values.value"
       :label="$t('headingElementForm.textTitle')"
       :placeholder="$t('elementForms.textInputPlaceholder')"
@@ -30,12 +30,12 @@
 
 <script>
 import form from '@baserow/modules/core/mixins/form'
-import FormulaFormInput from '@baserow/modules/core/components/formula/FormulaFormInput'
+import FormulaInputGroup from '@baserow/modules/core/components/formula/FormulaInputGroup'
 import { isValidFormula } from '@baserow/formula'
 
 export default {
   name: 'HeaderElementForm',
-  components: { FormulaFormInput },
+  components: { FormulaInputGroup },
   mixins: [form],
   props: {},
   data() {

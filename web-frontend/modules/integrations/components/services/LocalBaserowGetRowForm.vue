@@ -13,7 +13,7 @@
         />
       </div>
       <div class="col col-6">
-        <FormulaFormInput
+        <FormulaInputGroup
           v-model="values.row_id"
           small-label
           :label="$t('localBaserowGetRowForm.rowFieldLabel')"
@@ -31,11 +31,11 @@
 
 <script>
 import form from '@baserow/modules/core/mixins/form'
-import FormulaFormInput from '@baserow/modules/core/components/formula/FormulaFormInput.vue'
+import FormulaInputGroup from '@baserow/modules/core/components/formula/FormulaInputGroup'
 import { isValidFormula } from '@baserow/formula'
 
 export default {
-  components: { FormulaFormInput },
+  components: { FormulaInputGroup },
   mixins: [form],
   props: {
     builder: {
