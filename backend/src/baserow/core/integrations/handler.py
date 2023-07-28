@@ -6,7 +6,10 @@ from baserow.core.db import specific_iterator
 from baserow.core.exceptions import ApplicationOperationNotSupported
 from baserow.core.integrations.exceptions import IntegrationDoesNotExist
 from baserow.core.integrations.models import Integration
-from baserow.core.integrations.registries import IntegrationType
+from baserow.core.integrations.registries import (
+    IntegrationType,
+    integration_type_registry,
+)
 from baserow.core.models import Application
 from baserow.core.registries import application_type_registry
 from baserow.core.utils import extract_allowed
@@ -88,8 +91,16 @@ class IntegrationHandler:
         queryset = queryset.filter(application=application)
 
         if specific:
+
+            def per_content_type_queryset_hook(model, queryset):
+                integration_type = integration_type_registry.get_by_model(model)
+                return integration_type.enhance_queryset(queryset)
+
             queryset = queryset.select_related("content_type")
-            return specific_iterator(queryset)
+
+            return specific_iterator(
+                queryset, per_content_type_queryset_hook=per_content_type_queryset_hook
+            )
         else:
             return queryset
 

@@ -12,7 +12,7 @@ from baserow.core.db import specific_iterator
 from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.services.handler import ServiceHandler
 from baserow.core.services.models import Service
-from baserow.core.services.registries import ServiceType
+from baserow.core.services.registries import ServiceType, service_type_registry
 from baserow.core.utils import find_unused_name
 
 from .types import DataSourceForUpdate
@@ -112,7 +112,13 @@ class DataSourceHandler:
         data_source_queryset = (
             (base_queryset if base_queryset is not None else DataSource.objects.all())
             .filter(page=page)
-            .select_related("service")
+            .select_related(
+                "service",
+                "service__integration",
+                "page",
+                "page__builder",
+                "page__builder__workspace",
+            )
         )
 
         if specific:
@@ -128,10 +134,17 @@ class DataSourceHandler:
                 if data_source.service_id is not None
             ]
 
+            def per_content_type_queryset_hook(model, queryset):
+                service_type = service_type_registry.get_by_model(model)
+                return service_type.enhance_queryset(queryset)
+
             # Use specific iterator to get specific instance of services
             specific_services_map = {
                 s.id: s
-                for s in specific_iterator(Service.objects.filter(id__in=service_ids))
+                for s in specific_iterator(
+                    Service.objects.filter(id__in=service_ids),
+                    per_content_type_queryset_hook=per_content_type_queryset_hook,
+                )
             }
 
             # Distribute specific services to their data_source
@@ -267,12 +280,12 @@ class DataSourceHandler:
         :return: The result of dispatching the data source.
         """
 
-        if not data_source.service:
+        if not data_source.service_id:
             raise DataSourceImproperlyConfigured("The service type is missing.")
 
-        service = data_source.service.specific
-
-        return self.service_handler.dispatch_service(service, runtime_formula_context)
+        return self.service_handler.dispatch_service(
+            data_source.service.specific, runtime_formula_context
+        )
 
     def move_data_source(
         self, data_source: DataSourceForUpdate, before: Optional[DataSource] = None

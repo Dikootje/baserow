@@ -25,7 +25,6 @@ from baserow.contrib.builder.api.data_sources.errors import (
     ERROR_DATA_SOURCE_DOES_NOT_EXIST,
     ERROR_DATA_SOURCE_IMPROPERLY_CONFIGURED,
     ERROR_DATA_SOURCE_NOT_IN_SAME_PAGE,
-    ERROR_IN_DISPATCH_CONTEXT,
 )
 from baserow.contrib.builder.api.data_sources.serializers import (
     BaseUpdateDataSourceSerializer,
@@ -47,8 +46,8 @@ from baserow.contrib.builder.data_sources.handler import DataSourceHandler
 from baserow.contrib.builder.data_sources.service import DataSourceService
 from baserow.contrib.builder.pages.exceptions import PageDoesNotExist
 from baserow.contrib.builder.pages.handler import PageHandler
-from baserow.core.formula.exceptions import DispatchContextError
 from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
+from baserow.core.integrations.handler import IntegrationHandler
 from baserow.core.services.exceptions import DoesNotExist, ServiceImproperlyConfigured
 from baserow.core.services.registries import service_type_registry
 
@@ -369,7 +368,6 @@ class DispatchDataSourceView(APIView):
             DataSourceDoesNotExist: ERROR_DATA_SOURCE_DOES_NOT_EXIST,
             DataSourceImproperlyConfigured: ERROR_DATA_SOURCE_IMPROPERLY_CONFIGURED,
             ServiceImproperlyConfigured: ERROR_DATA_SOURCE_IMPROPERLY_CONFIGURED,
-            DispatchContextError: ERROR_IN_DISPATCH_CONTEXT,
             DoesNotExist: ERROR_DATA_DOES_NOT_EXIST,
         }
     )
@@ -382,8 +380,13 @@ class DispatchDataSourceView(APIView):
 
         runtime_formula_context = RuntimeFormulaContext(
             builder_data_provider_type_registry,
-            service=data_source.service,
             request=request,
+            integrations={
+                i.id: i
+                for i in IntegrationHandler().get_integrations(data_source.page.builder)
+            },
+            data_sources=DataSourceHandler().get_data_sources(data_source.page),
+            page=data_source.page,
         )
 
         response = DataSourceService().dispatch_data_source(
@@ -391,6 +394,71 @@ class DispatchDataSourceView(APIView):
         )
 
         return Response(response)
+
+
+class DispatchDataSourcesView(APIView):
+    permission_classes = (AllowAny,)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="page_id",
+                location=OpenApiParameter.PATH,
+                type=OpenApiTypes.INT,
+                description="",
+            ),
+            CLIENT_SESSION_ID_SCHEMA_PARAMETER,
+        ],
+        tags=["Builder data sources"],
+        operation_id="dispatch_builder_page_data_sources",
+        description=("Dispatches the service of the related page data_sources"),
+        responses={
+            404: get_error_schema(
+                [
+                    "ERROR_DATA_SOURCE_IMPROPERLY_CONFIGURED",
+                    "ERROR_IN_DISPATCH_CONTEXT",
+                    "ERROR_DATA_DOES_NOT_EXIST",
+                ]
+            ),
+        },
+    )
+    @transaction.atomic
+    @map_exceptions(
+        {
+            ServiceImproperlyConfigured: ERROR_DATA_SOURCE_IMPROPERLY_CONFIGURED,
+            DoesNotExist: ERROR_DATA_DOES_NOT_EXIST,
+        }
+    )
+    def post(self, request, page_id: int):
+        """
+        Call the given data_source related service dispatch method.
+        """
+
+        page = PageHandler().get_page(page_id)
+
+        runtime_formula_context = RuntimeFormulaContext(
+            builder_data_provider_type_registry,
+            request=request,
+            integrations={
+                i.id: i for i in IntegrationHandler().get_integrations(page.builder)
+            },
+            data_sources=DataSourceHandler().get_data_sources(page),
+            page=page,
+        )
+
+        service_contents = DataSourceService().dispatch_data_sources(
+            request.user, page, runtime_formula_context
+        )
+
+        responses = {}
+
+        for service_id, content in service_contents.items():
+            if isinstance(content, Exception):
+                responses[service_id] = {"_error": str(content)}
+            else:
+                responses[service_id] = content
+
+        return Response(responses)
 
 
 class MoveDataSourceView(APIView):

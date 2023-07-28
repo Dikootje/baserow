@@ -123,6 +123,14 @@ class ServiceType(
 
         return service
 
+    def enhance_queryset(self, queryset):
+        """
+        Allow to enhance the queryset when querying the service mainly to improve
+        performances.
+        """
+
+        return queryset
+
 
 ServiceTypeSubClass = TypeVar("ServiceTypeSubClass", bound=ServiceType)
 

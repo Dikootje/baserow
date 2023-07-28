@@ -1,11 +1,8 @@
 from typing import List, Union
 
-from baserow.contrib.builder.data_sources.handler import DataSourceHandler
-from baserow.contrib.builder.data_sources.models import DataSource
-from baserow.contrib.builder.pages.exceptions import PageDoesNotExist
-from baserow.contrib.builder.pages.handler import PageHandler
-from baserow.contrib.builder.pages.models import Page
-from baserow.core.formula.exceptions import DispatchContextError
+from baserow.contrib.builder.data_sources.exceptions import (
+    DataSourceImproperlyConfigured,
+)
 from baserow.core.formula.registries import DataProviderType
 from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.services.handler import ServiceHandler
@@ -50,6 +47,15 @@ class DataSourceDataProviderType(DataProviderType):
 
     type = "data_source"
 
+    def get_data_source(self, runtime_formula_context, data_source_name):
+        for data_source in runtime_formula_context.application_context["data_sources"]:
+            if data_source.name == data_source_name:
+                return data_source
+
+        raise DataSourceImproperlyConfigured(
+            f"Data source with name {data_source_name} doesn't exist"
+        )
+
     def get_data_chunk(
         self, runtime_formula_context: RuntimeFormulaContext, path: List[str]
     ):
@@ -59,32 +65,11 @@ class DataSourceDataProviderType(DataProviderType):
 
         if "request" not in runtime_formula_context.application_context:
             return None
-        if "service" not in runtime_formula_context.application_context:
-            return None
 
-        page_id = (
-            runtime_formula_context.application_context["request"]
-            .data.get("data_source", {})
-            .get("page_id", None)
-        )
-
-        base_queryset = Page.objects.filter(
-            datasource__service=runtime_formula_context.application_context["service"]
-        )
-
-        try:
-            page = PageHandler().get_page(page_id, base_queryset=base_queryset)
-        except PageDoesNotExist:
-            raise DispatchContextError(
-                "The given page_id doesn't exist or is not readable."
-            )
-
-        data_source = DataSourceHandler().get_data_source_by_name(
-            data_source_name, base_queryset=DataSource.objects.filter(page=page)
-        )
+        data_source = self.get_data_source(runtime_formula_context, data_source_name)
 
         service_dispatch = ServiceHandler().dispatch_service(
-            data_source.service.specific, runtime_formula_context
+            data_source.service, runtime_formula_context
         )
 
         return get_nested_value_from_dict(service_dispatch, rest)

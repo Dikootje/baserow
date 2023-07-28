@@ -35,5 +35,11 @@ export default (client) => {
         params
       )
     },
+    dispatchAll(pageId, params) {
+      return client.post(
+        `builder/page/${pageId}/dispatch-data-sources/`,
+        params
+      )
+    },
   }
 }

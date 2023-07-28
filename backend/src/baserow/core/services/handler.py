@@ -159,7 +159,19 @@ class ServiceHandler:
         :return: The result of dispatching the service.
         """
 
-        if service.integration is None:
+        if service.integration_id is None:
             raise ServiceImproperlyConfigured("The integration property is missing.")
 
-        return service.get_type().dispatch(service, runtime_formula_context)
+        if service.id not in runtime_formula_context.cache.setdefault(
+            "service_content", {}
+        ):
+            service_dispatch = service.get_type().dispatch(
+                service, runtime_formula_context
+            )
+            # Cache the dispatch in the formula content if we have formula that need
+            # it later
+            runtime_formula_context.cache["service_content"][
+                service.id
+            ] = service_dispatch
+
+        return runtime_formula_context.cache["service_content"][service.id]

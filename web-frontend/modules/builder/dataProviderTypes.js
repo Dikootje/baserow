@@ -21,21 +21,16 @@ export class DataSourceDataProviderType extends DataProviderType {
     return this.app.i18n.t('dataProviderType.dataSource')
   }
 
-  getBackendContext(runtimeFormulaContext) {
-    return {
-      page_id: runtimeFormulaContext.applicationContext.page.id,
-    }
-  }
-
   async init(runtimeFormulaContext) {
     const dataSources = this.app.store.getters['dataSource/getDataSources']
-    await Promise.all(
-      dataSources.map((dataSource) =>
-        this.app.store.dispatch('dataSourceContent/fetchDataSourceContent', {
-          dataSource,
-          data: runtimeFormulaContext.getAllBackendContext(),
-        })
-      )
+
+    await this.app.store.dispatch(
+      'dataSourceContent/fetchPageDataSourceContent',
+      {
+        page: runtimeFormulaContext.applicationContext.page,
+        data: runtimeFormulaContext.getAllBackendContext(),
+        dataSources,
+      }
     )
   }
 

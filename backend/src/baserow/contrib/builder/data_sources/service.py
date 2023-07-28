@@ -28,6 +28,7 @@ from baserow.core.exceptions import CannotCalculateIntermediateOrder
 from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.handler import CoreHandler
 from baserow.core.services.registries import ServiceType
+from baserow.core.types import PermissionCheck
 
 
 class DataSourceService:
@@ -214,6 +215,46 @@ class DataSourceService:
             self, data_source_id=data_source.id, page=page, user=user
         )
 
+    def dispatch_data_sources(
+        self,
+        user,
+        page: Page,
+        runtime_formula_context: RuntimeFormulaContext,
+    ) -> Any:
+        """
+        Dispatch the service related to the data_source if the user has the permission.
+
+        :param user: The current user.
+        :param data_source: The data source to be dispatched.
+        :param runtime_formula_context: The context used to resolve formulas.
+        :return: The result of dispatching the data source.
+        """
+
+        data_sources = runtime_formula_context.application_context["data_sources"]
+
+        checks = [
+            PermissionCheck(user, DispatchDataSourceOperationType.type, d)
+            for d in data_sources
+        ]
+
+        CoreHandler().check_multiple_permissions(
+            checks,
+            workspace=page.builder.workspace,
+        )
+
+        data_sources_dispatch = {}
+        for data_source in data_sources:
+            try:
+                data_sources_dispatch[
+                    data_source.id
+                ] = self.handler.dispatch_data_source(
+                    data_source, runtime_formula_context
+                )
+            except Exception as e:
+                data_sources_dispatch[data_source.id] = e
+
+        return data_sources_dispatch
+
     def dispatch_data_source(
         self,
         user,
@@ -229,14 +270,14 @@ class DataSourceService:
         :return: The result of dispatching the data source.
         """
 
-        CoreHandler().check_permissions(
-            user,
-            DispatchDataSourceOperationType.type,
-            workspace=data_source.page.builder.workspace,
-            context=data_source,
-        )
+        content = self.dispatch_data_sources(
+            user, data_source.page, runtime_formula_context
+        )[data_source.id]
 
-        return self.handler.dispatch_data_source(data_source, runtime_formula_context)
+        if isinstance(content, Exception):
+            raise content
+
+        return content
 
     def move_data_source(
         self,

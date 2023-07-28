@@ -26,6 +26,7 @@ class RuntimeFormulaContext(FormulaContext):
 
         self.registry = registry
         self.application_context = {**kwargs}
+        self.cache = {}  # can be used by data providers to save queries
 
     def __getitem__(self, key: str) -> Any:
         """

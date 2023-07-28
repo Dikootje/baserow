@@ -3,6 +3,7 @@ from django.urls import re_path
 from baserow.contrib.builder.api.data_sources.views import (
     DataSourcesView,
     DataSourceView,
+    DispatchDataSourcesView,
     DispatchDataSourceView,
     MoveDataSourceView,
 )
@@ -24,6 +25,11 @@ urlpatterns = [
         r"data-source/(?P<data_source_id>[0-9]+)/dispatch/$",
         DispatchDataSourceView.as_view(),
         name="dispatch",
+    ),
+    re_path(
+        r"page/(?P<page_id>[0-9]+)/dispatch-data-sources/$",
+        DispatchDataSourcesView.as_view(),
+        name="dispatch-all",
     ),
     re_path(
         r"data_source/(?P<data_source_id>[0-9]+)/move/$",

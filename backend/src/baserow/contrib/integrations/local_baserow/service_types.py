@@ -17,9 +17,9 @@ from baserow.contrib.integrations.local_baserow.integration_types import (
 )
 from baserow.contrib.integrations.local_baserow.models import (
     LocalBaserowGetRow,
+    LocalBaserowIntegration,
     LocalBaserowListRows,
 )
-from baserow.core.formula.exceptions import DispatchContextError
 from baserow.core.formula.registries import formula_runtime_function_registry
 from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.formula.serializers import FormulaSerializerField
@@ -56,6 +56,9 @@ class LocalBaserowListRowsUserServiceType(ServiceType):
         ),
     }
 
+    def enhance_queryset(self, queryset):
+        return queryset.select_related("table")
+
     def prepare_values(
         self, values: Dict[str, Any], user: AbstractUser
     ) -> Dict[str, Any]:
@@ -83,7 +86,7 @@ class LocalBaserowListRowsUserServiceType(ServiceType):
         :return: The list of rows.
         """
 
-        integration = service.integration.specific
+        integration = LocalBaserowIntegration.objects.get(id=service.integration_id)
 
         table = service.table
         if table is None:
@@ -140,6 +143,11 @@ class LocalBaserowGetRowUserServiceType(ServiceType):
         ),
     }
 
+    def enhance_queryset(self, queryset):
+        return queryset.select_related(
+            "table", "table__database", "table__database__workspace"
+        )
+
     def prepare_values(
         self, values: Dict[str, Any], user: AbstractUser
     ) -> Dict[str, Any]:
@@ -170,7 +178,9 @@ class LocalBaserowGetRowUserServiceType(ServiceType):
         :return: The rows.
         """
 
-        integration = service.integration.specific
+        integration = runtime_formula_context.application_context["integrations"][
+            service.integration_id
+        ]
 
         table = service.table
         if table is None:
@@ -189,8 +199,6 @@ class LocalBaserowGetRowUserServiceType(ServiceType):
                 "The result of the row_id formula must be an integer or convertible "
                 "to an integer."
             )
-        except DispatchContextError:
-            raise
         except Exception as e:
             raise ServiceImproperlyConfigured(
                 f"Unknown error while resolving `row_id` formula: {e}"

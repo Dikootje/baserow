@@ -12,11 +12,6 @@ ERROR_DATA_SOURCE_IMPROPERLY_CONFIGURED = (
     "The data_source configuration is incomplete: {e}",
 )
 
-ERROR_IN_DISPATCH_CONTEXT = (
-    "ERROR_IN_DISPATCH_CONTEXT",
-    HTTP_400_BAD_REQUEST,
-    "Invalid dispatch data: {e}",
-)
 
 ERROR_DATA_SOURCE_NOT_IN_SAME_PAGE = (
     "ERROR_DATA_SOURCE_NOT_IN_SAME_PAGE",
