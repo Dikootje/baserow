@@ -570,7 +570,7 @@ class NotificationHandler:
             ).include_in_notifications_email
         ]
 
-        with translation.override(user.profile.language), atomic_if_not_already():
+        with atomic_if_not_already(), translation.override(user.profile.language):
             email = NotificationEmail(
                 to=[user.email],
                 notifications=email_notifications,
@@ -592,27 +592,20 @@ class NotificationHandler:
         :param notifications_frequency: The frequency of the notifications to send.
         """
 
-        # To prevent self-mentions or self-assignments from triggering email
-        # notifications, we set `sent_by_email=True` for these types of
-        # notifications.
-        NotificationRecipient.objects.filter(
-            recipient=F("notification__sender")
-        ).update(sent_by_email=True)
+        unsent_notifications_prefetch = Prefetch(
+            "notificationrecipient_set",
+            queryset=NotificationRecipient.objects.filter(
+                broadcast=False,
+                read=False,
+                cleared=False,
+                queued=False,
+                sent_by_email=False,
+            ).select_related("notification"),
+            to_attr="unsent_notifications",
+        )
 
-        users_to_notify = (
-            User.objects.prefetch_related(
-                Prefetch(
-                    "notificationrecipient_set",
-                    queryset=NotificationRecipient.objects.filter(
-                        broadcast=False,
-                        read=False,
-                        cleared=False,
-                        queued=False,
-                        sent_by_email=False,
-                    ).select_related("notification"),
-                    to_attr="unsent_notifications",
-                )
-            )
+        users_annotated_with_notifications_to_send = (
+            User.objects.prefetch_related(unsent_notifications_prefetch)
             .filter(
                 profile__email_notifications_frequency=notifications_frequency,
                 notificationrecipient__read=False,
@@ -620,11 +613,11 @@ class NotificationHandler:
                 notificationrecipient__queued=False,
                 notificationrecipient__sent_by_email=False,
             )
-            .distinct()
             .select_related("profile")
+            .distinct()
         )
 
-        for user in users_to_notify:
+        for user in users_annotated_with_notifications_to_send:
             cls.send_notifications_to_user_by_email(user, user.unsent_notifications)
 
 

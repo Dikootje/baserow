@@ -1,4 +1,5 @@
-from abc import ABCMeta, abstractclassmethod
+from abc import ABCMeta, abstractmethod
+from typing import Optional
 
 from baserow.core.exceptions import (
     InstanceTypeAlreadyRegistered,
@@ -23,19 +24,21 @@ class NotificationType(MapAPIExceptionsInstanceMixin, Instance):
 class EmailRendererNotificationTypeMixin(metaclass=ABCMeta):
     """
     A mixin for notification types that can be sent by email, which provides the
-    `get_email_renderer` method.
+    methods needed to render a title and an optional description in the email message.
     """
 
     include_in_notifications_email = True
 
-    @abstractclassmethod
-    def render_title(cls, notification, context):
+    @classmethod
+    @abstractmethod
+    def render_title(cls, notification, context) -> str:
         """
         Renders the translatable string for the title of the notification.
         """
 
-    @abstractclassmethod
-    def render_description(cls, notification, context):
+    @classmethod
+    @abstractmethod
+    def render_description(cls, notification, context) -> Optional[str]:
         """
         Renders the translatable string for the description of the notification.
         """
