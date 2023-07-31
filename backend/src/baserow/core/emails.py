@@ -1,4 +1,5 @@
 import re
+from typing import List
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -7,6 +8,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils.translation import gettext as _
 
+from baserow.core.notifications.models import Notification
 from baserow.core.notifications.registries import notification_type_registry
 
 
@@ -114,17 +116,24 @@ class NotificationsSummaryEmail(BaseEmailMessage):
     template_name = "baserow/core/notifications_summary.html"
     MAX_NOTIFICATIONS_PER_EMAIL = 10
 
-    def __init__(self, to, notifications, *args, **kwargs):
+    def __init__(
+        self,
+        to,
+        notifications: List[Notification],
+        more_available_count: int = 0,
+        *args,
+        **kwargs
+    ):
         limit = self.MAX_NOTIFICATIONS_PER_EMAIL
-        self.notifications = notifications[:limit]
-        self.total_count = len(notifications)
-        self.unlisted_new = (
-            len(notifications) - limit if len(notifications) > limit else None
+        self.total_count = len(notifications) + more_available_count
+        self.more_available_count = more_available_count + max(
+            len(notifications) - limit, 0
         )
+        self.notifications = notifications[:limit]
         super().__init__(to=to, *args, **kwargs)
 
     def get_subject(self):
-        count = len(self.notifications)
+        count = self.total_count
         return _("You have %(count)d new notifications - Baserow") % {"count": count}
 
     def get_context(self):
@@ -143,6 +152,6 @@ class NotificationsSummaryEmail(BaseEmailMessage):
         context.update(
             notifications=rendered_notifications,
             total_count=self.total_count,
-            unlisted_new=self.unlisted_new,
+            more_available_count=self.more_available_count,
         )
         return context

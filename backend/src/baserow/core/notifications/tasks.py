@@ -1,10 +1,9 @@
 from collections import defaultdict
-from datetime import timedelta
 
+from django.conf import settings
 from django.db import transaction
 
 from celery.exceptions import SoftTimeLimitExceeded
-from celery.schedules import crontab
 
 from baserow.api.notifications.serializers import NotificationRecipientSerializer
 from baserow.config.celery import app
@@ -138,14 +137,14 @@ def send_weekly_notifications_by_email_to_users(self):
 @app.on_after_finalize.connect
 def setup_periodic_action_tasks(sender, **kwargs):
     sender.add_periodic_task(
-        timedelta(seconds=60),
+        settings.EMAIL_NOTIFICATIONS_CRONTABS["instant"],
         send_instant_notifications_by_email_to_users.s(),
     )
     sender.add_periodic_task(
-        crontab(hour=0, minute=0),
+        settings.EMAIL_NOTIFICATIONS_CRONTABS["daily"],
         send_daily_notification_by_email_to_users.s(),
     )
     sender.add_periodic_task(
-        crontab(hour=0, minute=0, day_of_week=1),
+        settings.EMAIL_NOTIFICATIONS_CRONTABS["weekly"],
         send_weekly_notifications_by_email_to_users.s(),
     )

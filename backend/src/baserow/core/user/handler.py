@@ -29,6 +29,7 @@ from baserow.core.models import (
     Workspace,
     WorkspaceUser,
 )
+from baserow.core.notifications.models import NotificationRecipient
 from baserow.core.registries import plugin_registry
 from baserow.core.signals import (
     before_user_deleted,
@@ -240,7 +241,7 @@ class UserHandler(metaclass=baserow_trace_methods(tracer)):
         user: AbstractUser,
         first_name: Optional[str] = None,
         language: Optional[str] = None,
-        email_notifications_frequency: Optional[str] = None,
+        email_notification_frequency: Optional[str] = None,
     ) -> AbstractUser:
         """
         Updates the user's account editable properties. Handles the scenario
@@ -249,7 +250,7 @@ class UserHandler(metaclass=baserow_trace_methods(tracer)):
         :param user: The user instance to update.
         :param first_name: The new user first name.
         :param language: The language selected by the user.
-        :param email_notifications_frequency: The frequency of email notifications.
+        :param email_notification_frequency: The frequency of email notifications.
         :return: The user object.
         """
 
@@ -263,9 +264,19 @@ class UserHandler(metaclass=baserow_trace_methods(tracer)):
             user.profile.language = language
             profile_fields_to_update.append("language")
 
-        if email_notifications_frequency is not None:
-            user.profile.email_notifications_frequency = email_notifications_frequency
-            profile_fields_to_update.append("email_notifications_frequency")
+        if email_notification_frequency is not None:
+            # If the user wants to activate email notifications, he just wants
+            # to receive emails from now on, so set all previous notifications
+            # to sent_by_email=True
+            prev_value = user.profile.email_notification_frequency
+            never = UserProfile.EmailNotificationFrequencyOptions.NEVER
+            if prev_value is never and email_notification_frequency is not never:
+                NotificationRecipient.objects.filter(
+                    recipient_id=user.id, sent_by_email=False
+                ).update(sent_by_email=True)
+
+            user.profile.email_notification_frequency = email_notification_frequency
+            profile_fields_to_update.append("email_notification_frequency")
 
         if profile_fields_to_update:
             user.profile.save(update_fields=profile_fields_to_update)

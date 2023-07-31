@@ -870,10 +870,20 @@ EMAIL_NOTIFICATIONS_LIMITS = {
     "daily": int(os.getenv("BASEROW_EMAIL_NOTIFICATIONS_LIMIT_DAILY", 1000)),
     "weekly": int(os.getenv("BASEROW_EMAIL_NOTIFICATIONS_LIMIT_WEEKLY", 5000)),
 }
+EMAIL_NOTIFICATIONS_CRONTABS = {
+    "instant": get_crontab_from_env(
+        "BASEROW_EMAIL_NOTIFICATIONS_CRONTAB_INSTANT", default_crontab="* * * * *"
+    ),
+    "daily": get_crontab_from_env(
+        "BASEROW_EMAIL_NOTIFICATIONS_CRONTAB_DAILY", default_crontab="0 0 * * *"
+    ),
+    "weekly": get_crontab_from_env(
+        "BASEROW_EMAIL_NOTIFICATIONS_CRONTAB_WEEKLY", default_crontab="0 0 * * 0"
+    ),
+}
 
 MAX_EMAILS_PER_MINUTE = int(os.getenv("BASEROW_MAX_EMAILS_PER_MINUTE", 50))
 CELERY_EMAIL_TASK_CONFIG = {
-    "queue": "email",
     "rate_limit": f"{MAX_EMAILS_PER_MINUTE}/m",  # * CELERY_EMAIL_CHUNK_SIZE (default: 10)
 }
 

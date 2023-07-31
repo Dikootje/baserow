@@ -38,7 +38,7 @@ def language_validation(value):
     return value
 
 
-def email_notifications_frequency(value):
+def email_notification_frequency(value):
     """
     Verifies that the provided email notification frequency is a valid option.
     """
@@ -48,7 +48,7 @@ def email_notifications_frequency(value):
     ]
     if value not in valid_options:
         raise serializers.ValidationError(
-            f"Only the following email notification frequency options are valid: "
+            f"Only the following email notifications frequency options are valid: "
             f"{','.join(valid_options)}",
             code="invalid_email_notification_frequency",
         )

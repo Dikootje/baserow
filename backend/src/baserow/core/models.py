@@ -147,7 +147,7 @@ class UserProfile(models.Model):
         blank=True,
         help_text="An optional per user concurrency limit.",
     )
-    email_notifications_frequency = models.TextField(
+    email_notification_frequency = models.TextField(
         max_length=16,
         choices=EmailNotificationFrequencyOptions.choices,
         default=EmailNotificationFrequencyOptions.INSTANT,

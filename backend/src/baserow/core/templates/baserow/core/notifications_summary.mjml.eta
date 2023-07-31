@@ -3,7 +3,7 @@
 <mj-section>
   <mj-column>
     <mj-text mj-class="title">
-      {% blocktrans trimmed with count as count %}
+      {% blocktrans trimmed with total_count as count %}
         You have {{ count }} new notifications in Baserow.
       {% endblocktrans %}
     </mj-text>
@@ -16,6 +16,13 @@
       <mj-raw><!-- htmlmin:ignore -->{% endif %}<!-- htmlmin:ignore --></mj-raw>
       <mj-divider border-width="1px" border-style="dashed" border-color="lightgrey" />
     <mj-raw><!-- htmlmin:ignore -->{% endfor %}<!-- htmlmin:ignore --></mj-raw>
+    <mj-raw><!-- htmlmin:ignore -->{% if more_available_count %}<!-- htmlmin:ignore --></mj-raw>
+        <mj-text mj-class="notification-description">
+        {% blocktrans trimmed with more_available_count as count %}
+          Plus {{ count }} more notifications.
+        {% endblocktrans %}
+        </mj-text>
+      <mj-raw><!-- htmlmin:ignore -->{% endif %}<!-- htmlmin:ignore --></mj-raw>
     <mj-spacer height="20px" />
     <mj-button mj-class="button" href="{{ public_web_frontend_url }}">
       {% trans "View on Baserow" %}

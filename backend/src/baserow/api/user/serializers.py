@@ -19,7 +19,7 @@ from baserow.api.sessions import set_user_session_data_from_request
 from baserow.api.user.jwt import get_user_from_token
 from baserow.api.user.registries import user_data_registry
 from baserow.api.user.validators import (
-    email_notifications_frequency,
+    email_notification_frequency,
     language_validation,
     password_validation,
 )
@@ -69,10 +69,10 @@ class UserSerializer(serializers.ModelSerializer):
         help_text="An ISO 639 language code (with optional variant) "
         "selected by the user. Ex: en-GB.",
     )
-    email_notifications_frequency = serializers.CharField(
-        source="profile.email_notifications_frequency",
+    email_notification_frequency = serializers.CharField(
+        source="profile.email_notification_frequency",
         required=False,
-        validators=[email_notifications_frequency],
+        validators=[email_notification_frequency],
         help_text="The frequency at which the user wants to receive email notifications.",
     )
 
@@ -85,7 +85,7 @@ class UserSerializer(serializers.ModelSerializer):
             "is_staff",
             "id",
             "language",
-            "email_notifications_frequency",
+            "email_notification_frequency",
         )
         extra_kwargs = {
             "password": {"write_only": True},
@@ -166,10 +166,10 @@ class AccountSerializer(serializers.Serializer):
         help_text="An ISO 639 language code (with optional variant) "
         "selected by the user. Ex: en-GB.",
     )
-    email_notifications_frequency = serializers.CharField(
-        source="profile.email_notifications_frequency",
+    email_notification_frequency = serializers.CharField(
+        source="profile.email_notification_frequency",
         required=False,
-        validators=[email_notifications_frequency],
+        validators=[email_notification_frequency],
         help_text="The frequency at which the user wants to receive email notifications.",
     )
 

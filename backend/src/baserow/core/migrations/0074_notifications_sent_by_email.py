@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="userprofile",
-            name="email_notifications_frequency",
+            name="email_notification_frequency",
             field=models.TextField(
                 choices=[
                     ("instant", "instant"),
