@@ -9,6 +9,21 @@ from baserow.core.integrations.models import Integration
 from baserow.core.integrations.registries import integration_type_registry
 
 
+@extend_schema_field(OpenApiTypes.INT)
+class IntegrationAuthorizedUserSerializerField(serializers.PrimaryKeyRelatedField):
+    """
+    A `PrimaryKeyRelatedField` which defines its `User` queryset so that
+    serializers with an `authorized_user` can be DRYer.
+    """
+
+    def __init__(self, **kwargs):
+        self.queryset = User.objects.filter(profile__to_be_deleted=False)
+        self.help_text = (
+            "The user which this integration will use for its authorization checks."
+        )
+        super().__init__(**kwargs)
+
+
 class IntegrationSerializer(serializers.ModelSerializer):
     """
     Basic integration serializer mostly for returned values.
@@ -48,11 +63,7 @@ class CreateIntegrationSerializer(serializers.ModelSerializer):
         help_text="If provided, creates the integration before the integration with "
         "the given id.",
     )
-    authorized_user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.filter(profile__to_be_deleted=False),
-        help_text="The user which this integration will use for its "
-        "authorization checks.",
-    )
+    authorized_user = IntegrationAuthorizedUserSerializerField()
 
     class Meta:
         model = Integration
@@ -60,12 +71,7 @@ class CreateIntegrationSerializer(serializers.ModelSerializer):
 
 
 class UpdateIntegrationSerializer(serializers.ModelSerializer):
-    authorized_user = serializers.PrimaryKeyRelatedField(
-        required=False,
-        queryset=User.objects.filter(profile__to_be_deleted=False),
-        help_text="The user which this integration will use for its "
-        "authorization checks.",
-    )
+    authorized_user = IntegrationAuthorizedUserSerializerField(required=False)
 
     class Meta:
         model = Integration
