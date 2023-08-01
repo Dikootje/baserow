@@ -5,13 +5,14 @@ from django.db.models import QuerySet
 from baserow.contrib.builder.pages.models import Page
 from baserow.core.db import specific_iterator
 from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
+from baserow.core.integrations.handler import IntegrationHandler
 from baserow.core.integrations.models import Integration
 from baserow.core.services.exceptions import (
     ServiceDoesNotExist,
     ServiceImproperlyConfigured,
 )
 from baserow.core.services.models import Service
-from baserow.core.services.registries import ServiceType
+from baserow.core.services.registries import ServiceType, service_type_registry
 from baserow.core.utils import extract_allowed
 
 from .types import ServiceForUpdate
@@ -70,7 +71,7 @@ class ServiceHandler:
 
     def get_services(
         self,
-        integration: Integration,
+        integration: Optional[Integration] = None,
         base_queryset: Optional[QuerySet] = None,
         specific: bool = True,
     ) -> Union[QuerySet[Page], Iterable[Page]]:
@@ -81,16 +82,47 @@ class ServiceHandler:
         :param base_queryset: The base queryset to use to build the query.
         :param specific: Whether to return the generic services or the specific
             instances.
+            #TODO
         :return: The services of that page.
         """
 
         queryset = base_queryset if base_queryset is not None else Service.objects.all()
 
-        queryset = queryset.filter(integration=integration)
+        if integration:
+            queryset = queryset.filter(integration=integration)
 
         if specific:
             queryset = queryset.select_related("content_type")
-            return specific_iterator(queryset)
+
+            def per_content_type_queryset_hook(model, queryset):
+                service_type = service_type_registry.get_by_model(model)
+                return service_type.enhance_queryset(queryset)
+
+            specific_services = list(
+                specific_iterator(
+                    queryset,
+                    per_content_type_queryset_hook=per_content_type_queryset_hook,
+                )
+            )
+
+            integration_ids = [d.integration_id for d in specific_services]
+
+            # Load the specific integrations as well
+            specific_integration_map = {
+                i.id: i
+                for i in IntegrationHandler().get_integrations(
+                    base_queryset=Integration.objects.filter(id__in=integration_ids)
+                )
+            }
+
+            for service in specific_services:
+                if service.integration_id:
+                    service.integration = specific_integration_map[
+                        service.integration_id
+                    ]
+
+            return specific_services
+
         else:
             return queryset
 
@@ -162,16 +194,4 @@ class ServiceHandler:
         if service.integration_id is None:
             raise ServiceImproperlyConfigured("The integration property is missing.")
 
-        if service.id not in runtime_formula_context.cache.setdefault(
-            "service_content", {}
-        ):
-            service_dispatch = service.get_type().dispatch(
-                service, runtime_formula_context
-            )
-            # Cache the dispatch in the formula content if we have formula that need
-            # it later
-            runtime_formula_context.cache["service_content"][
-                service.id
-            ] = service_dispatch
-
-        return runtime_formula_context.cache["service_content"][service.id]
+        return service.get_type().dispatch(service, runtime_formula_context)

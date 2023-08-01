@@ -8,11 +8,10 @@ from baserow.contrib.builder.data_sources.exceptions import (
 )
 from baserow.contrib.builder.data_sources.models import DataSource
 from baserow.contrib.builder.pages.models import Page
-from baserow.core.db import specific_iterator
 from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
 from baserow.core.services.handler import ServiceHandler
 from baserow.core.services.models import Service
-from baserow.core.services.registries import ServiceType, service_type_registry
+from baserow.core.services.registries import ServiceType
 from baserow.core.utils import find_unused_name
 
 from .types import DataSourceForUpdate
@@ -47,31 +46,6 @@ class DataSourceHandler:
 
         return data_source
 
-    def get_data_source_by_name(
-        self, data_source_name: str, base_queryset: Optional[QuerySet] = None
-    ) -> DataSource:
-        """
-        Returns a data_source instance from the database.
-
-        :param data_source_name: The name of the data_source.
-        :param base_queryset: The base queryset to use to build the query.
-        :raises DataSourceDoesNotExist: If the data_source can't be found.
-        :return: The data_source instance.
-        """
-
-        queryset = (
-            base_queryset if base_queryset is not None else DataSource.objects.all()
-        )
-
-        try:
-            data_source = queryset.select_related(
-                "page", "page__builder", "page__builder__workspace", "service"
-            ).get(name=data_source_name)
-        except DataSource.DoesNotExist:
-            raise DataSourceDoesNotExist()
-
-        return data_source
-
     def get_data_source_for_update(
         self, data_source_id: int, base_queryset=None
     ) -> DataSourceForUpdate:
@@ -100,12 +74,15 @@ class DataSourceHandler:
         page: Page,
         base_queryset: Optional[QuerySet] = None,
         specific: bool = True,
+        with_specific_integrations: bool = False,
     ) -> Union[QuerySet[DataSource], Iterable[DataSource]]:
         """
         Gets all the specific data_sources of a given page.
 
         :param page: The page that holds the data_sources.
         :param base_queryset: The base queryset to use to build the query.
+        :param specific: ...
+        :param with_specific_integrations: ...
         :return: The data_sources of that page.
         """
 
@@ -114,7 +91,6 @@ class DataSourceHandler:
             .filter(page=page)
             .select_related(
                 "service",
-                "service__integration",
                 "page",
                 "page__builder",
                 "page__builder__workspace",
@@ -134,16 +110,10 @@ class DataSourceHandler:
                 if data_source.service_id is not None
             ]
 
-            def per_content_type_queryset_hook(model, queryset):
-                service_type = service_type_registry.get_by_model(model)
-                return service_type.enhance_queryset(queryset)
-
-            # Use specific iterator to get specific instance of services
             specific_services_map = {
                 s.id: s
-                for s in specific_iterator(
-                    Service.objects.filter(id__in=service_ids),
-                    per_content_type_queryset_hook=per_content_type_queryset_hook,
+                for s in ServiceHandler().get_services(
+                    base_queryset=Service.objects.filter(id__in=service_ids)
                 )
             }
 
@@ -283,9 +253,19 @@ class DataSourceHandler:
         if not data_source.service_id:
             raise DataSourceImproperlyConfigured("The service type is missing.")
 
-        return self.service_handler.dispatch_service(
-            data_source.service.specific, runtime_formula_context
-        )
+        if data_source.id not in runtime_formula_context.cache.setdefault(
+            "data_source_contents", {}
+        ):
+            service_dispatch = self.service_handler.dispatch_service(
+                data_source.service.specific, runtime_formula_context
+            )
+            # Cache the dispatch in the formula cache if we have formulas that need
+            # it later
+            runtime_formula_context.cache["data_source_contents"][
+                data_source.id
+            ] = service_dispatch
+
+        return runtime_formula_context.cache["data_source_contents"][data_source.id]
 
     def move_data_source(
         self, data_source: DataSourceForUpdate, before: Optional[DataSource] = None

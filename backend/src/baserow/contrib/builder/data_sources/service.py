@@ -230,7 +230,11 @@ class DataSourceService:
         :return: The result of dispatching the data source.
         """
 
-        data_sources = runtime_formula_context.application_context["data_sources"]
+        data_sources = self.handler.get_data_sources(page)
+
+        # Here we cache the data sources into the context because we know they are used
+        # after in the data providers
+        runtime_formula_context.cache["data_sources"] = data_sources
 
         checks = [
             PermissionCheck(user, DispatchDataSourceOperationType.type, d)

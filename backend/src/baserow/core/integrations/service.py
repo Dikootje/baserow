@@ -78,7 +78,7 @@ class IntegrationService:
         )
 
         return self.handler.get_integrations(
-            application, base_queryset=user_integrations
+            application=application, base_queryset=user_integrations
         )
 
     def create_integration(

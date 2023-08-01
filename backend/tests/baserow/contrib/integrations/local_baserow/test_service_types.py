@@ -124,6 +124,7 @@ def test_dispatch_local_baserow_list_rows_service_permission_denied(
     )
 
     runtime_formula_context = {}
+
     with stub_check_permissions(raise_permission_denied=True), pytest.raises(
         PermissionException
     ):
@@ -153,8 +154,10 @@ def test_dispatch_local_baserow_list_rows_service_validation_error(data_fixture)
         integration=integration, table=None
     )
 
+    runtime_formula_context = {}
+
     with pytest.raises(ServiceImproperlyConfigured):
-        ServiceHandler().dispatch_service(service, {})
+        ServiceHandler().dispatch_service(service, runtime_formula_context)
 
 
 @pytest.mark.django_db
@@ -265,7 +268,7 @@ def test_dispatch_local_baserow_get_row_service_permission_denied(
         integration=integration, table=table, row_id="get('test')"
     )
 
-    runtime_formula_context = {"test": 2}
+    runtime_formula_context = {"test": "1"}
 
     with stub_check_permissions(raise_permission_denied=True), pytest.raises(
         PermissionException
@@ -296,14 +299,16 @@ def test_dispatch_local_baserow_get_row_service_validation_error(data_fixture):
         integration=integration, table=None, row_id="1"
     )
 
+    runtime_formula_context = {"test": "1"}
+
     with pytest.raises(ServiceImproperlyConfigured):
-        ServiceHandler().dispatch_service(service, {})
+        ServiceHandler().dispatch_service(service, runtime_formula_context)
 
     service = data_fixture.create_local_baserow_get_row_service(
         integration=integration, table=table, row_id="get('test')"
     )
 
-    runtime_formula_context = {"test": "str"}
+    runtime_formula_context = {"test": ""}
 
     with pytest.raises(ServiceImproperlyConfigured):
         ServiceHandler().dispatch_service(service, runtime_formula_context)
@@ -317,7 +322,7 @@ def test_dispatch_local_baserow_get_row_service_validation_error(data_fixture):
 
 
 @pytest.mark.django_db
-def test_dispatch_local_baserow_get_row_service_row_not_exists(data_fixture):
+def test_dispatch_local_baserow_get_row_service_row_not_exist(data_fixture):
     user = data_fixture.create_user()
     page = data_fixture.create_builder_page(user=user)
     table, fields, rows = data_fixture.build_table(

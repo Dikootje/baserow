@@ -66,13 +66,15 @@ def test_data_source_data_provider_get_data_chunk(data_fixture):
     data_source_provider = DataSourceDataProviderType()
 
     fake_request = MagicMock()
-    fake_request.data = {"data_source": {"page_id": page.id}}
 
     runtime_formula_context = MagicMock()
     runtime_formula_context.application_context = {
         "request": fake_request,
         "service": data_source.service,
+        "page": page,
+        "integrations": [integration],
     }
+    runtime_formula_context.cache = {}
 
     assert (
         data_source_provider.get_data_chunk(
@@ -124,6 +126,8 @@ def test_data_source_data_provider_get_data_chunk_with_formula(data_fixture):
         builder_data_provider_type_registry,
         service=data_source.service,
         request=fake_request,
+        page=page,
+        integrations=[integration],
     )
 
     assert (
@@ -198,6 +202,8 @@ def test_data_source_data_provider_get_data_chunk_with_formula_using_datasource(
         builder_data_provider_type_registry,
         service=data_source.service,
         request=fake_request,
+        page=page,
+        integrations=[integration],
     )
 
     assert (

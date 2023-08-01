@@ -47,7 +47,6 @@ from baserow.contrib.builder.data_sources.service import DataSourceService
 from baserow.contrib.builder.pages.exceptions import PageDoesNotExist
 from baserow.contrib.builder.pages.handler import PageHandler
 from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
-from baserow.core.integrations.handler import IntegrationHandler
 from baserow.core.services.exceptions import DoesNotExist, ServiceImproperlyConfigured
 from baserow.core.services.registries import service_type_registry
 
@@ -381,11 +380,6 @@ class DispatchDataSourceView(APIView):
         runtime_formula_context = RuntimeFormulaContext(
             builder_data_provider_type_registry,
             request=request,
-            integrations={
-                i.id: i
-                for i in IntegrationHandler().get_integrations(data_source.page.builder)
-            },
-            data_sources=DataSourceHandler().get_data_sources(data_source.page),
             page=data_source.page,
         )
 
@@ -439,10 +433,6 @@ class DispatchDataSourcesView(APIView):
         runtime_formula_context = RuntimeFormulaContext(
             builder_data_provider_type_registry,
             request=request,
-            integrations={
-                i.id: i for i in IntegrationHandler().get_integrations(page.builder)
-            },
-            data_sources=DataSourceHandler().get_data_sources(page),
             page=page,
         )
 
@@ -454,6 +444,7 @@ class DispatchDataSourcesView(APIView):
 
         for service_id, content in service_contents.items():
             if isinstance(content, Exception):
+                # TODO improve error
                 responses[service_id] = {"_error": str(content)}
             else:
                 responses[service_id] = content

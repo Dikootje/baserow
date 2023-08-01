@@ -3,9 +3,9 @@ from typing import List, Union
 from baserow.contrib.builder.data_sources.exceptions import (
     DataSourceImproperlyConfigured,
 )
+from baserow.contrib.builder.data_sources.handler import DataSourceHandler
 from baserow.core.formula.registries import DataProviderType
 from baserow.core.formula.runtime_formula_context import RuntimeFormulaContext
-from baserow.core.services.handler import ServiceHandler
 from baserow.core.utils import get_nested_value_from_dict
 
 
@@ -24,9 +24,6 @@ class PageParameterDataProviderType(DataProviderType):
         When a page parameter is read, returns the value previously saved from the
         request object.
         """
-
-        if "request" not in runtime_formula_context.application_context:
-            return None
 
         if len(path) != 1:
             return None
@@ -48,7 +45,14 @@ class DataSourceDataProviderType(DataProviderType):
     type = "data_source"
 
     def get_data_source(self, runtime_formula_context, data_source_name):
-        for data_source in runtime_formula_context.application_context["data_sources"]:
+        if "data_sources" not in runtime_formula_context.cache:
+            runtime_formula_context.cache[
+                "data_sources"
+            ] = DataSourceHandler().get_data_sources(
+                runtime_formula_context.application_context["page"]
+            )
+
+        for data_source in runtime_formula_context.cache["data_sources"]:
             if data_source.name == data_source_name:
                 return data_source
 
@@ -63,13 +67,10 @@ class DataSourceDataProviderType(DataProviderType):
 
         data_source_name, *rest = path
 
-        if "request" not in runtime_formula_context.application_context:
-            return None
-
         data_source = self.get_data_source(runtime_formula_context, data_source_name)
 
-        service_dispatch = ServiceHandler().dispatch_service(
-            data_source.service, runtime_formula_context
+        dispatch_result = DataSourceHandler().dispatch_data_source(
+            data_source, runtime_formula_context
         )
 
-        return get_nested_value_from_dict(service_dispatch, rest)
+        return get_nested_value_from_dict(dispatch_result, rest)

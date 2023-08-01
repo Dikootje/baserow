@@ -617,7 +617,6 @@ def test_dispatch_data_source_improperly_configured(api_client, data_fixture):
         url,
         {
             "page_parameter": {"id": 2},
-            "data_source": {"page_id": page.id},
         },
         format="json",
         HTTP_AUTHORIZATION=f"JWT {token}",
@@ -639,7 +638,6 @@ def test_dispatch_data_source_improperly_configured(api_client, data_fixture):
         url,
         {
             "page_parameter": {"id": 2},
-            "data_source": {"page_id": page.id},
         },
         format="json",
         HTTP_AUTHORIZATION=f"JWT {token}",
@@ -661,7 +659,6 @@ def test_dispatch_data_source_improperly_configured(api_client, data_fixture):
         url,
         {
             "page_parameter": {"id": "test"},
-            "data_source": {"page_id": page.id},
         },
         format="json",
         HTTP_AUTHORIZATION=f"JWT {token}",
@@ -679,24 +676,6 @@ def test_dispatch_data_source_improperly_configured(api_client, data_fixture):
         "api:builder:data_source:dispatch", kwargs={"data_source_id": data_source4.id}
     )
 
-    # The given dispatch query page_id context is wrong
-    response = api_client.post(
-        url,
-        {
-            "page_parameter": {"id": "1"},
-            "data_source": {"page_id": 999},
-        },
-        format="json",
-        HTTP_AUTHORIZATION=f"JWT {token}",
-    )
-
-    assert response.status_code == HTTP_400_BAD_REQUEST
-    assert response.json()["error"] == "ERROR_IN_DISPATCH_CONTEXT"
-    assert (
-        response.json()["detail"] == "Invalid dispatch data: "
-        "The given page_id doesn't exist or is not readable."
-    )
-
 
 @pytest.mark.django_db
 def test_dispatch_data_sources(api_client, data_fixture):
@@ -710,6 +689,8 @@ def test_dispatch_data_sources(api_client, data_fixture):
         rows=[
             ["BMW", "Blue"],
             ["Audi", "Orange"],
+            ["2Cv", "Green"],
+            ["Tesla", "Dark"],
         ],
     )
     builder = data_fixture.create_builder_application(user=user)
@@ -727,6 +708,9 @@ def test_dispatch_data_sources(api_client, data_fixture):
         user=user, page=page, integration=integration, table=table, row_id="4"
     )
     data_source3 = data_fixture.create_builder_local_baserow_get_row_data_source(
+        user=user, page=page, integration=integration, table=table, row_id="bad"
+    )
+    data_source4 = data_fixture.create_builder_local_baserow_get_row_data_source(
         user=user, integration=integration, table=table, row_id="4"
     )
 
@@ -740,4 +724,27 @@ def test_dispatch_data_sources(api_client, data_fixture):
     )
 
     assert response.status_code == HTTP_200_OK
-    assert response.json() == {}
+    assert response.json() == {
+        str(data_source.id): {
+            "My Color": "Orange",
+            "Name": "Audi",
+            "id": rows[1].id,
+            "order": "1.00000000000000000000",
+        },
+        str(data_source1.id): {
+            "My Color": "Green",
+            "Name": "2Cv",
+            "id": rows[2].id,
+            "order": "1.00000000000000000000",
+        },
+        str(data_source2.id): {
+            "My Color": "Dark",
+            "Name": "Tesla",
+            "id": rows[3].id,
+            "order": "1.00000000000000000000",
+        },
+        str(data_source3.id): {
+            "_error": "Unknown error while resolving `row_id` formula: Invalid syntax "
+            "at line 1, col 3: mismatched input 'the end of the formula' expecting '('"
+        },
+    }

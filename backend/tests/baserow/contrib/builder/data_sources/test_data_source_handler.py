@@ -1,4 +1,5 @@
 from decimal import Decimal
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -46,21 +47,6 @@ def test_get_data_source(data_fixture):
 def test_get_data_source_does_not_exist(data_fixture):
     with pytest.raises(DataSourceDoesNotExist):
         assert DataSourceHandler().get_data_source(0)
-
-
-@pytest.mark.django_db
-def test_get_data_source_by_name(data_fixture):
-    data_source = data_fixture.create_builder_local_baserow_get_row_data_source()
-    assert (
-        DataSourceHandler().get_data_source_by_name(data_source.name).id
-        == data_source.id
-    )
-
-
-@pytest.mark.django_db
-def test_get_data_source_by_name_does_not_exist(data_fixture):
-    with pytest.raises(DataSourceDoesNotExist):
-        assert DataSourceHandler().get_data_source_by_name("missing")
 
 
 @pytest.mark.django_db
@@ -167,7 +153,10 @@ def test_dispatch_data_source(data_fixture):
         user=user, page=page, integration=integration, table=table, row_id="2"
     )
 
-    result = DataSourceHandler().dispatch_data_source(data_source, {})
+    formula_context = MagicMock()
+    MagicMock.cache = {}
+
+    result = DataSourceHandler().dispatch_data_source(data_source, formula_context)
 
     assert result == {
         "id": rows[1].id,

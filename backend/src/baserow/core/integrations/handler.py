@@ -70,7 +70,7 @@ class IntegrationHandler:
 
     def get_integrations(
         self,
-        application: Application,
+        application: Optional[Application] = None,
         base_queryset: Optional[QuerySet] = None,
         specific: bool = True,
     ) -> Union[QuerySet[Integration], Iterable[Integration]]:
@@ -88,7 +88,8 @@ class IntegrationHandler:
             base_queryset if base_queryset is not None else Integration.objects.all()
         )
 
-        queryset = queryset.filter(application=application)
+        if application:
+            queryset = queryset.filter(application=application)
 
         if specific:
 

@@ -1,5 +1,5 @@
 from decimal import Decimal
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -355,7 +355,12 @@ def test_dispatch_data_source(data_fixture):
         user=user, page=page, integration=integration, table=table, row_id="2"
     )
 
-    result = DataSourceService().dispatch_data_source(user, data_source, {})
+    formula_context = MagicMock()
+    formula_context.cache = {}
+
+    result = DataSourceService().dispatch_data_source(
+        user, data_source, formula_context
+    )
 
     assert result == {
         "id": rows[1].id,
@@ -387,10 +392,13 @@ def test_dispatch_data_source_permission_denied(data_fixture, stub_check_permiss
         user=user, page=page, integration=integration, table=table, row_id="1"
     )
 
+    formula_context = MagicMock()
+    formula_context.cache = {}
+
     with stub_check_permissions(raise_permission_denied=True), pytest.raises(
         PermissionException
     ):
-        DataSourceService().dispatch_data_source(user, data_source, {})
+        DataSourceService().dispatch_data_source(user, data_source, formula_context)
 
 
 @pytest.mark.django_db
@@ -413,5 +421,8 @@ def test_dispatch_data_source_improperly_configured(data_fixture):
         user=user, page=page, integration=integration
     )
 
+    formula_context = MagicMock()
+    formula_context.cache = {}
+
     with pytest.raises(DataSourceImproperlyConfigured):
-        DataSourceService().dispatch_data_source(user, data_source, {})
+        DataSourceService().dispatch_data_source(user, data_source, formula_context)
