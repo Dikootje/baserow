@@ -696,3 +696,48 @@ def test_dispatch_data_source_improperly_configured(api_client, data_fixture):
         response.json()["detail"] == "Invalid dispatch data: "
         "The given page_id doesn't exist or is not readable."
     )
+
+
+@pytest.mark.django_db
+def test_dispatch_data_sources(api_client, data_fixture):
+    user, token = data_fixture.create_user_and_token()
+    table, fields, rows = data_fixture.build_table(
+        user=user,
+        columns=[
+            ("Name", "text"),
+            ("My Color", "text"),
+        ],
+        rows=[
+            ["BMW", "Blue"],
+            ["Audi", "Orange"],
+        ],
+    )
+    builder = data_fixture.create_builder_application(user=user)
+    integration = data_fixture.create_local_baserow_integration(
+        user=user, application=builder
+    )
+    page = data_fixture.create_builder_page(user=user, builder=builder)
+    data_source = data_fixture.create_builder_local_baserow_get_row_data_source(
+        user=user, page=page, integration=integration, table=table, row_id="2"
+    )
+    data_source1 = data_fixture.create_builder_local_baserow_get_row_data_source(
+        user=user, page=page, integration=integration, table=table, row_id="3"
+    )
+    data_source2 = data_fixture.create_builder_local_baserow_get_row_data_source(
+        user=user, page=page, integration=integration, table=table, row_id="4"
+    )
+    data_source3 = data_fixture.create_builder_local_baserow_get_row_data_source(
+        user=user, integration=integration, table=table, row_id="4"
+    )
+
+    url = reverse("api:builder:data_source:dispatch-all", kwargs={"page_id": page.id})
+
+    response = api_client.post(
+        url,
+        {},
+        format="json",
+        HTTP_AUTHORIZATION=f"JWT {token}",
+    )
+
+    assert response.status_code == HTTP_200_OK
+    assert response.json() == {}

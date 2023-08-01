@@ -241,7 +241,7 @@ class InputTextElement(InputElement):
     An input element of text type.
     """
 
-    default_value = ExpressionField(
+    default_value = FormulaField(
         default="", help_text="This text input's default value."
     )
     required = models.BooleanField(

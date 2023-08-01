@@ -352,14 +352,14 @@ class InputTextElementType(InputElementType):
     class SerializedDict(ElementDict):
         required: bool
         placeholder: str
-        default_value: Expression
+        default_value: BaserowFormula
 
     @property
     def serializer_field_overrides(self):
-        from baserow.core.expression.serializers import ExpressionSerializer
+        from baserow.core.formula.serializers import FormulaSerializerField
 
         overrides = {
-            "default_value": ExpressionSerializer(
+            "default_value": FormulaSerializerField(
                 help_text=InputTextElement._meta.get_field("default_value").help_text,
                 required=False,
                 allow_blank=True,
