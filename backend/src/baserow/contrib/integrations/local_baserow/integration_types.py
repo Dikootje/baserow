@@ -1,7 +1,6 @@
 from typing import Any, Dict
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AbstractUser
 
 from rest_framework import serializers
 
