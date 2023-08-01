@@ -82,9 +82,29 @@
         "allWorkspaces": "All Workspaces",
         "allActionTypes": "All Event Types"
     },
+    "workspaceAuditLog": {
+        "title": "Workspace Audit log - '{workspaceName}' ({workspaceId})",
+        "filterUserTitle": "User",
+        "filterActionTypeTitle": "Event Type",
+        "filterFromTimestampTitle": "From Date",
+        "filterFromTimestamp": "From Date",
+        "filterToTimestampTitle": "To Date",
+        "filterToTimestamp": "To Date",
+        "user": "User",
+        "actionType": "Event Type",
+        "description": "Description",
+        "timestamp": "Timestamp",
+        "ip_address": "IP Address",
+        "exportToCsv": "Export to CSV",
+        "exportModalTitle": "Export to CSV",
+        "clearFilters": "Clear",
+        "allUsers": "All Users",
+        "allActionTypes": "All Event Types"
+    },
     "auditLogExportModal": {
         "title": "Export to CSV",
-        "exportFilename": "Audit Log Export - {date}",
+        "exportFilename": "Admin Audit Log Export - {date}",
+        "exportWorkspaceFilename": " Workspace ({workspaceId}) Audit Log Export - {date}",
         "cancelledTitle": "Export failed",
         "cancelledDescription": "Something went wrong while exporting the audit log. Please try again."
     },
@@ -275,5 +295,9 @@
     },
     "snapshotModalWarning": {
         "message": "Please be aware that a snapshot will include any permissions set on the application and its tables."
+    },
+    "auditLogSidebarWorkspace": {
+        "title": "Audit log",
+        "deactivated": "Available in enterprise version"
     }
 }

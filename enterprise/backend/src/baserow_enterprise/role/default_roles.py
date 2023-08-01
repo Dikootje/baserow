@@ -177,6 +177,9 @@ from baserow.core.trash.operations import (
     ReadApplicationTrashOperationType,
     ReadWorkspaceTrashOperationType,
 )
+from baserow_enterprise.audit_log.operations import (
+    ListWorkspaceAuditLogEntriesOperationType,
+)
 from baserow_enterprise.role.constants import (
     ADMIN_ROLE_UID,
     BUILDER_ROLE_UID,
@@ -407,5 +410,6 @@ default_roles[ADMIN_ROLE_UID].extend(
         ListSnapshotsApplicationOperationType,
         DeleteApplicationSnapshotOperationType,
         RestoreDomainOperationType,
+        ListWorkspaceAuditLogEntriesOperationType,
     ]
 )

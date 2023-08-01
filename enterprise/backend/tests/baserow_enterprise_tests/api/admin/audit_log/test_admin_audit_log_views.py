@@ -272,7 +272,7 @@ def test_audit_log_action_types_are_translated_in_the_admin_language(
 
 @pytest.mark.django_db
 @override_settings(DEBUG=True)
-def test_audit_log_entries_are_not_created_without_a_license(
+def test_audit_log_entries_are_created_even_without_a_license(
     api_client, enterprise_data_fixture
 ):
     user = enterprise_data_fixture.create_user()
@@ -283,7 +283,7 @@ def test_audit_log_entries_are_not_created_without_a_license(
     with freeze_time("2023-01-01 12:00:01"):
         CreateWorkspaceActionType.do(user, "workspace 2")
 
-    assert AuditLogEntry.objects.count() == 0
+    assert AuditLogEntry.objects.count() == 2
 
 
 @pytest.mark.django_db
@@ -631,6 +631,7 @@ def test_audit_log_can_export_to_csv_filtered_entries(
         "csv_column_separator": "|",
         "csv_first_row_header": False,
         "export_charset": "utf-8",
+        "exclude_columns": "ip_address",
     }
     filters = {
         "filter_user_id": admin_user.id,

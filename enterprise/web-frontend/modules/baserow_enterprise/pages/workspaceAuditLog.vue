@@ -4,6 +4,7 @@
       ref="exportModal"
       :filters="filters"
       :service="service"
+      :workspace-id="workspace.id"
     ></AuditLogExportModal>
     <CrudTable
       :columns="columns"
@@ -14,60 +15,57 @@
       row-id-key="id"
     >
       <template #title>
-        {{ $t('auditLog.title') }}
+        {{
+          $t('workspaceAuditLog.title', {
+            workspaceName: workspace.name,
+            workspaceId: workspace.id,
+          })
+        }}
       </template>
       <template #header-right-side>
         <button
           class="button button--large"
           @click.prevent="$refs.exportModal.show()"
         >
-          {{ $t('auditLog.exportToCsv') }}
+          {{ $t('workspaceAuditLog.exportToCsv') }}
         </button>
       </template>
       <template #header-filters>
-        <div class="audit-log__filters">
-          <FilterWrapper :name="$t('auditLog.filterUserTitle')">
+        <div class="audit-log__filters audit-log__filters--workspace">
+          <FilterWrapper :name="$t('workspaceAuditLog.filterUserTitle')">
             <PaginatedDropdown
               ref="userFilter"
               :value="filters.user_id"
               :fetch-page="fetchUsers"
-              :empty-item-display-name="$t('auditLog.allUsers')"
-              :not-selected-text="$t('auditLog.allUsers')"
+              :empty-item-display-name="$t('workspaceAuditLog.allUsers')"
+              :not-selected-text="$t('workspaceAuditLog.allUsers')"
               @input="filterUser"
             ></PaginatedDropdown>
           </FilterWrapper>
-          <FilterWrapper :name="$t('auditLog.filterWorkspaceTitle')">
-            <PaginatedDropdown
-              ref="workspaceFilter"
-              :value="filters.workspace_id"
-              :fetch-page="fetchWorkspaces"
-              :empty-item-display-name="$t('auditLog.allWorkspaces')"
-              :not-selected-text="$t('auditLog.allWorkspaces')"
-              @input="filterWorkspace"
-            ></PaginatedDropdown>
-          </FilterWrapper>
-          <FilterWrapper :name="$t('auditLog.filterActionTypeTitle')">
+          <FilterWrapper :name="$t('workspaceAuditLog.filterActionTypeTitle')">
             <PaginatedDropdown
               ref="typeFilter"
               :value="filters.action_type"
               :fetch-page="fetchActionTypes"
-              :empty-item-display-name="$t('auditLog.allActionTypes')"
-              :not-selected-text="$t('auditLog.allActionTypes')"
+              :empty-item-display-name="$t('workspaceAuditLog.allActionTypes')"
+              :not-selected-text="$t('workspaceAuditLog.allActionTypes')"
               @input="filterActionType"
             ></PaginatedDropdown>
           </FilterWrapper>
-          <FilterWrapper :name="$t('auditLog.filterFromTimestampTitle')">
+          <FilterWrapper
+            :name="$t('workspaceAuditLog.filterFromTimestampTitle')"
+          >
             <DateFilter
               ref="fromTimestampFilter"
-              :placeholder="$t('auditLog.filterFromTimestamp')"
+              :placeholder="$t('workspaceAuditLog.filterFromTimestamp')"
               :disable-dates="disableDates"
               @input="filterFromTimestamp"
             ></DateFilter>
           </FilterWrapper>
-          <FilterWrapper :name="$t('auditLog.filterToTimestampTitle')">
+          <FilterWrapper :name="$t('workspaceAuditLog.filterToTimestampTitle')">
             <DateFilter
               ref="toTimestampFilter"
-              :placeholder="$t('auditLog.filterToTimestamp')"
+              :placeholder="$t('workspaceAuditLog.filterToTimestamp')"
               :disable-dates="disableDates"
               @input="filterToTimestamp"
             ></DateFilter>
@@ -76,7 +74,7 @@
             class="audit-log__clear_filters_button button button--ghost"
             @click="clearFilters"
           >
-            {{ $t('auditLog.clearFilters') }}
+            {{ $t('workspaceAuditLog.clearFilters') }}
           </button>
         </div>
       </template>
@@ -86,10 +84,11 @@
 
 <script>
 import _ from 'lodash'
+import { mapGetters } from 'vuex'
 import moment from '@baserow/modules/core/moment'
 import CrudTable from '@baserow/modules/core/components/crudTable/CrudTable'
 import PaginatedDropdown from '@baserow/modules/core/components/PaginatedDropdown'
-import AdminAuditLogService from '@baserow_enterprise/services/adminAuditLog'
+import WorkspaceAuditLogService from '@baserow_enterprise/services/workspaceAuditLog'
 import DateFilter from '@baserow_enterprise/components/crudTable/filters/DateFilter'
 import FilterWrapper from '@baserow_enterprise/components/crudTable/filters/FilterWrapper'
 import SimpleField from '@baserow/modules/core/components/crudTable/fields/SimpleField'
@@ -100,7 +99,7 @@ import AuditLogExportModal from '@baserow_enterprise/components/admin/modals/Aud
 import EnterpriseFeatures from '@baserow_enterprise/features'
 
 export default {
-  name: 'AuditLog',
+  name: 'WorkspaceAuditLog',
   components: {
     AuditLogExportModal,
     CrudTable,
@@ -109,30 +108,33 @@ export default {
     FilterWrapper,
   },
   layout: 'app',
-  middleware: 'staff',
-  asyncData({ app, error }) {
+  middleware: 'authenticated',
+  asyncData({ store, error, route, app }) {
     if (!app.$hasFeature(EnterpriseFeatures.AUDIT_LOG)) {
       return error({
         statusCode: 401,
         message: 'Available in Enterprise version',
       })
     }
+
+    const workspaceId = parseInt(route.params.workspaceId)
+    const workspace = store.getters['workspace/get'](workspaceId)
+    if (
+      !app.$hasPermission(
+        'workspace.list_audit_log_entries',
+        workspace,
+        workspaceId
+      )
+    ) {
+      error({ statusCode: 404, message: 'Page not found' })
+    }
+    return { workspace }
   },
   data() {
     this.columns = [
       new CrudTableColumn(
         'user',
-        () => this.$t('auditLog.user'),
-        SimpleField,
-        true,
-        false,
-        false,
-        {},
-        '15'
-      ),
-      new CrudTableColumn(
-        'workspace',
-        () => this.$t('auditLog.workspace'),
+        () => this.$t('workspaceAuditLog.user'),
         SimpleField,
         true,
         false,
@@ -142,7 +144,7 @@ export default {
       ),
       new CrudTableColumn(
         'type',
-        () => this.$t('auditLog.actionType'),
+        () => this.$t('workspaceAuditLog.actionType'),
         SimpleField,
         true,
         false,
@@ -152,7 +154,7 @@ export default {
       ),
       new CrudTableColumn(
         'description',
-        () => this.$t('auditLog.description'),
+        () => this.$t('workspaceAuditLog.description'),
         LongTextField,
         false,
         false,
@@ -162,7 +164,7 @@ export default {
       ),
       new CrudTableColumn(
         'timestamp',
-        () => this.$t('auditLog.timestamp'),
+        () => this.$t('workspaceAuditLog.timestamp'),
         LocalDateField,
         true,
         false,
@@ -172,7 +174,7 @@ export default {
       ),
       new CrudTableColumn(
         'ip_address',
-        () => this.$t('auditLog.ip_address'),
+        () => this.$t('workspaceAuditLog.ip_address'),
         SimpleField,
         true,
         false,
@@ -181,7 +183,10 @@ export default {
         '10'
       ),
     ]
-    this.service = AdminAuditLogService(this.$client)
+
+    const workspaceId = parseInt(this.$route.params.workspaceId)
+    this.service = WorkspaceAuditLogService(this.$client, workspaceId)
+
     return {
       filters: {},
       dateTimeFormat: 'YYYY-MM-DDTHH:mm:ss.SSSZ',
@@ -196,12 +201,24 @@ export default {
         from: maximumDate.toDate(),
       }
     },
+    ...mapGetters({
+      selectedWorkspaceId: 'workspace/selectedId',
+    }),
+  },
+  watch: {
+    selectedWorkspaceId(newValue, oldValue) {
+      if (newValue !== oldValue) {
+        this.$router.push({
+          name: 'workspace-audit-log',
+          params: { workspaceId: newValue },
+        })
+      }
+    },
   },
   methods: {
     clearFilters() {
       for (const filterRef of [
         'userFilter',
-        'workspaceFilter',
         'typeFilter',
         'fromTimestampFilter',
         'toTimestampFilter',
@@ -226,12 +243,6 @@ export default {
     },
     fetchUsers(page, search) {
       return this.service.fetchUsers(page, search)
-    },
-    filterWorkspace(workspaceId) {
-      this.setFilter('workspace_id', workspaceId)
-    },
-    fetchWorkspaces(page, search) {
-      return this.service.fetchWorkspaces(page, search)
     },
     fetchActionTypes(page, search) {
       return this.service.fetchActionTypes(page, search)

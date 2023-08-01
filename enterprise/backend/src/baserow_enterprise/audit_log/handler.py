@@ -3,13 +3,10 @@ from typing import Any, Dict, Optional, Type
 
 from django.contrib.auth.models import AbstractUser
 
-from baserow_premium.license.handler import LicenseHandler
-
 from baserow.api.sessions import get_user_remote_addr_ip
 from baserow.core.action.registries import ActionType
 from baserow.core.action.signals import ActionCommandType
 from baserow.core.models import Workspace
-from baserow_enterprise.features import AUDIT_LOG
 
 from .models import AuditLogEntry
 
@@ -39,11 +36,7 @@ class AuditLogHandler:
         :param action_command_type: The command type that was used to perform
             the action.
         :param workspace: The workspace that the action was performed on.
-        :raises FeaturesNotAvailableError: When the AUDIT_LOG feature is not
-            available.
         """
-
-        LicenseHandler.raise_if_user_doesnt_have_feature_instance_wide(AUDIT_LOG, user)
 
         workspace_id, workspace_name = None, None
         if workspace is not None:

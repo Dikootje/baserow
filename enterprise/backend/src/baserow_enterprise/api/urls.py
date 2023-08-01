@@ -4,6 +4,7 @@ from .admin import urls as admin_urls
 from .role import urls as role_urls
 from .sso import urls as sso_urls
 from .teams import urls as teams_urls
+from .workspace import urls as workspace_urls
 
 app_name = "baserow_enterprise.api"
 
@@ -12,4 +13,5 @@ urlpatterns = [
     path("role/", include(role_urls, namespace="role")),
     path("admin/", include(admin_urls, namespace="admin")),
     path("sso/", include(sso_urls, namespace="sso")),
+    path("workspaces/", include(workspace_urls, namespace="workspace")),
 ]

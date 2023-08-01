@@ -5,7 +5,7 @@ from .views import (
     AdminAuditLogUserFilterView,
     AdminAuditLogView,
     AdminAuditLogWorkspaceFilterView,
-    AsyncAuditLogExportView,
+    AsyncAdminAuditLogExportView,
 )
 
 app_name = "baserow_enterprise.api.audit_log"
@@ -16,11 +16,10 @@ urlpatterns = [
     re_path(
         r"workspaces/$", AdminAuditLogWorkspaceFilterView.as_view(), name="workspaces"
     ),
-    # GroupDeprecation
     re_path(
         r"action-types/$",
         AdminAuditLogActionTypeFilterView.as_view(),
         name="action_types",
     ),
-    re_path(r"export/$", AsyncAuditLogExportView.as_view(), name="export"),
+    re_path(r"export/$", AsyncAdminAuditLogExportView.as_view(), name="export"),
 ]

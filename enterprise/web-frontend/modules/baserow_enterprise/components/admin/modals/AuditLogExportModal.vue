@@ -18,11 +18,7 @@
       <div v-if="job" class="audit-log__exported-list-item">
         <div class="audit-log__exported-list-item-info">
           <div class="audit-log__exported-list-item-name">
-            {{
-              $t('auditLogExportModal.exportFilename', {
-                date: localDate(job.created_on),
-              })
-            }}
+            {{ getExportedFilenameTitle(job) }}
           </div>
           <div class="audit-log__exported-list-item-details">
             {{ humanExportedAt(job.created_on) }}
@@ -37,11 +33,7 @@
       >
         <div class="audit-log__exported-list-item-info">
           <div class="audit-log__exported-list-item-name">
-            {{
-              $t('auditLogExportModal.exportFilename', {
-                date: localDate(finishedJob.created_on),
-              })
-            }}
+            {{ getExportedFilenameTitle(finishedJob) }}
           </div>
           <div class="audit-log__exported-list-item-details">
             {{ humanExportedAt(finishedJob.created_on) }}
@@ -67,7 +59,6 @@ import error from '@baserow/modules/core/mixins/error'
 import moment from '@baserow/modules/core/moment'
 import { getHumanPeriodAgoCount } from '@baserow/modules/core/utils/date'
 import ExportLoadingBar from '@baserow/modules/database/components/export/ExportLoadingBar'
-import AuditLogAdminService from '@baserow_enterprise/services/auditLogAdmin'
 import AuditLogExportForm from '@baserow_enterprise/components/admin/forms/AuditLogExportForm'
 
 const MAX_EXPORT_FILES = 4
@@ -81,6 +72,14 @@ export default {
       type: Object,
       required: true,
     },
+    service: {
+      type: Object,
+      required: true,
+    },
+    workspaceId: {
+      type: Number,
+      default: null,
+    },
   },
   data() {
     return {
@@ -93,11 +92,14 @@ export default {
   },
   async fetch() {
     this.loading = true
-    const jobs = await AuditLogAdminService(this.$client).getLastExportJobs(
-      MAX_EXPORT_FILES
+    const jobs = await this.service.getLastExportJobs(MAX_EXPORT_FILES)
+    const filteredJobs = this.workspaceId
+      ? jobs.filter((job) => job.filter_workspace_id === this.workspaceId)
+      : jobs
+    this.lastFinishedJobs = filteredJobs.filter(
+      (job) => job.state === 'finished'
     )
-    this.lastFinishedJobs = jobs.filter((job) => job.state === 'finished')
-    const runningJob = jobs.find(
+    const runningJob = filteredJobs.find(
       (job) => !['failed', 'cancelled', 'finished'].includes(job.state)
     )
     this.job = runningJob || null
@@ -129,6 +131,18 @@ export default {
     getExportedFilename(job) {
       return job ? `audit_log_${job.created_on}.csv` : ''
     },
+    getExportedFilenameTitle(job) {
+      if (job.filter_workspace_id) {
+        return this.$t('auditLogExportModal.exportWorkspaceFilename', {
+          date: this.localDate(job.created_on),
+          workspaceId: job.filter_workspace_id,
+        })
+      } else {
+        return this.$t('auditLogExportModal.exportFilename', {
+          date: this.localDate(job.created_on),
+        })
+      }
+    },
     humanExportedAt(timestamp) {
       const { period, count } = getHumanPeriodAgoCount(timestamp)
       return this.$tc(`datetime.${period}Ago`, count)
@@ -156,9 +170,10 @@ export default {
       )
 
       try {
-        const { data } = await AuditLogAdminService(
-          this.$client
-        ).startExportCsvJob({ ...values, ...filters })
+        const { data } = await this.service.startExportCsvJob({
+          ...values,
+          ...filters,
+        })
         this.lastFinishedJobs = this.lastFinishedJobs.slice(
           0,
           MAX_EXPORT_FILES - 1
@@ -172,9 +187,7 @@ export default {
     },
     async getJobInfo() {
       try {
-        const { data } = await AuditLogAdminService(
-          this.$client
-        ).getExportJobInfo(this.job.id)
+        const { data } = await this.service.getExportJobInfo(this.job.id)
         this.job = data
 
         if (this.jobIsRunning) {
