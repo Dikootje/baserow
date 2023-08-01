@@ -69,11 +69,15 @@
         "minMaxLength": "A minimum of {min} and a maximum of {max} characters is allowed here.",
         "requiredField": "This field is required."
     },
-    "permission": {
-        "admin": "Admin",
-        "adminDescription": "Can fully configure and edit workspaces and applications.",
-        "member": "Member",
-        "memberDescription": "Can fully configure and edit applications."
+    "roles": {
+        "admin": {
+            "name": "Admin",
+            "description": "Can fully configure and edit workspaces and applications."
+        },
+        "member": {
+            "name": "Member",
+            "description": "People within your team who use Baserow."
+        }
     },
     "fieldType": {
         "singleLineText": "Single line text",

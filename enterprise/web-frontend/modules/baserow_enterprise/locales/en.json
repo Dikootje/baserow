@@ -145,10 +145,6 @@
         "errorSignupDisabled": "sign up has been disabled by the administrator."
     },
     "roles": {
-        "admin": {
-            "name": "Admin",
-            "description": "Can fully configure and edit workspaces and applications."
-        },
         "builder": {
             "name": "Builder",
             "description": "Can fully configure and edit applications."
@@ -275,5 +271,11 @@
     },
     "snapshotModalWarning": {
         "message": "Please be aware that a snapshot will include any permissions set on the application and its tables."
+    },
+    "permission": {
+        "builder": "Builder",
+        "editor": "Editor",
+        "commenter": "Commenter",
+        "viewer": "Viewer"
     }
 }

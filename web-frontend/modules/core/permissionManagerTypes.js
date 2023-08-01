@@ -78,12 +78,12 @@ export class BasicPermissionManagerType extends PermissionManagerType {
 
     return {
       ADMIN: {
-        name: i18n.t('permission.admin'),
-        description: i18n.t('permission.adminDescription'),
+        name: i18n.t('roles.admin.name'),
+        description: i18n.t('roles.admin.description'),
       },
       MEMBER: {
-        name: i18n.t('permission.member'),
-        description: i18n.t('permission.memberDescription'),
+        name: i18n.t('roles.member.name'),
+        description: i18n.t('roles.member.description'),
       },
     }
   }

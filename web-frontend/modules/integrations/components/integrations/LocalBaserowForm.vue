@@ -20,7 +20,13 @@
             v-if="user.permissions !== 'ADMIN'"
             warning
             class="margin-left-1"
-            >{{ user.permissions }}</Badge
+            >{{
+              $t(
+                `roles.${permissionSanitized(
+                  user.permissions
+                ).toLowerCase()}.name`
+              )
+            }}</Badge
           >
         </DropdownItem>
         <template #emptyState>{{
@@ -63,6 +69,9 @@ export default {
     }
   },
   computed: {
+    roles() {
+      return this.workspace ? this.workspace._.roles : []
+    },
     getAuthorizedUserDisplayName() {
       const authorizedUser = this.workspace_users.find(
         (user) => user.id === this.values.authorized_user
@@ -74,6 +83,12 @@ export default {
     this.workspace_users = this.workspace.users.filter(
       (user) => user.to_be_deleted === false
     )
+  },
+  methods: {
+    permissionSanitized(uid) {
+      const permission = this.roles.find((role) => role.uid === uid)
+      return permission ? permission.uid : 'MEMBER'
+    },
   },
 }
 </script>
