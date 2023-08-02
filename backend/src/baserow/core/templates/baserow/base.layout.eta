@@ -74,6 +74,14 @@
               color="#646b75"
               font-family="Open Sans"
       />
+      <mj-class
+              name="mb-20"
+              margin-bottom="20px"
+      />
+      <mj-class
+              name="mt-20"
+              margin-top="20px"
+      />
     </mj-attributes>
   </mj-head>
   <mj-body>
