@@ -23,7 +23,7 @@
         </mj-text>
       <mj-raw><!-- htmlmin:ignore -->{% endif %}<!-- htmlmin:ignore --></mj-raw>
     <mj-button mj-class="button mt-20" href="{{ public_web_frontend_url }}">
-      {% trans "View on Baserow" %}
+      {% trans "View in Baserow" %}
     </mj-button>
     <mj-text mj-class="button-url">
       {{ public_web_frontend_url }}

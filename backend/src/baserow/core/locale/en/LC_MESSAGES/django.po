@@ -278,7 +278,7 @@ msgid "You have %(count)s new notifications in Baserow."
 msgstr ""
 
 #: src/baserow/core/templates/baserow/core/notifications_summary.html:201
-msgid "View on Baserow"
+msgid "View in Baserow"
 msgstr ""
 
 #: src/baserow/core/templates/baserow/core/user/account_deleted.html:146
