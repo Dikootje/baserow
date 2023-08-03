@@ -64,6 +64,14 @@ deconstruct_filter_key_regex = re.compile(
     r"filter__field_([0-9]+|created_on|updated_on)__([a-zA-Z0-9_]*)$"
 )
 
+deconstruct_filter_name_regex = re.compile(
+    r"filter__([\w\s]+|created_on|updated_on)__([a-zA-Z0-9_]*)$"
+)
+
+
+sab_regex = re.compile(
+    r"filter__(?:field_)?([0-9a-zA-Z\s]+|created_on|updated_on)__([a-zA-Z0-9_]*)$"
+)
 tracer = trace.get_tracer(__name__)
 
 
@@ -359,7 +367,11 @@ class TableModelQuerySet(models.QuerySet):
         return self.annotate(**annotations).order_by(*order_by)
 
     def filter_by_fields_object(
-        self, filter_object, filter_type=FILTER_TYPE_AND, only_filter_by_field_ids=None
+        self,
+        filter_object,
+        filter_type=FILTER_TYPE_AND,
+        only_filter_by_field_ids=None,
+        user_field_names=False,
     ):
         """
         Filters the query by the provided filters in the filter_object. The following
@@ -387,6 +399,9 @@ class TableModelQuerySet(models.QuerySet):
             filtered by. Other fields not in the iterable will be ignored and not be
             filtered.
         :type only_filter_by_field_ids: Optional[Iterable[int]]
+        :param user_field_names: If True, use field names in the filter object
+            instead of ids
+        :type user_field_names: bool
         :raises ValueError: Raised when the provided filer_type isn't AND or OR.
         :raises FilterFieldNotFound: Raised when the provided field isn't found in
             the model.
@@ -402,9 +417,13 @@ class TableModelQuerySet(models.QuerySet):
 
         filter_builder = FilterBuilder(filter_type=filter_type)
 
-        for key, values in filter_object.items():
-            matches = deconstruct_filter_key_regex.match(key)
+        if user_field_names:
+            user_field_name_to_id_mapping = {
+                v["field"].name: k for k, v in self.model._field_objects.items()
+            }
 
+        for key, values in filter_object.items():
+            matches = sab_regex.match(key)
             if not matches:
                 continue
 
@@ -417,8 +436,20 @@ class TableModelQuerySet(models.QuerySet):
                 field_name = matches[1]
                 field_instance = fixed_field_instance_mapping.get(field_name)
             else:
-                field_id = int(matches[1])
+                if user_field_names:
+                    field_identifier = matches[1]
 
+                    field_id = user_field_name_to_id_mapping.get(field_identifier)
+                    if field_id is None:
+                        try:
+                            field_id = int(field_identifier)
+                        except ValueError:
+                            raise FilterFieldNotFound(
+                                field_identifier,
+                                f"Field {field_identifier} does not exist.",
+                            )
+                else:
+                    field_id = int(matches[1])
                 if field_id not in self.model._field_objects or (
                     only_filter_by_field_ids is not None
                     and field_id not in only_filter_by_field_ids

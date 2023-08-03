@@ -348,6 +348,41 @@ def test_list_rows(api_client, data_fixture):
     assert response_json["results"][0]["id"] == row_1.id
     assert response_json["results"][1]["id"] == row_3.id
 
+    url = reverse("api:database:rows:list", kwargs={"table_id": table.id})
+    get_params = [
+        f"filter__{field_1.name}__equal=Product 1",
+        f"filter__{field_1.name}__equal=Product 3",
+        "filter_type=or",
+    ]
+    response = api_client.get(
+        f'{url}?user_field_names=true&{"&".join(get_params)}',
+        format="json",
+        HTTP_AUTHORIZATION=f"JWT {jwt_token}",
+    )
+    response_json = response.json()
+    assert response.status_code == HTTP_200_OK
+    assert response_json["count"] == 2
+    assert len(response_json["results"]) == 2
+    assert response_json["results"][0]["id"] == row_1.id
+    assert response_json["results"][1]["id"] == row_3.id
+
+    url = reverse("api:database:rows:list", kwargs={"table_id": table.id})
+    get_params = [
+        f"filter__{field_1.id}__equal=Product 1",
+        f"filter__{field_1.id}__equal=Product 3",
+        "filter_type=or",
+    ]
+    response = api_client.get(
+        f'{url}?user_field_names=true&{"&".join(get_params)}',
+        format="json",
+        HTTP_AUTHORIZATION=f"JWT {jwt_token}",
+    )
+    response_json = response.json()
+    assert response.status_code == HTTP_200_OK
+    assert response_json["count"] == 2
+    assert len(response_json["results"]) == 2
+    assert response_json["results"][0]["id"] == row_1.id
+    assert response_json["results"][1]["id"] == row_3.id
     row_2.order = Decimal("999")
     row_2.save()
     response = api_client.get(
