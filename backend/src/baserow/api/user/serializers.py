@@ -18,18 +18,14 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from baserow.api.sessions import set_user_session_data_from_request
 from baserow.api.user.jwt import get_user_from_token
 from baserow.api.user.registries import user_data_registry
-from baserow.api.user.validators import (
-    email_notification_frequency,
-    language_validation,
-    password_validation,
-)
+from baserow.api.user.validators import language_validation, password_validation
 from baserow.api.workspaces.invitations.serializers import (
     UserWorkspaceInvitationSerializer,
 )
 from baserow.core.action.registries import action_type_registry
 from baserow.core.auth_provider.exceptions import AuthProviderDisabled
 from baserow.core.auth_provider.handler import PasswordProviderHandler
-from baserow.core.models import Template
+from baserow.core.models import Template, UserProfile
 from baserow.core.user.actions import SignInUserActionType
 from baserow.core.user.exceptions import DeactivatedUserException
 from baserow.core.user.utils import (
@@ -69,11 +65,12 @@ class UserSerializer(serializers.ModelSerializer):
         help_text="An ISO 639 language code (with optional variant) "
         "selected by the user. Ex: en-GB.",
     )
-    email_notification_frequency = serializers.CharField(
+    email_notification_frequency = serializers.ChoiceField(
         source="profile.email_notification_frequency",
         required=False,
-        validators=[email_notification_frequency],
-        help_text="The frequency at which the user wants to receive email notifications.",
+        choices=UserProfile.EmailNotificationFrequencyOptions,
+        help_text="The maximum frequency at which the user wants to "
+        "receive email notifications.",
     )
 
     class Meta:
@@ -156,7 +153,7 @@ class AccountSerializer(serializers.Serializer):
     This serializer must be kept in sync with `UserSerializer`.
     """
 
-    first_name = serializers.CharField(min_length=2, max_length=150)
+    first_name = serializers.CharField(min_length=2, max_length=150, required=False)
     language = serializers.CharField(
         source="profile.language",
         required=False,
@@ -166,12 +163,25 @@ class AccountSerializer(serializers.Serializer):
         help_text="An ISO 639 language code (with optional variant) "
         "selected by the user. Ex: en-GB.",
     )
-    email_notification_frequency = serializers.CharField(
+    email_notification_frequency = serializers.ChoiceField(
         source="profile.email_notification_frequency",
         required=False,
-        validators=[email_notification_frequency],
-        help_text="The frequency at which the user wants to receive email notifications.",
+        choices=UserProfile.EmailNotificationFrequencyOptions,
+        help_text="The maximum frequency at which the user wants to "
+        "receive email notifications.",
     )
+
+    def validate(self, data):
+        profile_fields = ["language", "email_notification_frequency"]
+        profile_data = data.get("profile", {})
+        if "first_name" not in data and not any(
+            f in profile_data for f in profile_fields
+        ):
+            raise serializers.ValidationError(
+                "At least one of the fields first_name, %s must be provided."
+                % ", ".join(profile_fields)
+            )
+        return data
 
 
 class SendResetPasswordEmailBodyValidationSerializer(serializers.Serializer):

@@ -1,17 +1,14 @@
-import re
 from dataclasses import asdict, dataclass
 
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
 
-from prosemirror.model import DOMSerializer, Node
-
 from baserow.core.notifications.handler import NotificationHandler
 from baserow.core.notifications.registries import (
-    EmailRendererNotificationTypeMixin,
+    EmailNotificationTypeMixin,
     NotificationType,
 )
-from baserow.core.prosemirror.schema import schema as baserow_prosemirror_schema
+from baserow.core.prosemirror.utils import prosemirror_doc_to_plain_text
 
 from .signals import row_comment_created, row_comment_updated
 
@@ -39,9 +36,7 @@ class RowCommentMentionNotificationData:
         )
 
 
-class RowCommentMentionNotificationType(
-    EmailRendererNotificationTypeMixin, NotificationType
-):
+class RowCommentMentionNotificationType(EmailNotificationTypeMixin, NotificationType):
     type = "row_comment_mention"
 
     @classmethod
@@ -57,7 +52,7 @@ class RowCommentMentionNotificationType(
         notification_data = RowCommentMentionNotificationData.from_row_comment(
             row_comment
         )
-        NotificationHandler.create_notification_for_users(
+        NotificationHandler.create_direct_notification_for_users(
             notification_type=cls.type,
             recipients=mentions,
             data=asdict(notification_data),
@@ -66,23 +61,16 @@ class RowCommentMentionNotificationType(
         )
 
     @classmethod
-    def render_title(cls, notification, context):
-        return _("%(user)s mentioned you in row %(row_id)s in %(table_name)s") % {
+    def get_notification_title_for_email(cls, notification, context):
+        return _("%(user)s mentioned you in row %(row_id)s in %(table_name)s.") % {
             "user": notification.sender.first_name,
             "row_id": notification.data["row_id"],
             "table_name": notification.data["table_name"],
         }
 
     @classmethod
-    def render_description(cls, notification, context):
-        prosemirror_serializer = DOMSerializer.from_schema(baserow_prosemirror_schema)
-        prosemirror_doc = Node.from_json(
-            baserow_prosemirror_schema, notification.data["message"]
-        )
-        html = str(prosemirror_serializer.serialize_fragment(prosemirror_doc.content))
-        # Remove all HTML tags from the string so we can render it as plain text.
-        text = re.sub("<[^<]+?>", "", html)
-        return text
+    def get_notification_description_for_email(cls, notification, context):
+        return prosemirror_doc_to_plain_text(notification.data["message"])
 
 
 @receiver(row_comment_created)

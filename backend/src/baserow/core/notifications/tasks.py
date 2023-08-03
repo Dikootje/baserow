@@ -1,9 +1,17 @@
 from collections import defaultdict
+from datetime import datetime, timedelta
+from typing import Optional
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Q
+from django.utils import timezone
 
+import pytz
 from celery.exceptions import SoftTimeLimitExceeded
+from celery.schedules import crontab
+from celery_singleton import DuplicateTaskError, Singleton
+from loguru import logger
 
 from baserow.api.notifications.serializers import NotificationRecipientSerializer
 from baserow.config.celery import app
@@ -37,6 +45,9 @@ def send_queued_notifications_to_users(self):
         if not notifications_grouped_by_user:
             return
 
+        # Send all the notifications if less or equal to the limit.
+        # Otherwise, send just the updated unread count and let the user fetch the
+        # new notifications.
         def broadcast_all_notifications_at_once_to_user(
             notification_batch_limit=20,
         ):
@@ -75,42 +86,126 @@ def send_queued_notifications_to_users(self):
         queued_notificationrecipients.update(queued=False)
 
 
-def send_email_notifications_to_users_with_frequency(frequency):
+@app.task(bind=True, queue="export")
+def beat_send_instant_notifications_summary_by_email(self):
+    """
+    This tasks send the emails to users that have set the notification setting
+    to instant. Since this task will run every minute by default we want to
+    avoid to pile up tasks doing the same thing and potentially sending the same
+    email multiple times.
+    """
+
+    try:
+        singleton_send_instant_notifications_summary_by_email.delay()
+    except DuplicateTaskError:
+        logger.error(
+            "Cannot run `send_instant_notifications_email_to_users` "
+            "more than once at the same time."
+        )
+
+
+@app.task(
+    base=Singleton,
+    bind=True,
+    queue="export",
+    raise_on_duplicate=True,
+    lock_expiry=60 * 5,
+)
+def singleton_send_instant_notifications_summary_by_email(self):
+    send_instant_notifications_email_to_users()
+
+
+def send_instant_notifications_email_to_users():
     from .handler import NotificationHandler
 
-    NotificationHandler.send_email_notifications_to_users_with_frequency(frequency)
-
-
-@app.task(bind=True, queue="export", soft_time_limit=50)
-def send_instant_notifications_by_email_to_users(self):
-    """
-    This tasks send the emails to users that have set the notification setting
-    to immediate. This task will run every minute and with a soft time limit
-    set to 50 seconds we should
-    """
-
-    send_email_notifications_to_users_with_frequency(
+    notifications_frequency = (
         UserProfile.EmailNotificationFrequencyOptions.INSTANT.value
     )
+    max_emails = settings.EMAIL_NOTIFICATIONS_LIMIT_PER_TASK[notifications_frequency]
+
+    return (
+        NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
+            Q(profile__email_notification_frequency=notifications_frequency),
+            max_emails,
+        )
+    )
 
 
-@app.task(
-    bind=True,
-    queue="export",
-    autoretry_for=(SoftTimeLimitExceeded,),
-    retry_backoff=10,
-    max_retries=5,
-)
-def send_daily_notification_by_email_to_users(self):
-    """
-    This tasks send the emails to users that have set the notification setting
-    to daily. Since this task is scheduled once a week and we cannot know in
-    advance how long this task will take to complete, we catch the
-    SoftTimeLimitExceeded to reschedule the job and continue later.
-    """
+def send_daily_notifications_email_to_users(now: Optional[datetime] = None):
+    from .handler import NotificationHandler as handler
 
-    send_email_notifications_to_users_with_frequency(
-        UserProfile.EmailNotificationFrequencyOptions.DAILY.value
+    if now is None:
+        now = timezone.now()
+
+    hour_of_day = settings.EMAIL_NOTIFICATIONS_DAILY_HOUR_OF_DAY
+    timezones_to_send_notifications = [
+        tz
+        for tz in pytz.all_timezones
+        if now.astimezone(pytz.timezone(tz)).hour == hour_of_day
+    ]
+    logger.debug(
+        "Timezones where the hour of the day match settings: %s"
+        % "\n - ".join(timezones_to_send_notifications),
+    )
+    logger.debug(f"Hour of the day to send daily notifications: {hour_of_day}")
+    localized_now = now.astimezone(pytz.timezone(timezones_to_send_notifications[0]))
+    logger.debug(f"Now: {now} - localized now: {localized_now}")
+
+    notifications_frequency = UserProfile.EmailNotificationFrequencyOptions.DAILY.value
+    max_emails = settings.EMAIL_NOTIFICATIONS_LIMIT_PER_TASK[notifications_frequency]
+
+    return handler.send_new_notifications_to_users_matching_filters_by_email(
+        Q(
+            profile__email_notification_frequency=notifications_frequency,
+            profile__timezone__in=timezones_to_send_notifications,
+        )
+        & ~Q(
+            profile__last_notifications_email_sent_at__gt=now - timedelta(hours=12),
+        ),
+        max_emails,
+    )
+
+
+def send_weekly_notifications_email_to_users(now: Optional[datetime] = None):
+    from .handler import NotificationHandler as handler
+
+    if now is None:
+        now = timezone.now()
+
+    hour_of_day = settings.EMAIL_NOTIFICATIONS_DAILY_HOUR_OF_DAY
+    day_of_week = settings.EMAIL_NOTIFICATIONS_WEEKLY_DAY_OF_WEEK
+    timezones_to_send_notifications = [
+        tz
+        for tz in pytz.all_timezones
+        if now.astimezone(pytz.timezone(tz)).hour == hour_of_day
+        and now.astimezone(pytz.timezone(tz)).weekday() == day_of_week
+    ]
+    logger.debug(
+        "Timezones where the day of the week and the hour of the day match settings: %s"
+        % "\n - ".join(timezones_to_send_notifications or ["None"]),
+    )
+    logger.debug(f"Hour of the day to send daily notifications: {hour_of_day}")
+    logger.debug(f"Day of the week to send weekly notifications: {day_of_week}")
+    if timezones_to_send_notifications:
+        localized_now = now.astimezone(
+            pytz.timezone(timezones_to_send_notifications[0])
+        )
+        logger.debug(f"Now: {now} - localized now: {localized_now}")
+    else:
+        logger.debug(f"Now: {now} - No timezones match the settings")
+
+    notifications_frequency = UserProfile.EmailNotificationFrequencyOptions.WEEKLY.value
+    max_emails = settings.EMAIL_NOTIFICATIONS_LIMIT_PER_TASK[notifications_frequency]
+
+    return handler.send_new_notifications_to_users_matching_filters_by_email(
+        Q(
+            profile__email_notification_frequency=notifications_frequency,
+            profile__timezone__in=timezones_to_send_notifications,
+        )
+        & ~Q(
+            profile__last_notifications_email_sent_at__gt=now - timedelta(days=4),
+        ),
+        max_emails,
     )
 
 
@@ -118,33 +213,46 @@ def send_daily_notification_by_email_to_users(self):
     bind=True,
     queue="export",
     autoretry_for=(SoftTimeLimitExceeded,),
-    retry_backoff=10,
-    max_retries=10,
 )
-def send_weekly_notifications_by_email_to_users(self):
+def send_daily_and_weekly_notifications_summary_by_email(self, now=None):
     """
-    This tasks send the emails to users that have set the notification setting
-    to weekly. Since this task is scheduled once a week and we cannot know in
-    advance how long this task will take to complete, we catch the
-    SoftTimeLimitExceeded to reschedule the job and continue later.
+    This task will send a summary of the daily and weekly notifications to users
+    that have set the notification setting to daily or weekly. This task will
+    run every hour and the report will be sent at the time define in the
+    settings according to the user timezone.
     """
 
-    send_email_notifications_to_users_with_frequency(
-        UserProfile.EmailNotificationFrequencyOptions.WEEKLY.value
-    )
+    daily_result = send_daily_notifications_email_to_users(now)
+    weekly_result = send_weekly_notifications_email_to_users(now)
+
+    if (
+        daily_result.remaining_users_to_notify_count > 0
+        or weekly_result.remaining_users_to_notify_count > 0
+    ):
+        logger.error(
+            "The maximum number of email of notifications was reached.\n"
+            f"Daily sent: {len(daily_result.users_with_notifications)}.\n"
+            f"Daily remaining: {daily_result.remaining_users_to_notify_count}.\n"
+            f"Weekly sent: {len(weekly_result.users_with_notifications)}.\n"
+            f"Weekly reamaining: {weekly_result.remaining_users_to_notify_count}.\n"
+        )
+
+        # Retry the task later if we reached the limit of emails to send.
+        # Use the same 'now' as argument to continue from where we left off.
+        auto_retry_after_seconds = (
+            settings.EMAIL_NOTIFICATIONS_AUTO_RETRY_IF_LIMIT_REACHED_AFTER
+        )
+        if auto_retry_after_seconds:
+            raise self.retry(args=[now], countdown=auto_retry_after_seconds)
 
 
 @app.on_after_finalize.connect
 def setup_periodic_action_tasks(sender, **kwargs):
     sender.add_periodic_task(
-        settings.EMAIL_NOTIFICATIONS_CRONTABS["instant"],
-        send_instant_notifications_by_email_to_users.s(),
+        settings.EMAIL_NOTIFICATIONS_INSTANT_CRONTAB,
+        beat_send_instant_notifications_summary_by_email.s(),
     )
     sender.add_periodic_task(
-        settings.EMAIL_NOTIFICATIONS_CRONTABS["daily"],
-        send_daily_notification_by_email_to_users.s(),
-    )
-    sender.add_periodic_task(
-        settings.EMAIL_NOTIFICATIONS_CRONTABS["weekly"],
-        send_weekly_notifications_by_email_to_users.s(),
+        crontab(0, "*", "*", "*", "*"),
+        send_daily_and_weekly_notifications_summary_by_email.s(),
     )

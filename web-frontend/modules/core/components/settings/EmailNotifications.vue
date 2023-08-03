@@ -102,7 +102,6 @@ export default {
       this.loading = true
       try {
         await this.$store.dispatch('auth/update', {
-          first_name: this.user.first_name,
           email_notification_frequency:
             this.values.email_notification_frequency,
         })

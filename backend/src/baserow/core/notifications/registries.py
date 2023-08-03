@@ -21,7 +21,7 @@ class NotificationType(MapAPIExceptionsInstanceMixin, Instance):
     include_in_notifications_email = False
 
 
-class EmailRendererNotificationTypeMixin(metaclass=ABCMeta):
+class EmailNotificationTypeMixin(metaclass=ABCMeta):
     """
     A mixin for notification types that can be sent by email, which provides the
     methods needed to render a title and an optional description in the email message.
@@ -31,16 +31,29 @@ class EmailRendererNotificationTypeMixin(metaclass=ABCMeta):
 
     @classmethod
     @abstractmethod
-    def render_title(cls, notification, context) -> str:
+    def get_notification_title_for_email(cls, notification, context) -> str:
         """
-        Renders the translatable string for the title of the notification.
+        Returns the translatable string title for the given notification and context.
         """
 
     @classmethod
     @abstractmethod
-    def render_description(cls, notification, context) -> Optional[str]:
+    def get_notification_description_for_email(
+        cls, notification, context
+    ) -> Optional[str]:
         """
-        Renders the translatable string for the description of the notification.
+        Returns the translatable string description for the given notification
+        and context.
+        """
+
+
+class CliNotificationTypeMixin(metaclass=ABCMeta):
+    @classmethod
+    @abstractmethod
+    def prompt_for_args_in_cli_and_create_notification(cls):
+        """
+        Prompts the user for any additional arguments needed to create the
+        notification from the CLI, and then creates the notification.
         """
 
 

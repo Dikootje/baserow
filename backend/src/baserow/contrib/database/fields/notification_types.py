@@ -14,7 +14,7 @@ from baserow.core.notifications.handler import (
     UserNotificationsGrouper,
 )
 from baserow.core.notifications.registries import (
-    EmailRendererNotificationTypeMixin,
+    EmailNotificationTypeMixin,
     NotificationType,
 )
 
@@ -35,14 +35,14 @@ class CollaboratorAddedToRowNotificationData:
 
 
 class CollaboratorAddedToRowNotificationType(
-    EmailRendererNotificationTypeMixin, NotificationType
+    EmailNotificationTypeMixin, NotificationType
 ):
     type = "collaborator_added_to_row"
 
     @classmethod
-    def render_title(cls, notification, context):
+    def get_notification_title_for_email(cls, notification, context):
         return _(
-            "%(sender)s assigned you to %(field_name)s in row %(row_id)s in %(table_name)s"
+            "%(sender)s assigned you to %(field_name)s in row %(row_id)s in %(table_name)s."
         ) % {
             "sender": notification.sender.first_name,
             "field_name": notification.data["field_name"],
@@ -51,7 +51,7 @@ class CollaboratorAddedToRowNotificationType(
         }
 
     @classmethod
-    def render_description(cls, notification, context):
+    def get_notification_description_for_email(cls, notification, context):
         return None
 
     @classmethod

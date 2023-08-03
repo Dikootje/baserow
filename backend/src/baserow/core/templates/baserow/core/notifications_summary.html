@@ -145,7 +145,7 @@
                   <tbody>
                     <tr>
                       <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                        <div style="font-family:Montserrat;font-size:22px;font-weight:700;line-height:1;text-align:left;color:#062E47;">{% blocktrans trimmed with total_count as count %} You have {{ count }} new notifications in Baserow. {% endblocktrans %}</div>
+                        <div style="font-family:Montserrat;font-size:22px;font-weight:700;line-height:1;text-align:left;color:#062E47;">{% blocktrans trimmed count counter=new_notifications_count %} You have {{ counter }} new notification {% plural %} You have {{ counter }} new notifications {% endblocktrans %}</div>
                       </td>
                     </tr>
                     <tr>
@@ -167,7 +167,7 @@
                     <!-- htmlmin:ignore -->
                     <tr>
                       <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                        <div style="font-family:Open Sans;font-size:12px;line-height:1;text-align:left;color:#646b75;">{{ notification.description }}</div>
+                        <div style="font-family:Open Sans;font-size:12px;line-height:1;text-align:left;color:#646b75;">{{ notification.description|linebreaksbr }}</div>
                       </td>
                     </tr>
                     <!-- htmlmin:ignore -->{% endif %}
@@ -182,11 +182,11 @@
                     </tr>
                     <!-- htmlmin:ignore -->{% endfor %}
                     <!-- htmlmin:ignore -->
-                    <!-- htmlmin:ignore -->{% if more_available_count %}
+                    <!-- htmlmin:ignore -->{% if unlisted_notifications_count %}
                     <!-- htmlmin:ignore -->
                     <tr>
                       <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                        <div style="font-family:Open Sans;font-size:12px;line-height:1;text-align:left;color:#646b75;">{% blocktrans trimmed with more_available_count as count %} Plus {{ count }} more notifications. {% endblocktrans %}</div>
+                        <div style="font-family:Open Sans;font-size:12px;line-height:1;text-align:left;color:#646b75;">{% blocktrans trimmed count counter=unlisted_notifications_count %} Plus {{ counter }} more notification. {% plural %} Plus {{ counter }} more notifications. {% endblocktrans %}</div>
                       </td>
                     </tr>
                     <!-- htmlmin:ignore -->{% endif %}

@@ -133,7 +133,8 @@ class UpdateUserActionType(ActionType):
         :param user: The user that will be updated.
         :param first_name: The first name of the user.
         :param language: The language of the user.
-        :param email_notification_frequency: The frequency of email notifications.
+        :param email_notification_frequency: The frequency chosen by the user to
+            receive email notifications.
         :return: The updated user.
         """
 

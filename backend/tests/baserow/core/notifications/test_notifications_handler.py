@@ -1,13 +1,12 @@
-import contextlib
-from typing import Optional
 from unittest.mock import MagicMock, call, patch
 
+from django.conf import settings
 from django.db.models import Q
+from django.test import override_settings
 
 import pytest
 
 from baserow.api.notifications.serializers import NotificationRecipientSerializer
-from baserow.core.emails import NotificationsSummaryEmail
 from baserow.core.models import UserProfile, WorkspaceUser
 from baserow.core.notifications.exceptions import NotificationDoesNotExist
 from baserow.core.notifications.handler import (
@@ -15,24 +14,23 @@ from baserow.core.notifications.handler import (
     UserNotificationsGrouper,
 )
 from baserow.core.notifications.models import Notification, NotificationRecipient
-from baserow.core.notifications.registries import (
-    EmailRendererNotificationTypeMixin,
-    NotificationType,
-    notification_type_registry,
-)
 from baserow.core.user.handler import UserHandler
+
+from .utils import custom_notification_types_registered
 
 
 @pytest.mark.django_db
-def test_get_workspace_notifications(data_fixture):
+def test_get_workspace_notifications(data_fixture, mutable_notification_type_registry):
     user = data_fixture.create_user()
     workspace = data_fixture.create_workspace(user=user)
 
-    workspace_notification = data_fixture.create_workspace_notification(
-        recipients=[user], workspace=workspace, type="test_workspace_notification"
+    workspace_notification = data_fixture.create_workspace_notification_for_users(
+        recipients=[user],
+        workspace=workspace,
+        notification_type="test_workspace_notification",
     )
-    user_notification = data_fixture.create_user_notification(
-        recipients=[user], type="test_user_notification"
+    user_notification = data_fixture.create_user_notification_for_users(
+        recipients=[user], notification_type="test_user_notification"
     )
 
     notification_recipients = NotificationHandler.list_notifications(
@@ -47,9 +45,9 @@ def test_get_workspace_notifications(data_fixture):
 
 
 @pytest.mark.django_db
-def test_get_notification_by_id(data_fixture):
+def test_get_notification_by_id(data_fixture, mutable_notification_type_registry):
     user = data_fixture.create_user()
-    notification = data_fixture.create_user_notification(recipients=[user])
+    notification = data_fixture.create_user_notification_for_users(recipients=[user])
 
     assert (
         NotificationHandler.get_notification_by_id(user, notification.id).id
@@ -61,7 +59,9 @@ def test_get_notification_by_id(data_fixture):
 
 
 @pytest.mark.django_db
-def test_annotate_workspaces_with_unread_notifications_count(data_fixture):
+def test_annotate_workspaces_with_unread_notifications_count(
+    data_fixture, mutable_notification_type_registry
+):
     user = data_fixture.create_user()
     workspace = data_fixture.create_workspace(user=user)
 
@@ -74,7 +74,9 @@ def test_annotate_workspaces_with_unread_notifications_count(data_fixture):
 
     assert annotated_q[0].unread_notifications_count == 0
 
-    data_fixture.create_workspace_notification(recipients=[user], workspace=workspace)
+    data_fixture.create_workspace_notification_for_users(
+        recipients=[user], workspace=workspace
+    )
 
     annotated_q = (
         NotificationHandler.annotate_workspaces_with_unread_notifications_count(
@@ -86,22 +88,24 @@ def test_annotate_workspaces_with_unread_notifications_count(data_fixture):
 
 
 @pytest.mark.django_db
-def test_get_unread_notifications_count(data_fixture):
+def test_get_unread_notifications_count(
+    data_fixture, mutable_notification_type_registry
+):
     user = data_fixture.create_user()
 
     assert NotificationHandler.get_unread_notifications_count(user) == 0
 
-    data_fixture.create_user_notification(recipients=[user])
+    data_fixture.create_user_notification_for_users(recipients=[user])
 
     assert NotificationHandler.get_unread_notifications_count(user) == 1
 
 
 @pytest.mark.django_db
-def test_mark_notification_as_read(data_fixture):
+def test_mark_notification_as_read(data_fixture, mutable_notification_type_registry):
     user = data_fixture.create_user()
     workspace = data_fixture.create_workspace(user=user)
 
-    notification = data_fixture.create_workspace_notification(
+    notification = data_fixture.create_workspace_notification_for_users(
         recipients=[user], workspace=workspace
     )
 
@@ -114,12 +118,16 @@ def test_mark_notification_as_read(data_fixture):
 
 
 @pytest.mark.django_db
-def test_mark_all_notifications_as_read(data_fixture):
+def test_mark_all_notifications_as_read(
+    data_fixture, mutable_notification_type_registry
+):
     user = data_fixture.create_user()
     workspace = data_fixture.create_workspace(user=user)
 
-    data_fixture.create_workspace_notification(recipients=[user], workspace=workspace)
-    data_fixture.create_user_notification(recipients=[user])
+    data_fixture.create_workspace_notification_for_users(
+        recipients=[user], workspace=workspace
+    )
+    data_fixture.create_user_notification_for_users(recipients=[user])
 
     assert NotificationHandler.get_unread_notifications_count(user, workspace) == 2
 
@@ -129,12 +137,16 @@ def test_mark_all_notifications_as_read(data_fixture):
 
 
 @pytest.mark.django_db
-def test_clear_all_direct_notifications(data_fixture):
+def test_clear_all_direct_notifications(
+    data_fixture, mutable_notification_type_registry
+):
     user = data_fixture.create_user()
     workspace = data_fixture.create_workspace(user=user)
 
-    data_fixture.create_workspace_notification(recipients=[user], workspace=workspace)
-    data_fixture.create_user_notification(recipients=[user])
+    data_fixture.create_workspace_notification_for_users(
+        recipients=[user], workspace=workspace
+    )
+    data_fixture.create_user_notification_for_users(recipients=[user])
 
     assert Notification.objects.count() == 2
 
@@ -145,13 +157,13 @@ def test_clear_all_direct_notifications(data_fixture):
 
 @pytest.mark.django_db
 def test_clear_direct_notifications_should_delete_them(
-    data_fixture,
+    data_fixture, mutable_notification_type_registry
 ):
     user = data_fixture.create_user()
     workspace = data_fixture.create_workspace(user=user)
     other_user = data_fixture.create_user(workspace=workspace)
 
-    data_fixture.create_workspace_notification(
+    data_fixture.create_workspace_notification_for_users(
         recipients=[user, other_user], workspace=workspace
     )
 
@@ -180,7 +192,9 @@ def test_clear_direct_notifications_should_delete_them(
 
 
 @pytest.mark.django_db
-def test_all_users_can_see_and_clear_broadcast_notifications(data_fixture):
+def test_all_users_can_see_and_clear_broadcast_notifications(
+    data_fixture, mutable_notification_type_registry
+):
     user = data_fixture.create_user()
     other_user = data_fixture.create_user()
     workspace = data_fixture.create_workspace(user=user)
@@ -240,11 +254,16 @@ def test_all_users_can_see_and_clear_broadcast_notifications(data_fixture):
 @pytest.mark.django_db
 @patch("baserow.core.notifications.tasks.send_queued_notifications_to_users.delay")
 def test_queued_notifications_are_not_visible_to_the_users(
-    mocked_send_queued_notifications_to_users, data_fixture
+    mocked_send_queued_notifications_to_users,
+    data_fixture,
+    mutable_notification_type_registry,
 ):
     user = data_fixture.create_user()
     other_user = data_fixture.create_user()
     workspace = data_fixture.create_workspace(members=[user, other_user])
+
+    data_fixture.register_notification_type("test 1")
+    data_fixture.register_notification_type("test 2")
 
     notification_1 = Notification(workspace=workspace, type="test 1")
     notification_2 = Notification(workspace=workspace, type="test 2")
@@ -281,11 +300,16 @@ def test_queued_notifications_are_not_visible_to_the_users(
 @pytest.mark.django_db(transaction=True)
 @patch("baserow.ws.tasks.broadcast_to_users.apply")
 def test_queued_notifications_are_sent_grouped_by_user(
-    mocked_broadcast_to_users, data_fixture
+    mocked_broadcast_to_users,
+    data_fixture,
+    mutable_notification_type_registry,
 ):
     user = data_fixture.create_user()
     other_user = data_fixture.create_user()
     workspace = data_fixture.create_workspace(members=[user, other_user])
+
+    data_fixture.register_notification_type(notification_type="test 1")
+    data_fixture.register_notification_type(notification_type="test 2")
 
     notification_1 = NotificationHandler.construct_notification(
         notification_type="test 1", workspace=workspace
@@ -326,36 +350,10 @@ def test_queued_notifications_are_sent_grouped_by_user(
     )
 
 
-@contextlib.contextmanager
-def custom_notification_types_registered():
-    class ExcludedFromEmailTestNotification(NotificationType):
-        type = "excluded_from_email_test_notification"
-
-    class TestNotification(EmailRendererNotificationTypeMixin, NotificationType):
-        type = "test_notification"
-
-        @classmethod
-        def render_title(cls, notification, context) -> str:
-            return "Test notification"
-
-        @classmethod
-        def render_description(cls, notification, context) -> Optional[str]:
-            return None
-
-    notification_type_registry.register(ExcludedFromEmailTestNotification())
-    notification_type_registry.register(TestNotification())
-
-    try:
-        yield TestNotification, ExcludedFromEmailTestNotification
-    finally:
-        notification_type_registry.unregister(ExcludedFromEmailTestNotification.type)
-        notification_type_registry.unregister(TestNotification.type)
-
-
 @pytest.mark.django_db(transaction=True)
 @patch("baserow.core.notifications.handler.get_mail_connection")
 def test_not_all_notification_types_are_included_in_the_email_notification_summary(
-    mock_get_mail_connection, data_fixture
+    mock_get_mail_connection, data_fixture, mutable_notification_type_registry
 ):
     mock_connection = MagicMock()
     mock_get_mail_connection.return_value = mock_connection
@@ -367,30 +365,32 @@ def test_not_all_notification_types_are_included_in_the_email_notification_summa
         ExcludedFromEmailTestNotification,
     ):
         user_1 = data_fixture.create_user(email_notification_frequency=options.INSTANT)
-        data_fixture.create_notification(
-            recipients=[user_1], type=TestNotification.type
+        data_fixture.create_notification_for_users(
+            recipients=[user_1], notification_type=TestNotification.type
         )
-        data_fixture.create_notification(
-            recipients=[user_1], type=ExcludedFromEmailTestNotification.type
+        data_fixture.create_notification_for_users(
+            recipients=[user_1],
+            notification_type=ExcludedFromEmailTestNotification.type,
         )
 
-        res = NotificationHandler.send_email_notifications_to_users_with_frequency(
-            options.DAILY
+        res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
+            Q(profile__email_notification_frequency=options.DAILY)
         )
-        assert res.emails_sent == 0
+        assert res.users_with_notifications == []
+        assert res.remaining_users_to_notify_count == 0
 
-        res = NotificationHandler.send_email_notifications_to_users_with_frequency(
-            options.WEEKLY
+        res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
+            Q(profile__email_notification_frequency=options.WEEKLY)
         )
-        assert res.emails_sent == 0
+        assert res.users_with_notifications == []
+        assert res.remaining_users_to_notify_count == 0
 
-        res = NotificationHandler.send_email_notifications_to_users_with_frequency(
-            options.INSTANT
+        res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
+            Q(profile__email_notification_frequency=options.INSTANT)
         )
-        assert res.emails_sent == 1
-        assert res.notified_users == [user_1.pk]
-        assert res.notifications_updated == 2
-        assert res.more_available is False
+        assert res.users_with_notifications == [user_1]
+        assert len(res.users_with_notifications[0].unsent_email_notifications) == 1
+        assert res.remaining_users_to_notify_count == 0
 
         mock_get_mail_connection.assert_called_once_with(fail_silently=False)
         summary_emails = mock_connection.send_messages.call_args[0][0]
@@ -399,7 +399,7 @@ def test_not_all_notification_types_are_included_in_the_email_notification_summa
         assert user_1_summary_email.to == [user_1.email]
         assert (
             user_1_summary_email.get_subject()
-            == "You have 2 new notifications - Baserow"
+            == "You have 1 new notification - Baserow"
         )
 
         expected_context = {
@@ -409,8 +409,8 @@ def test_not_all_notification_types_are_included_in_the_email_notification_summa
                     "description": None,
                 }
             ],
-            "total_count": 2,
-            "more_available_count": 1,
+            "new_notifications_count": 1,
+            "unlisted_notifications_count": 0,
         }
         user_1_summary_email_context = user_1_summary_email.get_context()
 
@@ -419,7 +419,9 @@ def test_not_all_notification_types_are_included_in_the_email_notification_summa
 
 
 @pytest.mark.django_db
-def test_no_email_without_renderable_notifications(data_fixture):
+def test_no_email_without_renderable_notifications(
+    data_fixture, mutable_notification_type_registry
+):
     options = UserProfile.EmailNotificationFrequencyOptions
 
     with custom_notification_types_registered() as (
@@ -427,31 +429,38 @@ def test_no_email_without_renderable_notifications(data_fixture):
         ExcludedFromEmailTestNotification,
     ):
         user_1 = data_fixture.create_user(email_notification_frequency=options.INSTANT)
-        data_fixture.create_notification(
-            recipients=[user_1], type=ExcludedFromEmailTestNotification.type
+        data_fixture.create_notification_for_users(
+            recipients=[user_1],
+            notification_type=ExcludedFromEmailTestNotification.type,
         )
 
-        res = NotificationHandler.send_email_notifications_to_users_with_frequency(
-            options.DAILY
+        res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
+            Q(profile__email_notification_frequency=options.DAILY)
         )
-        assert res.emails_sent == 0
+        assert res.users_with_notifications == []
+        assert res.remaining_users_to_notify_count == 0
 
-        res = NotificationHandler.send_email_notifications_to_users_with_frequency(
-            options.WEEKLY
+        res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
+            Q(profile__email_notification_frequency=options.WEEKLY)
         )
-        assert res.emails_sent == 0
+        assert res.users_with_notifications == []
+        assert res.remaining_users_to_notify_count == 0
 
-        res = NotificationHandler.send_email_notifications_to_users_with_frequency(
-            options.INSTANT
+        res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
+            Q(profile__email_notification_frequency=options.INSTANT)
         )
-        assert res.emails_sent == 0
+        assert res.users_with_notifications == []
+        assert res.remaining_users_to_notify_count == 0
 
 
-@pytest.mark.django_db(transaction=True)
 @patch("baserow.core.notifications.handler.get_mail_connection")
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.parametrize("email_notification_frequency", ["daily", "weekly"])
 def test_user_with_daily_email_notification_frequency_settings(
-    mock_get_mail_connection, data_fixture, email_notification_frequency
+    mock_get_mail_connection,
+    email_notification_frequency,
+    data_fixture,
+    mutable_notification_type_registry,
 ):
     mock_connection = MagicMock()
     mock_get_mail_connection.return_value = mock_connection
@@ -467,23 +476,23 @@ def test_user_with_daily_email_notification_frequency_settings(
         )
         user_2 = data_fixture.create_user(email_notification_frequency=options.INSTANT)
         user_3 = data_fixture.create_user(email_notification_frequency=options.NEVER)
-        data_fixture.create_notification(
-            recipients=[user_1, user_2, user_3], type=TestNotification.type
+        data_fixture.create_notification_for_users(
+            recipients=[user_1, user_2, user_3], notification_type=TestNotification.type
         )
-        data_fixture.create_notification(
-            recipients=[user_2], type=TestNotification.type
+        data_fixture.create_notification_for_users(
+            recipients=[user_2], notification_type=TestNotification.type
         )
-        data_fixture.create_notification(
-            recipients=[user_1], type=ExcludedFromEmailTestNotification.type
+        data_fixture.create_notification_for_users(
+            recipients=[user_1],
+            notification_type=ExcludedFromEmailTestNotification.type,
         )
 
-        res = NotificationHandler.send_email_notifications_to_users_with_frequency(
-            email_notification_frequency
+        res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
+            Q(profile__email_notification_frequency=email_notification_frequency)
         )
-        assert res.emails_sent == 1
-        assert res.notified_users == [user_1.pk]
-        assert res.notifications_updated == 2
-        assert res.more_available is False
+        assert res.users_with_notifications == [user_1]
+        assert len(res.users_with_notifications[0].unsent_email_notifications) == 1
+        assert res.remaining_users_to_notify_count == 0
 
         mock_get_mail_connection.assert_called_once_with(fail_silently=False)
         summary_emails = mock_connection.send_messages.call_args[0][0]
@@ -492,7 +501,7 @@ def test_user_with_daily_email_notification_frequency_settings(
         assert user_1_summary_email.to == [user_1.email]
         assert (
             user_1_summary_email.get_subject()
-            == "You have 2 new notifications - Baserow"
+            == "You have 1 new notification - Baserow"
         )
 
         expected_context = {
@@ -502,8 +511,8 @@ def test_user_with_daily_email_notification_frequency_settings(
                     "description": None,
                 }
             ],
-            "total_count": 2,
-            "more_available_count": 1,
+            "new_notifications_count": 1,
+            "unlisted_notifications_count": 0,
         }
         user_1_summary_email_context = user_1_summary_email.get_context()
 
@@ -514,7 +523,7 @@ def test_user_with_daily_email_notification_frequency_settings(
 @pytest.mark.django_db(transaction=True)
 @patch("baserow.core.notifications.handler.get_mail_connection")
 def test_email_notifications_are_sent_only_after_setting_is_activated(
-    mock_get_mail_connection, data_fixture
+    mock_get_mail_connection, data_fixture, mutable_notification_type_registry
 ):
     mock_connection = MagicMock()
     mock_get_mail_connection.return_value = mock_connection
@@ -522,32 +531,31 @@ def test_email_notifications_are_sent_only_after_setting_is_activated(
 
     with custom_notification_types_registered() as (TestNotification, _):
         user_1 = data_fixture.create_user(email_notification_frequency=options.NEVER)
-        data_fixture.create_notification(
-            recipients=[user_1], type=TestNotification.type
+        data_fixture.create_notification_for_users(
+            recipients=[user_1], notification_type=TestNotification.type
         )
+        assert NotificationRecipient.objects.filter(email_scheduled=True).count() == 0
 
-        assert NotificationRecipient.objects.filter(sent_by_email=True).count() == 0
-
-        UserHandler().update_user(user_1, email_notification_frequency=options.INSTANT)
-
-        assert NotificationRecipient.objects.filter(sent_by_email=True).count() == 1
-
-        res = NotificationHandler.send_email_notifications_to_users_matching_filters(
+        user_1 = UserHandler().update_user(
+            user_1, email_notification_frequency=options.INSTANT
+        )
+        res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
             Q(pk=user_1.pk)
         )
-        assert res.emails_sent == 0
+        assert res.users_with_notifications == []
+        assert mock_get_mail_connection.call_count == 0
 
-        data_fixture.create_notification(
-            recipients=[user_1], type=TestNotification.type
+        data_fixture.create_notification_for_users(
+            recipients=[user_1], notification_type=TestNotification.type
         )
 
-        res = NotificationHandler.send_email_notifications_to_users_matching_filters(
+        res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
             Q(pk=user_1.pk)
         )
-        assert res.emails_sent == 1
-        assert res.notified_users == [user_1.pk]
-        assert res.notifications_updated == 1
-        assert res.more_available is False
+
+        assert res.users_with_notifications == [user_1]
+        assert len(res.users_with_notifications[0].unsent_email_notifications) == 1
+        assert res.remaining_users_to_notify_count == 0
 
         mock_get_mail_connection.assert_called_once_with(fail_silently=False)
         summary_emails = mock_connection.send_messages.call_args[0][0]
@@ -556,7 +564,7 @@ def test_email_notifications_are_sent_only_after_setting_is_activated(
         assert user_1_summary_email.to == [user_1.email]
         assert (
             user_1_summary_email.get_subject()
-            == "You have 1 new notifications - Baserow"
+            == "You have 1 new notification - Baserow"
         )
 
         expected_context = {
@@ -566,8 +574,8 @@ def test_email_notifications_are_sent_only_after_setting_is_activated(
                     "description": None,
                 }
             ],
-            "total_count": 1,
-            "more_available_count": 0,
+            "new_notifications_count": 1,
+            "unlisted_notifications_count": 0,
         }
         user_1_summary_email_context = user_1_summary_email.get_context()
 
@@ -577,28 +585,29 @@ def test_email_notifications_are_sent_only_after_setting_is_activated(
 
 @pytest.mark.django_db(transaction=True)
 @patch("baserow.core.notifications.handler.get_mail_connection")
+@override_settings(MAX_NOTIFICATIONS_LISTED_PER_EMAIL=10)
 def test_email_notifications_are_included_up_to_email_limit(
-    mock_get_mail_connection, data_fixture
+    mock_get_mail_connection, data_fixture, mutable_notification_type_registry
 ):
     mock_connection = MagicMock()
     mock_get_mail_connection.return_value = mock_connection
-    limit = NotificationsSummaryEmail.MAX_NOTIFICATIONS_PER_EMAIL
+    limit = settings.MAX_NOTIFICATIONS_LISTED_PER_EMAIL
 
     with custom_notification_types_registered() as (TestNotification, _):
         user_1 = data_fixture.create_user()
 
         for _ in range(limit + 1):
-            data_fixture.create_notification(
-                recipients=[user_1], type=TestNotification.type
+            data_fixture.create_notification_for_users(
+                recipients=[user_1], notification_type=TestNotification.type
             )
 
-        res = NotificationHandler.send_email_notifications_to_users_matching_filters(
+        res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
             Q(pk=user_1.pk)
         )
-        assert res.emails_sent == 1
-        assert res.notified_users == [user_1.pk]
-        assert res.notifications_updated == limit + 1
-        assert res.more_available is False
+        assert res.users_with_notifications == [user_1]
+        assert len(res.users_with_notifications[0].unsent_email_notifications) == limit
+        assert res.users_with_notifications[0].total_unsent_count == limit + 1
+        assert res.remaining_users_to_notify_count == 0
 
         mock_get_mail_connection.assert_called_once_with(fail_silently=False)
         summary_emails = mock_connection.send_messages.call_args[0][0]
@@ -618,8 +627,8 @@ def test_email_notifications_are_included_up_to_email_limit(
                 }
                 for _ in range(limit)
             ],
-            "total_count": limit + 1,
-            "more_available_count": 1,
+            "new_notifications_count": limit + 1,
+            "unlisted_notifications_count": 1,
         }
         user_1_summary_email_context = user_1_summary_email.get_context()
 
@@ -628,7 +637,9 @@ def test_email_notifications_are_included_up_to_email_limit(
 
 
 @pytest.mark.django_db(transaction=True)
-def test_email_notifications_are_sent_just_once(data_fixture):
+def test_email_notifications_are_sent_just_once(
+    data_fixture, mutable_notification_type_registry
+):
     options = UserProfile.EmailNotificationFrequencyOptions
 
     with custom_notification_types_registered() as (
@@ -636,31 +647,34 @@ def test_email_notifications_are_sent_just_once(data_fixture):
         ExcludedFromEmailTestNotification,
     ):
         user_1 = data_fixture.create_user(email_notification_frequency=options.INSTANT)
-        data_fixture.create_notification(
-            recipients=[user_1], type=TestNotification.type
+        data_fixture.create_notification_for_users(
+            recipients=[user_1], notification_type=TestNotification.type
         )
-        data_fixture.create_notification(
-            recipients=[user_1], type=ExcludedFromEmailTestNotification.type
+        data_fixture.create_notification_for_users(
+            recipients=[user_1],
+            notification_type=ExcludedFromEmailTestNotification.type,
         )
 
-        res = NotificationHandler.send_email_notifications_to_users_with_frequency(
-            options.INSTANT
+        assert NotificationRecipient.objects.filter(email_scheduled=True).count() == 1
+        res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
+            Q(profile__email_notification_frequency=options.INSTANT)
         )
-        assert res.emails_sent == 1
-        assert res.notified_users == [user_1.pk]
-        assert res.notifications_updated == 2
-        assert res.more_available is False
+        assert res.users_with_notifications == [user_1]
+        assert len(res.users_with_notifications[0].unsent_email_notifications) == 1
+        assert res.remaining_users_to_notify_count == 0
 
-        res = NotificationHandler.send_email_notifications_to_users_with_frequency(
-            options.INSTANT
+        assert NotificationRecipient.objects.filter(email_scheduled=True).count() == 0
+        res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
+            Q(profile__email_notification_frequency=options.INSTANT)
         )
-        assert res.emails_sent == 0
+        assert res.users_with_notifications == []
+        assert res.remaining_users_to_notify_count == 0
 
 
 @pytest.mark.django_db(transaction=True)
 @patch("baserow.core.notifications.handler.get_mail_connection")
 def test_broadcast_notifications_are_not_sent_by_email(
-    mock_get_mail_connection, data_fixture
+    mock_get_mail_connection, data_fixture, mutable_notification_type_registry
 ):
     data_fixture.create_user(
         email_notification_frequency=UserProfile.EmailNotificationFrequencyOptions.INSTANT
@@ -669,7 +683,125 @@ def test_broadcast_notifications_are_not_sent_by_email(
 
     user_1 = data_fixture.create_user()
 
-    res = NotificationHandler.send_email_notifications_to_users_matching_filters(
+    res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
         Q(pk=user_1.pk)
     )
-    assert res.emails_sent == 0
+    assert res.users_with_notifications == []
+    assert res.remaining_users_to_notify_count == 0
+
+
+@pytest.mark.django_db(transaction=True)
+@patch("baserow.core.notifications.handler.get_mail_connection")
+@override_settings(EMAIL_NOTIFICATIONS_ENABLED=False)
+def test_email_notifications_are_not_sent_if_global_setting_is_disabled(
+    mock_get_mail_connection, data_fixture, mutable_notification_type_registry
+):
+    mock_connection = MagicMock()
+    mock_get_mail_connection.return_value = mock_connection
+
+    with custom_notification_types_registered() as (TestNotification, _):
+        user_1 = data_fixture.create_user()
+
+        data_fixture.create_notification_for_users(
+            recipients=[user_1], notification_type=TestNotification.type
+        )
+
+        assert NotificationRecipient.objects.filter(email_scheduled=True).count() == 1
+
+        res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
+            Q(pk=user_1.pk)
+        )
+        assert res.users_with_notifications == [user_1]
+        assert len(res.users_with_notifications[0].unsent_email_notifications) == 1
+        assert res.remaining_users_to_notify_count == 0
+
+        mock_get_mail_connection.assert_not_called()
+
+        # Ensure no more notifications are scheduled to be sent
+        assert NotificationRecipient.objects.filter(email_scheduled=True).count() == 0
+
+
+@pytest.mark.django_db(transaction=True)
+@patch("baserow.core.notifications.handler.get_mail_connection")
+def test_email_notifications_are_not_sent_if_already_read_by_user(
+    mock_get_mail_connection, data_fixture, mutable_notification_type_registry
+):
+    mock_connection = MagicMock()
+    mock_get_mail_connection.return_value = mock_connection
+
+    with custom_notification_types_registered() as (TestNotification, _):
+        user_1 = data_fixture.create_user()
+        workspace = data_fixture.create_workspace(user=user_1)
+
+        data_fixture.create_workspace_notification_for_users(
+            recipients=[user_1],
+            notification_type=TestNotification.type,
+            workspace=workspace,
+        )
+
+        assert NotificationRecipient.objects.filter(email_scheduled=True).count() == 1
+
+        NotificationHandler.mark_all_notifications_as_read(user_1, workspace)
+
+        assert NotificationRecipient.objects.filter(email_scheduled=True).count() == 0
+
+        res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
+            Q(pk=user_1.pk)
+        )
+        assert res.users_with_notifications == []
+        assert res.remaining_users_to_notify_count == 0
+
+        mock_get_mail_connection.assert_not_called()
+
+        notification = data_fixture.create_workspace_notification_for_users(
+            recipients=[user_1],
+            notification_type=TestNotification.type,
+            workspace=workspace,
+        )
+
+        assert NotificationRecipient.objects.filter(email_scheduled=True).count() == 1
+
+        NotificationHandler.mark_notification_as_read(user_1, notification)
+
+        assert NotificationRecipient.objects.filter(email_scheduled=True).count() == 0
+
+        res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
+            Q(pk=user_1.pk)
+        )
+        assert res.users_with_notifications == []
+        assert res.remaining_users_to_notify_count == 0
+
+        mock_get_mail_connection.assert_not_called()
+
+
+@pytest.mark.django_db(transaction=True)
+@patch("baserow.core.notifications.handler.get_mail_connection")
+def test_email_notifications_are_not_sent_if_already_cleared_by_user(
+    mock_get_mail_connection, data_fixture, mutable_notification_type_registry
+):
+    mock_connection = MagicMock()
+    mock_get_mail_connection.return_value = mock_connection
+
+    with custom_notification_types_registered() as (TestNotification, _):
+        user_1 = data_fixture.create_user()
+        workspace = data_fixture.create_workspace(user=user_1)
+
+        data_fixture.create_workspace_notification_for_users(
+            recipients=[user_1],
+            notification_type=TestNotification.type,
+            workspace=workspace,
+        )
+
+        assert NotificationRecipient.objects.filter(email_scheduled=True).count() == 1
+
+        NotificationHandler.clear_all_notifications(user_1, workspace)
+
+        assert NotificationRecipient.objects.filter(email_scheduled=True).count() == 0
+
+        res = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
+            Q(pk=user_1.pk)
+        )
+        assert res.users_with_notifications == []
+        assert res.remaining_users_to_notify_count == 0
+
+        mock_get_mail_connection.assert_not_called()

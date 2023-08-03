@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-28 07:47+0000\n"
+"POT-Creation-Date: 2023-08-07 15:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,10 +18,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/baserow/contrib/builder/application_types.py:43
+#: src/baserow/contrib/builder/application_types.py:49
 msgid "Homepage"
 msgstr ""
 
-#: src/baserow/contrib/builder/data_sources/service.py:120
+#: src/baserow/contrib/builder/data_sources/service.py:123
 msgid "Data source"
 msgstr ""

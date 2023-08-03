@@ -95,11 +95,11 @@ class NotificationRecipient(models.Model):
             "set to False and the user will be able to fetch it via API."
         ),
     )
-    sent_by_email = models.BooleanField(
+    email_scheduled = models.BooleanField(
         default=False,
         help_text=(
-            "If True, then the notification has been sent by email to the user. "
-            "This field is only used for direct notifications."
+            "If True, then the notification has been scheduled to be sent by email "
+            "to the recipient email."
         ),
     )
     # The following fields are copies of the notification fields needed to

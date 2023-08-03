@@ -4,8 +4,6 @@ from django.core.exceptions import ValidationError
 
 from rest_framework import serializers
 
-from baserow.core.models import UserProfile
-
 
 def password_validation(value):
     """
@@ -33,24 +31,6 @@ def language_validation(value):
         raise serializers.ValidationError(
             f"Only the following language keys are valid: {','.join(valid_languages)}",
             code="invalid_language",
-        )
-
-    return value
-
-
-def email_notification_frequency(value):
-    """
-    Verifies that the provided email notification frequency is a valid option.
-    """
-
-    valid_options = [
-        option[0] for option in UserProfile.EmailNotificationFrequencyOptions.choices
-    ]
-    if value not in valid_options:
-        raise serializers.ValidationError(
-            f"Only the following email notifications frequency options are valid: "
-            f"{','.join(valid_options)}",
-            code="invalid_email_notification_frequency",
         )
 
     return value

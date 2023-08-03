@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-28 07:47+0000\n"
+"POT-Creation-Date: 2023-08-07 15:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -188,24 +188,28 @@ msgstr ""
 msgid "Group \"%(group_name)s\" (%(group_id)s) left."
 msgstr ""
 
-#: src/baserow/core/emails.py:99
+#: src/baserow/core/emails.py:103
 #, python-format
 msgid "%(by)s invited you to %(workspace_name)s - Baserow"
 msgstr ""
 
-#: src/baserow/core/emails.py:128
+#: src/baserow/core/emails.py:136
+msgid "You have 1 new notification - Baserow"
+msgstr ""
+
+#: src/baserow/core/emails.py:138
 #, python-format
 msgid "You have %(count)d new notifications - Baserow"
 msgstr ""
 
 #: src/baserow/core/notification_types.py:91
 #, python-format
-msgid "%(user)s accepted your invitation to collaborate to %(workspace_name)s"
+msgid "%(user)s accepted your invitation to collaborate to %(workspace_name)s."
 msgstr ""
 
 #: src/baserow/core/notification_types.py:132
 #, python-format
-msgid "%(user)s rejected your invitation to collaborate to %(workspace_name)s"
+msgid "%(user)s rejected your invitation to collaborate to %(workspace_name)s."
 msgstr ""
 
 #: src/baserow/core/snapshots/actions.py:21
@@ -260,7 +264,7 @@ msgid "Accept invitation"
 msgstr ""
 
 #: src/baserow/core/templates/baserow/core/group_invitation.html:179
-#: src/baserow/core/templates/baserow/core/notifications_summary.html:215
+#: src/baserow/core/templates/baserow/core/notifications_summary.html:214
 #: src/baserow/core/templates/baserow/core/user/account_deleted.html:156
 #: src/baserow/core/templates/baserow/core/user/account_deletion_cancelled.html:156
 #: src/baserow/core/templates/baserow/core/user/account_deletion_scheduled.html:161
@@ -274,10 +278,19 @@ msgstr ""
 
 #: src/baserow/core/templates/baserow/core/notifications_summary.html:148
 #, python-format
-msgid "You have %(count)s new notifications in Baserow."
-msgstr ""
+msgid "You have %(counter)s new notification"
+msgid_plural "You have %(counter)s new notifications"
+msgstr[0] ""
+msgstr[1] ""
 
-#: src/baserow/core/templates/baserow/core/notifications_summary.html:201
+#: src/baserow/core/templates/baserow/core/notifications_summary.html:189
+#, python-format
+msgid "Plus %(counter)s more notification."
+msgid_plural "Plus %(counter)s more notifications."
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/baserow/core/templates/baserow/core/notifications_summary.html:200
 msgid "View in Baserow"
 msgstr ""
 

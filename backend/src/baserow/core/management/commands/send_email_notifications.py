@@ -1,10 +1,33 @@
+import sys
+from datetime import datetime
+
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 
+import pytz
 from loguru import logger
 
-from baserow.core.models import UserProfile
+from baserow.core.models import User, UserProfile
 from baserow.core.notifications.handler import NotificationHandler
+from baserow.core.notifications.tasks import (
+    send_daily_notifications_email_to_users,
+    send_instant_notifications_email_to_users,
+    send_weekly_notifications_email_to_users,
+)
+
+
+def send_notifications_to_users_with_frequency(frequency, timestamp):
+    if timestamp is not None:
+        timestamp = datetime.fromisoformat(timestamp)
+        if timestamp.tzinfo is None:
+            timestamp = timestamp.astimezone(pytz.UTC)
+
+    if frequency == UserProfile.EmailNotificationFrequencyOptions.INSTANT.value:
+        return send_instant_notifications_email_to_users()
+    elif frequency == UserProfile.EmailNotificationFrequencyOptions.DAILY.value:
+        return send_daily_notifications_email_to_users(timestamp)
+    elif frequency == UserProfile.EmailNotificationFrequencyOptions.WEEKLY.value:
+        return send_weekly_notifications_email_to_users(timestamp)
 
 
 class Command(BaseCommand):
@@ -17,7 +40,22 @@ class Command(BaseCommand):
             "--frequency",
             type=str,
             choices=[x.value for x in UserProfile.EmailNotificationFrequencyOptions],
-            help="The user frequency setting of email notifications to send.",
+            help=(
+                "Filter users to notify by email based on the email_notification_frequency "
+                "profile settings (instant, daily, weekly)."
+            ),
+        )
+        parser.add_argument(
+            "-t",
+            "--timestamp",
+            type=str,
+            help=(
+                "This is an ISO timestamp used to schedule the command for execution at a specified time. "
+                "This argument is particularly useful for sending daily and weekly notifications to users "
+                "in specific timezones. For instance, if EMAIL_NOTIFICATIONS_DAILY_HOUR_OF_DAY is set "
+                "to 14 (2 PM), you can provide the timestamp of 2023-08-01T12:00:00 to send daily email "
+                "notifications to all users in the UTC+2 timezone (i.e. Europe/Rome)."
+            ),
         )
         parser.add_argument(
             "-l",
@@ -38,27 +76,22 @@ class Command(BaseCommand):
         frequency = options["frequency"]
         max_emails = options["limit"]
         user_id = options["user_id"]
+        timestamp = options["timestamp"]
 
         if user_id is not None and not frequency:
-            result = (
-                NotificationHandler.send_email_notifications_to_users_matching_filters(
-                    Q(id=user_id), max_emails=max_emails
-                )
+            result = NotificationHandler.send_new_notifications_to_users_matching_filters_by_email(
+                Q(id=user_id), max_emails=max_emails
             )
             logger.info(
-                f"Sent {result.emails_sent} email notifications to user with user_id {user_id}"
+                f"Sent {len(result.users_with_notifications)} email "
+                f"notifications to {User.objects.get(pk=user_id).email} (id={user_id})"
             )
         elif frequency is not None:
-            result = (
-                NotificationHandler.send_email_notifications_to_users_with_frequency(
-                    frequency, max_emails=max_emails
-                )
-            )
+            result = send_notifications_to_users_with_frequency(frequency, timestamp)
             logger.info(
-                f"Sent {result.emails_sent} email notifications to users "
-                f"with the frequency set to {frequency}."
+                f"Sent {len(result.users_with_notifications)} email "
+                f"notifications to users with the frequency set to {frequency}."
             )
         else:
-            raise ValueError(
-                "Either the frequency or the user id must be provided, but not both."
-            )
+            print("Please provide one between --frequency or --user-id.\n")
+            self.print_help(sys.argv[0], sys.argv[1])

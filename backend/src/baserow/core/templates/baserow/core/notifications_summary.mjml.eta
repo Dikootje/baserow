@@ -3,22 +3,26 @@
 <mj-section>
   <mj-column>
     <mj-text mj-class="title mb-20">
-      {% blocktrans trimmed with total_count as count %}
-        You have {{ count }} new notifications in Baserow.
+      {% blocktrans trimmed count counter=new_notifications_count %}
+        You have {{ counter }} new notification
+        {% plural %}
+        You have {{ counter }} new notifications
       {% endblocktrans %}
     </mj-text>
     <mj-divider border-width="1px" border-style="dashed" border-color="lightgrey" />
     <mj-raw><!-- htmlmin:ignore -->{% for notification in notifications %}<!-- htmlmin:ignore --></mj-raw>
       <mj-text mj-class="notification-title">{{ notification.title }}</mj-text>
       <mj-raw><!-- htmlmin:ignore -->{% if notification.description %}<!-- htmlmin:ignore --></mj-raw>
-        <mj-text mj-class="notification-description">{{ notification.description }}</mj-text>
+        <mj-text mj-class="notification-description">{{ notification.description|linebreaksbr }}</mj-text>
       <mj-raw><!-- htmlmin:ignore -->{% endif %}<!-- htmlmin:ignore --></mj-raw>
       <mj-divider border-width="1px" border-style="dashed" border-color="lightgrey" />
     <mj-raw><!-- htmlmin:ignore -->{% endfor %}<!-- htmlmin:ignore --></mj-raw>
-    <mj-raw><!-- htmlmin:ignore -->{% if more_available_count %}<!-- htmlmin:ignore --></mj-raw>
+    <mj-raw><!-- htmlmin:ignore -->{% if unlisted_notifications_count %}<!-- htmlmin:ignore --></mj-raw>
         <mj-text mj-class="notification-description">
-        {% blocktrans trimmed with more_available_count as count %}
-          Plus {{ count }} more notifications.
+        {% blocktrans trimmed count counter=unlisted_notifications_count %}
+          Plus {{ counter }} more notification.
+          {% plural %}
+          Plus {{ counter }} more notifications.
         {% endblocktrans %}
         </mj-text>
       <mj-raw><!-- htmlmin:ignore -->{% endif %}<!-- htmlmin:ignore --></mj-raw>

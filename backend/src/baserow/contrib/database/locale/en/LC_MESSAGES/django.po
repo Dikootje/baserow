@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-28 07:47+0000\n"
+"POT-Creation-Date: 2023-08-07 15:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -108,7 +108,8 @@ msgstr ""
 #: src/baserow/contrib/database/fields/notification_types.py:45
 #, python-format
 msgid ""
-"%(sender)s assigned you to %(field_name)s in row %(row_id)s in %(table_name)s"
+"%(sender)s assigned you to %(field_name)s in row %(row_id)s in "
+"%(table_name)s."
 msgstr ""
 
 #: src/baserow/contrib/database/plugins.py:63
@@ -229,11 +230,11 @@ msgstr ""
 msgid "Row (%(row_id)s) updated"
 msgstr ""
 
-#: src/baserow/contrib/database/rows/actions.py:686
+#: src/baserow/contrib/database/rows/actions.py:687
 msgid "Update rows"
 msgstr ""
 
-#: src/baserow/contrib/database/rows/actions.py:686
+#: src/baserow/contrib/database/rows/actions.py:687
 #, python-format
 msgid "Rows (%(row_ids)s) updated"
 msgstr ""
@@ -423,67 +424,67 @@ msgstr ""
 msgid "View changed public slug URL"
 msgstr ""
 
-#: src/baserow/contrib/database/views/actions.py:838
+#: src/baserow/contrib/database/views/actions.py:839
 msgid "Update view"
 msgstr ""
 
-#: src/baserow/contrib/database/views/actions.py:839
+#: src/baserow/contrib/database/views/actions.py:840
 #, python-format
 msgid "View \"%(view_name)s\" (%(view_id)s) updated"
 msgstr ""
 
-#: src/baserow/contrib/database/views/actions.py:912
+#: src/baserow/contrib/database/views/actions.py:914
 msgid "Create view"
 msgstr ""
 
-#: src/baserow/contrib/database/views/actions.py:913
+#: src/baserow/contrib/database/views/actions.py:915
 #, python-format
 msgid "View \"%(view_name)s\" (%(view_id)s) created"
 msgstr ""
 
-#: src/baserow/contrib/database/views/actions.py:981
+#: src/baserow/contrib/database/views/actions.py:983
 msgid "Duplicate view"
 msgstr ""
 
-#: src/baserow/contrib/database/views/actions.py:983
+#: src/baserow/contrib/database/views/actions.py:985
 #, python-format
 msgid ""
 "View \"%(view_name)s\" (%(view_id)s) duplicated from view "
 "\"%(original_view_name)s\" (%(original_view_id)s)"
 msgstr ""
 
-#: src/baserow/contrib/database/views/actions.py:1051
+#: src/baserow/contrib/database/views/actions.py:1053
 msgid "Delete view"
 msgstr ""
 
-#: src/baserow/contrib/database/views/actions.py:1052
+#: src/baserow/contrib/database/views/actions.py:1054
 #, python-format
 msgid "View \"%(view_name)s\" (%(view_id)s) deleted"
 msgstr ""
 
-#: src/baserow/contrib/database/views/actions.py:1109
+#: src/baserow/contrib/database/views/actions.py:1111
 msgid "Create decoration"
 msgstr ""
 
-#: src/baserow/contrib/database/views/actions.py:1110
+#: src/baserow/contrib/database/views/actions.py:1112
 #, python-format
 msgid "View decoration %(decorator_id)s created"
 msgstr ""
 
-#: src/baserow/contrib/database/views/actions.py:1205
+#: src/baserow/contrib/database/views/actions.py:1207
 msgid "Update decoration"
 msgstr ""
 
-#: src/baserow/contrib/database/views/actions.py:1206
+#: src/baserow/contrib/database/views/actions.py:1208
 #, python-format
 msgid "View decoration %(decorator_id)s updated"
 msgstr ""
 
-#: src/baserow/contrib/database/views/actions.py:1330
+#: src/baserow/contrib/database/views/actions.py:1332
 msgid "Delete decoration"
 msgstr ""
 
-#: src/baserow/contrib/database/views/actions.py:1331
+#: src/baserow/contrib/database/views/actions.py:1333
 #, python-format
 msgid "View decoration %(decorator_id)s deleted"
 msgstr ""
@@ -499,22 +500,22 @@ msgid ""
 "to %(webhook_url)s\" created"
 msgstr ""
 
-#: src/baserow/contrib/database/webhooks/actions.py:81
+#: src/baserow/contrib/database/webhooks/actions.py:82
 msgid "Delete Webhook"
 msgstr ""
 
-#: src/baserow/contrib/database/webhooks/actions.py:83
+#: src/baserow/contrib/database/webhooks/actions.py:84
 #, python-format
 msgid ""
 "Webhook \"%(webhook_name)s\" (%(webhook_id)s) as %(webhook_request_method)s "
 "to %(webhook_url)s\" deleted"
 msgstr ""
 
-#: src/baserow/contrib/database/webhooks/actions.py:138
+#: src/baserow/contrib/database/webhooks/actions.py:140
 msgid "Update Webhook"
 msgstr ""
 
-#: src/baserow/contrib/database/webhooks/actions.py:140
+#: src/baserow/contrib/database/webhooks/actions.py:142
 #, python-format
 msgid ""
 "Webhook \"%(webhook_name)s\" (%(webhook_id)s) as %(webhook_request_method)s "

@@ -8,6 +8,8 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils.translation import gettext as _
 
+from loguru import logger
+
 from baserow.core.notifications.models import Notification
 from baserow.core.notifications.registries import notification_type_registry
 
@@ -114,26 +116,25 @@ class WorkspaceInvitationEmail(BaseEmailMessage):
 
 class NotificationsSummaryEmail(BaseEmailMessage):
     template_name = "baserow/core/notifications_summary.html"
-    MAX_NOTIFICATIONS_PER_EMAIL = 10
 
     def __init__(
         self,
-        to,
+        to: List[str],
         notifications: List[Notification],
-        more_available_count: int = 0,
+        new_notifications_count: int,
         *args,
-        **kwargs
+        **kwargs,
     ):
-        limit = self.MAX_NOTIFICATIONS_PER_EMAIL
-        self.total_count = len(notifications) + more_available_count
-        self.more_available_count = more_available_count + max(
-            len(notifications) - limit, 0
-        )
-        self.notifications = notifications[:limit]
-        super().__init__(to=to, *args, **kwargs)
+        self.notifications = notifications
+        self.new_notifications_count = new_notifications_count
+        super().__init__(to, *args, **kwargs)
 
     def get_subject(self):
-        count = self.total_count
+        count = self.new_notifications_count
+
+        if count == 1:
+            return _("You have 1 new notification - Baserow")
+
         return _("You have %(count)d new notifications - Baserow") % {"count": count}
 
     def get_context(self):
@@ -141,17 +142,34 @@ class NotificationsSummaryEmail(BaseEmailMessage):
         rendered_notifications = []
         for notification in self.notifications:
             notification_type = notification_type_registry.get(notification.type)
+            if not notification_type.include_in_notifications_email:
+                logger.error(
+                    f"Notification type {notification_type.type} cannot be included "
+                    f"in the notifications email but it was included in the query. This "
+                    f"shouldn't happen."
+                )
+                continue
+
+            email_title = notification_type.get_notification_title_for_email(
+                notification, context
+            )
+            email_description = (
+                notification_type.get_notification_description_for_email(
+                    notification, context
+                )
+            )
             rendered_notifications.append(
                 {
-                    "title": notification_type.render_title(notification, context),
-                    "description": notification_type.render_description(
-                        notification, context
-                    ),
+                    "title": email_title,
+                    "description": email_description,
                 }
             )
+        unlisted_notifications_count = self.new_notifications_count - len(
+            rendered_notifications
+        )
         context.update(
             notifications=rendered_notifications,
-            total_count=self.total_count,
-            more_available_count=self.more_available_count,
+            new_notifications_count=self.new_notifications_count,
+            unlisted_notifications_count=unlisted_notifications_count,
         )
         return context

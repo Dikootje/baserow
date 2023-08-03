@@ -29,6 +29,7 @@ from .mixins import (
 )
 from .notifications.models import Notification
 from .services.models import Service
+from .timezones import ALL_TIMEZONES
 
 __all__ = [
     "Settings",
@@ -128,6 +129,8 @@ class UserProfile(models.Model):
         WEEKLY = "weekly", "weekly"
         NEVER = "never", "never"
 
+    TIMEZONES = [(tz, tz) for tz in ALL_TIMEZONES]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     language = models.TextField(
         max_length=10,
@@ -147,10 +150,21 @@ class UserProfile(models.Model):
         blank=True,
         help_text="An optional per user concurrency limit.",
     )
+    timezone = models.CharField(
+        max_length=255,
+        choices=TIMEZONES,
+        default="UTC",
+        help_text="The user timezone to use for dates and times.",
+    )
     email_notification_frequency = models.TextField(
         max_length=16,
         choices=EmailNotificationFrequencyOptions.choices,
         default=EmailNotificationFrequencyOptions.INSTANT,
+    )
+    last_notifications_email_sent_at = models.DateTimeField(
+        null=True,
+        default=None,
+        help_text="The last time an email notification was sent to the user.",
     )
 
 

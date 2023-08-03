@@ -29,7 +29,6 @@ from baserow.core.models import (
     Workspace,
     WorkspaceUser,
 )
-from baserow.core.notifications.models import NotificationRecipient
 from baserow.core.registries import plugin_registry
 from baserow.core.signals import (
     before_user_deleted,
@@ -250,11 +249,12 @@ class UserHandler(metaclass=baserow_trace_methods(tracer)):
         :param user: The user instance to update.
         :param first_name: The new user first name.
         :param language: The language selected by the user.
-        :param email_notification_frequency: The frequency of email notifications.
-        :return: The user object.
+        :param email_notification_frequency: The frequency chosen by the user to
+            receive email notifications.
+        :return: The updated user object.
         """
 
-        if first_name is not None:
+        if first_name is not None and first_name != user.first_name:
             user.first_name = first_name
             user.save()
 
@@ -265,16 +265,6 @@ class UserHandler(metaclass=baserow_trace_methods(tracer)):
             profile_fields_to_update.append("language")
 
         if email_notification_frequency is not None:
-            # If the user wants to activate email notifications, he just wants
-            # to receive emails from now on, so set all previous notifications
-            # to sent_by_email=True
-            prev_value = user.profile.email_notification_frequency
-            never = UserProfile.EmailNotificationFrequencyOptions.NEVER
-            if prev_value is never and email_notification_frequency is not never:
-                NotificationRecipient.objects.filter(
-                    recipient_id=user.id, sent_by_email=False
-                ).update(sent_by_email=True)
-
             user.profile.email_notification_frequency = email_notification_frequency
             profile_fields_to_update.append("email_notification_frequency")
 

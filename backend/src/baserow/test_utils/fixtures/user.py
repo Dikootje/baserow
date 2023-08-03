@@ -48,6 +48,7 @@ class UserFixtures:
         profile_data["email_notification_frequency"] = kwargs.pop(
             "email_notification_frequency", "instant"
         )
+        profile_data["timezone"] = kwargs.pop("timezone", "UTC")
 
         user = User(**kwargs)
         user.set_password(kwargs["password"])
