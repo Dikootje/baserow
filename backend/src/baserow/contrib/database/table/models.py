@@ -63,6 +63,11 @@ from baserow.core.utils import split_comma_separated_string
 deconstruct_filter_key_or_name_regex = re.compile(
     r"filter__(?:field_)?([0-9a-zA-Z\s]+|created_on|updated_on)__([a-zA-Z0-9_]*)$"
 )
+
+
+deconstruct_filter_key_regex = re.compile(
+    r"filter__field_([0-9]+|created_on|updated_on)__([a-zA-Z0-9_]*)$"
+)
 tracer = trace.get_tracer(__name__)
 
 
@@ -414,7 +419,11 @@ class TableModelQuerySet(models.QuerySet):
             }
 
         for key, values in filter_object.items():
-            matches = deconstruct_filter_key_or_name_regex.match(key)
+            if user_field_names:
+                matches = deconstruct_filter_key_or_name_regex.match(key)
+            else:
+                matches = deconstruct_filter_key_regex.match(key)
+
             if not matches:
                 continue
 
