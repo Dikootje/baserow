@@ -25,7 +25,8 @@
           v-if="index === 1 && !disableFilter"
           :value="filterType"
           :show-search="false"
-          class="dropdown--floating dropdown--tiny"
+          :fixed-items="true"
+          class="dropdown--tiny"
           @input="selectBooleanOperator($event)"
         >
           <DropdownItem
@@ -49,7 +50,8 @@
         <Dropdown
           :value="filter.field"
           :disabled="disableFilter"
-          class="dropdown--floating dropdown--tiny"
+          :fixed-items="true"
+          class="dropdown--tiny"
           @input="updateFilter(filter, { field: $event })"
         >
           <DropdownItem
@@ -65,7 +67,8 @@
         <Dropdown
           :disabled="disableFilter"
           :value="filter.type"
-          class="dropdown--floating dropdown--tiny"
+          :fixed-items="true"
+          class="dropdown--tiny"
           @input="updateFilter(filter, { type: $event })"
         >
           <DropdownItem
