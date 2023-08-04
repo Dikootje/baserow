@@ -1,0 +1,101 @@
+.switch {
+  position: relative;
+  line-height: 22px;
+  height: 28px;
+  padding-left: 40px;
+  cursor: pointer;
+  user-select: none;
+
+  &.switch--static {
+    cursor: initial;
+    user-select: initial;
+  }
+
+  &:focus {
+    &::before {
+      box-shadow: 0 0 0 2px #fff, 0 0 0 4px $color-neutral-1300 !important;
+    }
+  }
+
+  &:hover {
+    &::before {
+      background-color: $color-neutral-500;
+    }
+  }
+
+  &::before {
+    content: '';
+    @include rounded($radius-xl);
+    width: 40px;
+    height: 24px;
+    background-color: $color-neutral-400;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  &::after {
+    content: '';
+    border-radius: 100%;
+    width: 20px;
+    height: 20px;
+    background-color: $white;
+    transition: left 0.1s ease-in;
+    box-shadow: 0px 1px 3px 0px rgba(7, 13, 16, 0.15),
+      0px 0px 1px 0px rgba(7, 13, 16, 0.15);
+
+    @include absolute(2px, auto, auto, 2px);
+  }
+
+  &.active {
+    &::before {
+      background-color: $color-green-500;
+    }
+
+    &:hover {
+      &::before {
+        background-color: $color-green-800;
+      }
+    }
+
+    &::after {
+      left: 17px;
+    }
+  }
+
+  &.switch--disabled {
+    cursor: not-allowed;
+
+    &::before {
+      background-color: $color-neutral-400;
+    }
+
+    &::after {
+      box-shadow: none;
+    }
+  }
+
+  &.switch--small {
+    padding-left: 24px;
+    line-height: 16px;
+
+    &::before {
+      height: 16px;
+      width: 24px;
+    }
+
+    &::after {
+      top: 2px;
+      width: 12px;
+      height: 12px;
+    }
+
+    &.active::after {
+      left: 10px;
+    }
+  }
+}
+
+.switch__label {
+  margin-left: 8px;
+}

@@ -1,6 +1,8 @@
 <template>
-  <div class="switch" :class="classNames" @click="toggle(value)">
-    <slot></slot>
+  <div class="switch" :class="classNames" @click="toggle(checked)">
+    <div class="switch__label">
+      <slot></slot>
+    </div>
   </div>
 </template>
 
@@ -8,12 +10,12 @@
 export default {
   name: 'SwitchInput',
   props: {
-    value: {
-      type: [Boolean, Number],
+    checked: {
+      type: Boolean,
       required: false,
       default: false,
     },
-    large: {
+    small: {
       type: Boolean,
       required: false,
       default: false,
@@ -27,14 +29,9 @@ export default {
   computed: {
     classNames() {
       return {
-        'switch--has-content': Object.prototype.hasOwnProperty.call(
-          this.$slots,
-          'default'
-        ),
-        'switch--large': this.large,
+        'switch--small': this.small,
         'switch--disabled': this.disabled,
-        active: this.value === true,
-        unknown: this.value !== true && this.value !== false,
+        active: this.checked === true,
       }
     },
   },
