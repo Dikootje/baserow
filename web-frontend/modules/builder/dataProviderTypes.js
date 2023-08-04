@@ -22,7 +22,9 @@ export class DataSourceDataProviderType extends DataProviderType {
   }
 
   async init(runtimeFormulaContext) {
-    const dataSources = this.app.store.getters['dataSource/getDataSources']
+    const dataSources = this.app.store.getters['dataSource/getPageDataSources'](
+      runtimeFormulaContext.applicationContext.page
+    )
 
     await this.app.store.dispatch(
       'dataSourceContent/fetchPageDataSourceContent',
@@ -36,7 +38,9 @@ export class DataSourceDataProviderType extends DataProviderType {
 
   getDataChunk(runtimeFormulaContext, [dataSourceName, ...rest]) {
     // Get the data sources for the current page.
-    const dataSources = this.app.store.getters['dataSource/getDataSources']
+    const dataSources = this.app.store.getters['dataSource/getPageDataSources'](
+      runtimeFormulaContext.applicationContext.page
+    )
 
     const dataSource = dataSources.find(({ name }) => name === dataSourceName)
 

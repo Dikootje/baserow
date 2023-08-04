@@ -28,7 +28,6 @@ export default {
         if (builderId) {
           // We have the builderId in the params so this is a preview
           // Must fetch the builder instance by this Id.
-
           await context.store.dispatch('publicBuilder/fetchById', {
             builderId,
           })

@@ -7,6 +7,7 @@ export function populatePage(page) {
   page._ = {
     selected: false,
   }
+  page.dataSource = []
   return page
 }
 
