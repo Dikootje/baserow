@@ -14,6 +14,7 @@
         v-if="elementsMatchingSearchTerm.length"
         :elements="elementsMatchingSearchTerm"
         :element-selected="elementSelected"
+        :page="page"
         @select="selectElement($event)"
       />
       <div class="select__footer">
@@ -56,9 +57,11 @@ export default {
   computed: {
     ...mapGetters({
       page: 'page/getSelected',
-      elements: 'element/getRootElements',
       elementSelected: 'element/getSelected',
     }),
+    elements() {
+      return this.$store.getters['element/getRootElements'](this.page)
+    },
     elementsMatchingSearchTerm() {
       if (
         this.search === '' ||

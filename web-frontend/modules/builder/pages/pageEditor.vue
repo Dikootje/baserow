@@ -41,19 +41,18 @@ export default {
     const data = { panelWidth: 360 }
 
     try {
-      await store.dispatch('element/clearAll')
-      const { builder, page } = await store.dispatch('page/selectById', {
-        builderId,
-        pageId,
-      })
-      data.builder = builder
-      data.page = page
+      const builder = await store.dispatch('application/selectById', builderId)
+
+      const page = await store.getters['page/getById'](builder, pageId)
 
       await store.dispatch('workspace/selectById', builder.workspace.id)
 
-      await store.dispatch('dataSource/fetch', {
-        page,
-      })
+      await Promise.all([
+        store.dispatch('dataSource/fetch', {
+          page,
+        }),
+        store.dispatch('element/fetch', { page }),
+      ])
 
       const runtimeFormulaContext = new RuntimeFormulaContext(
         $registry.getAll('builderDataProvider'),
@@ -67,7 +66,14 @@ export default {
       // Initialize all data provider contents
       await runtimeFormulaContext.initAll()
 
-      await store.dispatch('element/fetch', { page })
+      // And finally select the page to display it
+      await store.dispatch('page/selectById', {
+        builder,
+        pageId,
+      })
+
+      data.builder = builder
+      data.page = page
     } catch (e) {
       // In case of a network error we want to fail hard.
       if (e.response === undefined && !(e instanceof StoreItemLookupError)) {

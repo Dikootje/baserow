@@ -50,12 +50,14 @@ export class DataSourceDataProviderType extends DataProviderType {
 
     // Update the dataSource content if needed
     this.app.store.dispatch('dataSourceContent/smartFetchDataSourceContent', {
+      page: runtimeFormulaContext.applicationContext.page,
       dataSource,
       data: runtimeFormulaContext.getAllBackendContext(),
     })
 
-    const dataSourceContents =
-      this.app.store.getters['dataSourceContent/getDataSourceContents']
+    const dataSourceContents = this.app.store.getters[
+      'dataSourceContent/getDataSourceContents'
+    ](runtimeFormulaContext.applicationContext.page)
 
     if (!dataSourceContents[dataSource.id]) {
       return null
@@ -83,6 +85,7 @@ export class PageParameterDataProviderType extends DataProviderType {
       await Promise.all(
         page.path_params.map(({ name, type }) =>
           this.app.store.dispatch('pageParameter/setParameter', {
+            page,
             name,
             value: type === 'numeric' ? 1 : 'test',
           })
@@ -93,6 +96,7 @@ export class PageParameterDataProviderType extends DataProviderType {
       await Promise.all(
         Object.entries(pageParamsValue).map(([name, value]) =>
           this.app.store.dispatch('pageParameter/setParameter', {
+            page,
             name,
             value,
           })
@@ -107,7 +111,9 @@ export class PageParameterDataProviderType extends DataProviderType {
     }
 
     const [prop] = path
-    const parameters = this.app.store.getters['pageParameter/getParameters']
+    const parameters = this.app.store.getters['pageParameter/getParameters'](
+      runtimeFormulaContext.applicationContext.page
+    )
 
     if (parameters[prop] === undefined) {
       return null
@@ -116,7 +122,11 @@ export class PageParameterDataProviderType extends DataProviderType {
     return parameters[prop]
   }
 
-  getBackendContext() {
-    return clone(this.app.store.getters['pageParameter/getParameters'])
+  getBackendContext(runtimeFormulaContext) {
+    return clone(
+      this.app.store.getters['pageParameter/getParameters'](
+        runtimeFormulaContext.applicationContext.page
+      )
+    )
   }
 }

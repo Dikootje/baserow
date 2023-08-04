@@ -2,45 +2,40 @@ import _ from 'lodash'
 import DataSourceService from '@baserow/modules/builder/services/dataSource'
 import { clone } from '@baserow/modules/core/utils/object'
 
-const state = {
-  // The data source loaded content.
-  contents: {},
-  // Save the fetch content status
-  fetchContext: {},
-}
+const state = {}
 
 const fetchTimeout = {}
 
 const mutations = {
-  SET_CONTENT(state, { dataSourceId, value }) {
-    if (!state.contents[dataSourceId]) {
+  SET_CONTENT(state, { page, dataSourceId, value }) {
+    if (!page.contents[dataSourceId]) {
       // Here we need to change the reference of the dataSourceContents object to
       // trigger computed values that use it in some situation (before the key exists
       // for instance)
-      state.contents = {
-        ...state.contents,
+      page.contents = {
+        ...page.contents,
         [dataSourceId]: value,
       }
-    } else if (!_.isEqual(state.contents[dataSourceId], value)) {
-      state.contents[dataSourceId] = value
+    } else if (!_.isEqual(page.contents[dataSourceId], value)) {
+      page.contents[dataSourceId] = value
     }
   },
-  UPDATE_FETCH_CONTEXT(state, { dataSourceId, value }) {
-    if (!state.fetchContext[dataSourceId]) {
+  UPDATE_FETCH_CONTEXT(state, { page, dataSourceId, value }) {
+    if (!page.fetchContext[dataSourceId]) {
       // Here we need to change the reference of the dataSourceContents object to
       // trigger computed values that use it in some situation (before the key exists
       // for instance)
-      state.fetchContext = {
-        ...state.fetchContext,
+      page.fetchContext = {
+        ...page.fetchContext,
         [dataSourceId]: { lastDataSource: null, lastQueryData: null, ...value },
       }
-    } else if (!_.isEqual(state.fetchContext[dataSourceId], value)) {
-      state.fetchContext[dataSourceId] = value
+    } else if (!_.isEqual(page.fetchContext[dataSourceId], value)) {
+      page.fetchContext[dataSourceId] = value
     }
   },
-  CLEAR_CONTENTS(state) {
-    state.contents = {}
-    state.fetchContext = {}
+  CLEAR_CONTENTS(state, { page }) {
+    page.contents = {}
+    page.fetchContext = {}
   },
 }
 
@@ -50,7 +45,10 @@ const actions = {
    * @param {object} dataSource the data source we want to dispatch
    * @param {object} data the query body
    */
-  async fetchDataSourceContent({ commit }, { dataSource, data: queryData }) {
+  async fetchDataSourceContent(
+    { commit },
+    { page, dataSource, data: queryData }
+  ) {
     if (!dataSource.type) {
       return
     }
@@ -63,14 +61,23 @@ const actions = {
           dataSource.id,
           queryData
         )
-        commit('SET_CONTENT', { dataSourceId: dataSource.id, value: data })
+        commit('SET_CONTENT', {
+          page,
+          dataSourceId: dataSource.id,
+          value: data,
+        })
       } else {
-        commit('SET_CONTENT', { dataSourceId: dataSource.id, value: null })
+        commit('SET_CONTENT', {
+          page,
+          dataSourceId: dataSource.id,
+          value: null,
+        })
       }
     } catch (e) {
-      commit('SET_CONTENT', { dataSourceId: dataSource.id, value: null })
+      commit('SET_CONTENT', { page, dataSourceId: dataSource.id, value: null })
     } finally {
       commit('UPDATE_FETCH_CONTEXT', {
+        page,
         dataSourceId: dataSource.id,
         value: {
           lastDataSource: clone(dataSource),
@@ -98,6 +105,7 @@ const actions = {
         // if we don't find the data source it means it's not fully configured
         if (foundDataSource !== undefined) {
           commit('UPDATE_FETCH_CONTEXT', {
+            page,
             dataSourceId,
             value: {
               lastDataSource: clone(foundDataSource),
@@ -105,14 +113,14 @@ const actions = {
             },
           })
           if (dataContent._error) {
-            commit('SET_CONTENT', { dataSourceId, value: null })
+            commit('SET_CONTENT', { page, dataSourceId, value: null })
           } else {
-            commit('SET_CONTENT', { dataSourceId, value: dataContent })
+            commit('SET_CONTENT', { page, dataSourceId, value: dataContent })
           }
         }
       })
     } catch (e) {
-      commit('CLEAR_CONTENTS')
+      commit('CLEAR_CONTENTS', { page })
       throw e
     }
   },
@@ -126,11 +134,11 @@ const actions = {
    */
   smartFetchDataSourceContent(
     { dispatch, getters },
-    { dataSource, data: queryData }
+    { page, dataSource, data: queryData }
   ) {
     const fetch = async () => {
       const { lastDataSource = null, lastQueryData = null } =
-        getters.getFetchContext[dataSource.id] || {}
+        getters.getFetchContext(page)[dataSource.id] || {}
       // We want to update the content only if the dataSource configuration or the query
       // parameters have changed.
       if (
@@ -138,6 +146,7 @@ const actions = {
         !_.isEqual(lastQueryData, queryData)
       ) {
         await dispatch('fetchDataSourceContent', {
+          page,
           dataSource,
           data: queryData,
         })
@@ -149,17 +158,17 @@ const actions = {
     fetchTimeout[dataSource.id] = setTimeout(fetch, 500)
   },
 
-  clearDataSourceContents({ commit }) {
-    commit('CLEAR_CONTENTS')
+  clearDataSourceContents({ commit }, { page }) {
+    commit('CLEAR_CONTENTS', { page })
   },
 }
 
 const getters = {
-  getDataSourceContents: (state) => {
-    return state.contents
+  getDataSourceContents: (state) => (page) => {
+    return page.contents
   },
-  getFetchContext: (state) => {
-    return state.fetchContext
+  getFetchContext: (state) => (page) => {
+    return page.fetchContext
   },
 }
 

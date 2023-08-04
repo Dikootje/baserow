@@ -11,7 +11,6 @@
 import PageContent from '@baserow/modules/builder/components/page/PageContent'
 import { resolveApplicationRoute } from '@baserow/modules/builder/utils/routing'
 import RuntimeFormulaContext from '@baserow/modules/core/runtimeFormulaContext'
-import { mapGetters } from 'vuex'
 
 export default {
   components: { PageContent },
@@ -19,9 +18,9 @@ export default {
     return { builder: this.builder, page: this.page, mode: this.mode }
   },
   async asyncData(context) {
-    let builder = context.store.getters['publicBuilder/getBuilder']
+    let builder = context.store.getters['application/getSelected']
     let mode = 'public'
-    const builderId = context.route.params.builderId
+    const builderId = parseInt(context.route.params.builderId, 10)
 
     if (!builder) {
       try {
@@ -31,6 +30,10 @@ export default {
           await context.store.dispatch('publicBuilder/fetchById', {
             builderId,
           })
+          builder = await context.store.dispatch(
+            'application/selectById',
+            builderId
+          )
         } else {
           // We don't have the builderId so it's a public page.
           // Must fetch the builder instance by domain name.
@@ -39,11 +42,17 @@ export default {
             : window.location.host
           const domain = new URL(`http://${host}`).hostname
 
-          await context.store.dispatch('publicBuilder/fetchByDomain', {
-            domain,
-          })
+          const { id: receivedBuilderId } = await context.store.dispatch(
+            'publicBuilder/fetchByDomain',
+            {
+              domain,
+            }
+          )
+          builder = await context.store.dispatch(
+            'application/selectById',
+            receivedBuilderId
+          )
         }
-        builder = context.store.getters['publicBuilder/getBuilder']
       } catch (e) {
         return context.error({
           statusCode: 404,
@@ -69,13 +78,19 @@ export default {
       })
     }
 
-    const [page, path, params] = found
+    const [pageFound, path, params] = found
 
-    await context.store.dispatch('element/clearAll')
+    const page = await context.store.getters['page/getById'](
+      builder,
+      pageFound.id
+    )
 
-    await context.store.dispatch('dataSource/fetchPublished', {
-      page,
-    })
+    await Promise.all([
+      context.store.dispatch('dataSource/fetchPublished', {
+        page,
+      }),
+      context.store.dispatch('element/fetchPublished', { page }),
+    ])
 
     const runtimeFormulaContext = new RuntimeFormulaContext(
       context.$registry.getAll('builderDataProvider'),
@@ -90,7 +105,11 @@ export default {
     // Initialize all data provider contents
     await runtimeFormulaContext.initAll()
 
-    await context.store.dispatch('element/fetchPublished', { page })
+    // And finally select the page to display it
+    await context.store.dispatch('page/selectById', {
+      builder,
+      pageId: pageFound.id,
+    })
 
     return {
       builder,
@@ -110,9 +129,9 @@ export default {
     }
   },
   computed: {
-    ...mapGetters({
-      elements: 'element/getRootElements',
-    }),
+    elements() {
+      return this.$store.getters['element/getRootElements'](this.page)
+    },
   },
 }
 </script>

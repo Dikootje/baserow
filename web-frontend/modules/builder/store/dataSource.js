@@ -194,7 +194,11 @@ const actions = {
     }
   },
   async fetch({ dispatch, commit }, { page }) {
-    dispatch('dataSourceContent/clearDataSourceContents', null, { root: true })
+    dispatch(
+      'dataSourceContent/clearDataSourceContents',
+      { page },
+      { root: true }
+    )
     const { data: dataSources } = await DataSourceService(
       this.$client
     ).fetchAll(page.id)
@@ -209,7 +213,11 @@ const actions = {
     return dataSources
   },
   async fetchPublished({ dispatch, commit }, { page }) {
-    dispatch('dataSourceContent/clearDataSourceContents', null, { root: true })
+    dispatch(
+      'dataSourceContent/clearDataSourceContents',
+      { page },
+      { root: true }
+    )
 
     const { data: dataSources } = await PublishedBuilderService(
       this.$client

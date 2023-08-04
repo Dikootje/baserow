@@ -8,6 +8,10 @@ export function populatePage(page) {
     selected: false,
   }
   page.dataSource = []
+  page.contents = {}
+  page.fetchContext = {}
+  page.parameters = {}
+  page.elements = []
   return page
 }
 
@@ -66,10 +70,7 @@ const actions = {
   forceCreate({ commit }, { builder, page }) {
     commit('ADD_ITEM', { builder, page })
   },
-  async selectById({ commit, dispatch }, { builderId, pageId }) {
-    const builder = await dispatch('application/selectById', builderId, {
-      root: true,
-    })
+  selectById({ commit, dispatch, getters }, { builder, pageId }) {
     const type = BuilderApplicationType.getType()
 
     // Check if the just selected application is a builder
@@ -80,13 +81,7 @@ const actions = {
     }
 
     // Check if the provided page id is found in the just selected builder.
-    const index = builder.pages.findIndex((item) => item.id === pageId)
-    if (index === -1) {
-      throw new StoreItemLookupError(
-        'The page is not found in the selected application.'
-      )
-    }
-    const page = builder.pages[index]
+    const page = getters.getById(builder, pageId)
 
     commit('SET_SELECTED', { builder, page })
 
@@ -99,7 +94,7 @@ const actions = {
       { root: true }
     )
 
-    return { builder, page }
+    return page
   },
   unselect({ commit }) {
     commit('UNSELECT')
@@ -167,6 +162,17 @@ const actions = {
 }
 
 const getters = {
+  getById: (state) => (builder, pageId) => {
+    const index = builder.pages.findIndex((item) => item.id === pageId)
+
+    if (index === -1) {
+      throw new StoreItemLookupError(
+        'The page is not found in the selected application.'
+      )
+    }
+
+    return builder.pages[index]
+  },
   getSelected(state) {
     return state.selected
   },

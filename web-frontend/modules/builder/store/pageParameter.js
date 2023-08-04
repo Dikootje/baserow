@@ -1,23 +1,22 @@
 const state = {
   // The parameter values
-  parameters: {},
 }
 
 const mutations = {
-  SET_PARAMETER(state, { name, value }) {
-    state.parameters = { ...state.parameters, [name]: value }
+  SET_PARAMETER(state, { page, name, value }) {
+    page.parameters = { ...page.parameters, [name]: value }
   },
 }
 
 const actions = {
-  setParameter({ commit }, { name, value }) {
-    commit('SET_PARAMETER', { name, value })
+  setParameter({ commit }, { page, name, value }) {
+    commit('SET_PARAMETER', { page, name, value })
   },
 }
 
 const getters = {
-  getParameters: (state) => {
-    return state.parameters
+  getParameters: (state) => (page) => {
+    return page.parameters
   },
 }
 
