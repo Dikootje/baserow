@@ -1,5 +1,9 @@
 <template>
-  <NodeViewWrapper as="span" class="get-formula-component">
+  <NodeViewWrapper
+    as="span"
+    class="get-formula-component"
+    :class="{ 'get-formula-component--selected': selected }"
+  >
     {{ pathParts.dataProvider }}
     <template v-for="(part, index) in pathParts.parts">
       <i :key="index" class="get-formula-component__caret fas fa-angle-right">

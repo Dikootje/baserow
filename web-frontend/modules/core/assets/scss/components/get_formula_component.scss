@@ -7,6 +7,10 @@
   margin-right: 5px;
 }
 
+.get-formula-component--selected {
+  border: 1px solid $color-primary-600;
+}
+
 .get-formula-component__caret {
   color: $color-neutral-300;
   padding-left: 5px;
