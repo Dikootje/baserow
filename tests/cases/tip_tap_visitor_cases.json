@@ -36,5 +36,38 @@
             },
             { "type": "text", "text": "friend :)" }
         ]
+    },
+
+    {
+        "formula": "concat(concat('hello', '\\n'), 'there')",
+        "content": [
+            {
+                "type": "text",
+                "text": "hello"
+            },
+            {
+                "type": "hardBreak"
+            },
+            {
+                "type": "text",
+                "text": "there"
+            }
+        ]
+    },
+    {
+        "formula": "concat(concat('hello', '\\n'), get('data_source.hello.there'))",
+        "content": [
+            {
+                "type": "text",
+                "text": "hello"
+            },
+            {
+                "type": "hardBreak"
+            },
+            {
+                "type": "get-formula-component",
+                "attrs": { "path": "data_source.hello.there" }
+            }
+        ]
     }
 ]

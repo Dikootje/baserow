@@ -17,6 +17,8 @@ export class FromTipTapVisitor {
     switch (node.type) {
       case 'text':
         return this.visitText(node)
+      case 'hardBreak':
+        return this.visitHardBreak(node)
       default:
         return this.visitFunction(node)
     }
@@ -42,6 +44,10 @@ export class FromTipTapVisitor {
 
   visitText(node) {
     return `'${node.text}'`
+  }
+
+  visitHardBreak(node) {
+    return `'\\n'`
   }
 
   visitFunction(node) {

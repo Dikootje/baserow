@@ -8,12 +8,12 @@ import { Placeholder } from '@tiptap/extension-placeholder'
 import { Document } from '@tiptap/extension-document'
 import { Text } from '@tiptap/extension-text'
 import _ from 'lodash'
-import { NoNewLineExt } from '@baserow/modules/core/components/tiptap/extensions/noNewLine'
 import parseBaserowFormula from '@baserow/formula/parser/parser'
 import { ToTipTapVisitor } from '@baserow/modules/core/formula/toTipTapVisitor'
 import { RuntimeFunctionCollection } from '@baserow/modules/core/functionCollection'
 import { FromTipTapVisitor } from '@baserow/modules/core/formula/fromTipTapVisitor'
 import { mergeAttributes } from '@tiptap/core'
+import { HardBreak } from '@tiptap/extension-hard-break'
 
 export default {
   name: 'FormulaInputField',
@@ -48,6 +48,15 @@ export default {
         placeholder: this.placeholder,
       })
     },
+    hardBreakExt() {
+      return HardBreak.extend({
+        addKeyboardShortcuts() {
+          return {
+            Enter: () => this.editor.commands.setHardBreak(),
+          }
+        },
+      })
+    },
     formulaComponents() {
       return Object.values(this.$registry.getAll('runtime_formula_type'))
         .map((type) => type.formulaComponent)
@@ -72,8 +81,8 @@ export default {
         DocumentNode,
         WrapperNode,
         TextNode,
-        NoNewLineExt,
         this.placeHolderExt,
+        this.hardBreakExt,
         ...this.formulaComponents,
       ]
     },
