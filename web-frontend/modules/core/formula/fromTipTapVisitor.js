@@ -15,8 +15,6 @@ export class FromTipTapVisitor {
 
   visitNode(node) {
     switch (node.type) {
-      case 'wrapper':
-        return this.visitWrapper(node)
       case 'text':
         return this.visitText(node)
       default:
@@ -24,31 +22,19 @@ export class FromTipTapVisitor {
     }
   }
 
-  visitWrapper(node) {
-    if (!node.content) {
-      return "'\\n'"
-    }
-
-    return this.visit(node.content)
-  }
-
   visitArray(content) {
-    const contentVisited = content
-      .map((node) => this.visit(node))
-      .filter((node) => node !== null)
-
-    if (contentVisited.length === 0) {
+    if (content.length === 0) {
       return ''
     }
 
-    if (contentVisited.length === 1) {
-      return contentVisited[0]
+    if (content.length === 1) {
+      return this.visit(content[0])
     }
 
-    let result = `concat(${contentVisited[0]}, ${contentVisited[1]})`
+    let result = `concat(${this.visit(content[0])}, ${this.visit(content[1])})`
 
-    for (let i = 2; i < contentVisited.length; i++) {
-      result = `concat(${result}, ${contentVisited[i]})`
+    for (let i = 2; i < content.length; i++) {
+      result = `concat(${result}, ${this.visit(content[i])})`
     }
 
     return result
