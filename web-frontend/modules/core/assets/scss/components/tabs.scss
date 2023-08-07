@@ -1,6 +1,7 @@
 .tabs {
   width: 100%;
   background-color: $white;
+  font-weight: 500;
 }
 
 .tabs--full-height {
@@ -13,20 +14,10 @@
   display: flex;
   flex-wrap: nowrap;
   list-style: none;
-  padding: 0 15px;
+  padding: 0;
   margin: 0;
-  gap: 15px;
+  gap: 24px;
   border-bottom: solid 1px $color-neutral-200;
-
-  .tabs--no-separation & {
-    border-bottom: unset;
-    padding: 0;
-  }
-
-  .tabs--large & {
-    gap: 24px;
-    padding: 0 0 0 40px;
-  }
 }
 
 .tabs__item {
@@ -34,7 +25,7 @@
 
   &.tabs__item--disabled {
     user-select: none;
-    color: $color-primary-900;
+    color: $color-neutral-700;
     opacity: 0.6;
     text-decoration: none;
 
@@ -45,31 +36,29 @@
 
   &.tabs__item--active::after {
     content: '';
-    height: 1px;
-    background-color: $color-primary-600;
+    height: 2px;
+    background-color: $color-blue-600;
 
     @include absolute(auto, 0, -1px, 0);
   }
 }
 
 .tabs__link {
-  color: $color-neutral-900;
   display: block;
-  font-size: 12px;
   padding: 12px 0;
-
-  .tabs--large & {
-    font-size: 14px;
-    padding: 18px 0;
-  }
+  color: $color-neutral-900;
 
   &:hover {
     text-decoration: none;
+    color: $color-neutral-1300;
   }
 
-  &:hover,
   .tabs__item--active & {
-    color: $color-primary-600;
+    color: $color-neutral-1300;
+  }
+
+  .tabs__item--active &:hover {
+    color: $color-blue-600;
   }
 }
 
