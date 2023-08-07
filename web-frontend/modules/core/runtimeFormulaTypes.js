@@ -8,7 +8,6 @@ import {
   InvalidFormulaArgumentType,
   InvalidNumberOfArguments,
 } from '@baserow/formula/parser/errors'
-import { uuid } from '@baserow/modules/core/utils/string'
 import { Node, VueNodeViewRenderer } from '@tiptap/vue-2'
 import GetFormulaComponent from '@baserow/modules/core/components/formula/GetFormulaComponent'
 import { mergeAttributes } from '@tiptap/core'
