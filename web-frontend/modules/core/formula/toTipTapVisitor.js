@@ -14,7 +14,12 @@ export class ToTipTapVisitor extends BaserowFormulaVisitor {
   }
 
   visitStringLiteral(ctx) {
-    return { type: 'text', text: this.processString(ctx) }
+    switch (ctx.getText()) {
+      case "'\\n'":
+        return { type: 'wrapper' }
+      default:
+        return { type: 'text', text: this.processString(ctx) }
+    }
   }
 
   visitDecimalLiteral(ctx) {

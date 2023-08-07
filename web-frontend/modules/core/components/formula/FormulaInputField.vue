@@ -8,7 +8,6 @@ import { Placeholder } from '@tiptap/extension-placeholder'
 import { Document } from '@tiptap/extension-document'
 import { Text } from '@tiptap/extension-text'
 import _ from 'lodash'
-import { NoNewLineExt } from '@baserow/modules/core/components/tiptap/extensions/noNewLine'
 import parseBaserowFormula from '@baserow/formula/parser/parser'
 import { ToTipTapVisitor } from '@baserow/modules/core/formula/toTipTapVisitor'
 import { RuntimeFunctionCollection } from '@baserow/modules/core/functionCollection'
@@ -72,7 +71,6 @@ export default {
         DocumentNode,
         WrapperNode,
         TextNode,
-        NoNewLineExt,
         this.placeHolderExt,
         ...this.formulaComponents,
       ]
@@ -80,13 +78,13 @@ export default {
     htmlContent() {
       return generateHTML(this.content, this.extensions)
     },
-    wrapperContent() {
-      return this.editor.getJSON().content[0].content
+    editorContent() {
+      return this.editor.getJSON().content
     },
   },
   watch: {
     value(value) {
-      if (!_.isEqual(value, this.toFormula(this.wrapperContent))) {
+      if (!_.isEqual(value, this.toFormula(this.editorContent))) {
         this.content = this.toContent(value)
       }
     },
@@ -146,13 +144,16 @@ export default {
       })
     },
     onUpdate() {
-      this.$emit('input', this.toFormula(this.wrapperContent))
+      this.$emit('input', this.toFormula(this.editorContent))
     },
     onFocus() {
       this.isFocused = true
     },
     onBlur() {
       this.isFocused = false
+    },
+    isContentEmpty(content) {
+      return _.isEqual(content, [{ type: 'wrapper' }])
     },
     toContent(formula) {
       if (_.isEmpty(formula)) {
@@ -168,10 +169,13 @@ export default {
 
       return {
         type: 'doc',
-        content: [{ type: 'wrapper', content }],
+        content,
       }
     },
     toFormula(content) {
+      if (this.isContentEmpty(content)) {
+        return ''
+      }
       const functionCollection = new RuntimeFunctionCollection(this.$registry)
       return new FromTipTapVisitor(functionCollection).visit(content || [])
     },
