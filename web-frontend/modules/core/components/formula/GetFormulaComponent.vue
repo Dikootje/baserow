@@ -6,10 +6,7 @@
       </i>
       <span :key="index + part">{{ part }}</span>
     </template>
-    <a
-      class="get-formula-component__remove"
-      @click="emitToEditor('remove', node.attrs.id)"
-    >
+    <a class="get-formula-component__remove" @click="deleteNode">
       <i class="fas fa-times"></i>
     </a>
   </NodeViewWrapper>

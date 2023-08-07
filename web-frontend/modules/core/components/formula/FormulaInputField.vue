@@ -1,5 +1,5 @@
 <template>
-  <EditorContent :class="classes" :editor="editor" @remove="remove" />
+  <EditorContent :class="classes" :editor="editor" />
 </template>
 
 <script>
@@ -128,32 +128,6 @@ export default {
     this.editor?.destroy()
   },
   methods: {
-    remove(id) {
-      const deleteObjectById = (obj, id) => {
-        if (obj?.attrs?.id === id) {
-          return true
-        }
-
-        if (_.isObject(obj)) {
-          Object.keys(obj).forEach((key) => {
-            if (deleteObjectById(obj[key], id)) {
-              if (_.isArray(obj)) {
-                obj.splice(key, 1)
-              } else {
-                delete obj[key]
-              }
-              return true
-            }
-          })
-        }
-      }
-
-      deleteObjectById(this.content, id)
-
-      this.$nextTick(() => {
-        this.onUpdate()
-      })
-    },
     onUpdate() {
       this.$emit('input', this.toFormula(this.wrapperContent))
     },

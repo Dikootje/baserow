@@ -130,9 +130,6 @@ export class RuntimeFormulaFunction extends Registerable {
   toNode(args) {
     return {
       type: this.formulaComponentType,
-      attrs: {
-        id: uuid(),
-      },
     }
   }
 }
@@ -180,9 +177,6 @@ export class RuntimeGet extends RuntimeFormulaFunction {
       },
       addAttributes() {
         return {
-          id: {
-            default: '',
-          },
           path: {
             default: '',
           },
