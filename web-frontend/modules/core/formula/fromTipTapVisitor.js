@@ -43,7 +43,7 @@ export class FromTipTapVisitor {
   }
 
   visitText(node) {
-    return `'${node.text}'`
+    return `'${node.text.replace(/'/g, "\\'")}'`
   }
 
   visitHardBreak(node) {

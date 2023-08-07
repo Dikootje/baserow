@@ -47,7 +47,7 @@ export class ToTipTapVisitor extends BaserowFormulaVisitor {
       literal = literalWithoutOuterQuotes.replace('\\"', '"')
     }
 
-    return literal
+    return literal.replace(/\\'/g, "'")
   }
 
   visitFunctionCall(ctx) {
