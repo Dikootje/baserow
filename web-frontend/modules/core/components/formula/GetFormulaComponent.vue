@@ -8,7 +8,7 @@
     </template>
     <a
       class="get-formula-component__remove"
-      @click="emit('remove', node.attrs.id)"
+      @click="emitToEditor('remove', node.attrs.id)"
     >
       <i class="fas fa-times"></i>
     </a>
