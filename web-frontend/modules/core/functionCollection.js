@@ -7,10 +7,10 @@ export class RuntimeFunctionCollection extends FunctionCollection {
   }
 
   get(name) {
-    return this.$registry.get('runtime_formula_type', name)
+    return this.$registry.get('runtimeFormulaFunction', name)
   }
 
   getAll() {
-    return this.$registry.getAll('runtime_formula_type')
+    return this.$registry.getAll('runtimeFormulaFunction')
   }
 }

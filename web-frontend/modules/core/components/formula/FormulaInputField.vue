@@ -58,7 +58,7 @@ export default {
       })
     },
     formulaComponents() {
-      return Object.values(this.$registry.getAll('runtime_formula_type'))
+      return Object.values(this.$registry.getAll('runtimeFormulaFunction'))
         .map((type) => type.formulaComponent)
         .filter((component) => component !== null)
     },
