@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.test import override_settings
 
 import pytest
+from baserow.contrib.database.views.signals import view_loaded
 
 from baserow.contrib.database.fields.exceptions import FieldNotInTable
 from baserow.contrib.database.fields.handler import FieldHandler
@@ -3081,12 +3082,54 @@ def test_update_index_replaces_index_with_diff_collation(
     )
     index_1 = ViewIndexingHandler.get_index(grid_view, table_model)
     assert ViewIndexingHandler.does_index_exist(index_1.name) is True
-
     grid_view.refresh_from_db()
 
     # different collation settings should overwrite the index
     settings.BASEROW_COLLATION = EXPECTED_COLLATION
     ViewIndexingHandler.update_index(grid_view, table_model)
+
+    index_2 = ViewIndexingHandler.get_index(grid_view, table_model)
+    assert index_1.name != index_2.name
+    assert ViewIndexingHandler.does_index_exist(index_1.name) is False
+    assert ViewIndexingHandler.does_index_exist(index_2.name) is True
+
+
+@override_settings(
+    AUTO_INDEX_VIEW_ENABLED=True,
+)
+@pytest.mark.django_db(transaction=True)
+def test_view_loaded_replaces_index_with_diff_collation(
+    settings, data_fixture, enable_singleton_testing
+):
+    settings.BASEROW_COLLATION = None
+    user = data_fixture.create_user()
+    table = data_fixture.create_database_table(user=user)
+    text_field = data_fixture.create_text_field(user=user, table=table)
+    handler = ViewHandler()
+    grid_view = handler.create_view(
+        user=user,
+        table=table,
+        type_name="grid",
+        name="Test grid",
+        ownership_type=OWNERSHIP_TYPE_COLLABORATIVE,
+    )
+    table_model = table.get_model()
+    view_sort_1 = handler.create_sort(
+        user=user, view=grid_view, field=text_field, order="ASC"
+    )
+    index_1 = ViewIndexingHandler.get_index(grid_view, table_model)
+    assert ViewIndexingHandler.does_index_exist(index_1.name) is True
+    grid_view.refresh_from_db()
+
+    # different collation settings should overwrite the index
+    settings.BASEROW_COLLATION = EXPECTED_COLLATION
+    view_loaded.send(
+        sender=None,
+        table=table,
+        view=grid_view,
+        table_model=table_model,
+        user=user,
+    )
 
     index_2 = ViewIndexingHandler.get_index(grid_view, table_model)
     assert index_1.name != index_2.name
