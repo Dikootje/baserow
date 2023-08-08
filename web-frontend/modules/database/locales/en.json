@@ -561,6 +561,9 @@
         "insertRowAbove": "Insert row above",
         "insertRowBelow": "Insert row below",
         "duplicateRow": "Duplicate row",
+        "copyRowURL": "Copy Row URL",
+        "copiedRowURL": "Copied Row URL",
+        "copiedRowURLMessage": "Row {id}'s URL has been copied to your clipboard.",
         "enlargeRow": "Enlarge row",
         "deleteRow": "Delete row",
         "deleteRows": "Delete rows",
@@ -764,5 +767,11 @@
     "fileField": {
         "errorEmptyFileNameTitle": "Invalid file name",
         "errorEmptyFileNameMessage": "You can't set an empty name for a file."
+    },
+    "fieldCollaboratorSubForm": {
+        "notifyUserWhenAdded": "Notify user when added"
+    },
+    "collaboratorAddedToRowNotification": {
+        "title": "{sender} assigned you to {fieldName} in row {rowId} in {tableName}"
     }
 }

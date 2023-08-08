@@ -12,6 +12,7 @@ from urllib.parse import urljoin, urlparse
 from django.core.exceptions import ImproperlyConfigured
 
 import dj_database_url
+import posthog
 from corsheaders.defaults import default_headers
 
 from baserow.cachalot_patch import patch_cachalot_for_baserow
@@ -473,7 +474,7 @@ SPECTACULAR_SETTINGS = {
         "name": "MIT",
         "url": "https://gitlab.com/baserow/baserow/-/blob/master/LICENSE",
     },
-    "VERSION": "1.18.0",
+    "VERSION": "1.19.1",
     "SERVE_INCLUDE_SCHEMA": False,
     "TAGS": [
         {"name": "Settings"},
@@ -612,8 +613,7 @@ class AttrDict(dict):
         globals()[key] = value
 
 
-# The storage must always overwrite existing files.
-DEFAULT_FILE_STORAGE = "baserow.core.storage.OverwriteFileSystemStorage"
+DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 AWS_STORAGE_ENABLED = os.getenv("AWS_ACCESS_KEY_ID", "") != ""
 GOOGLE_STORAGE_ENABLED = os.getenv("GS_BUCKET_NAME", "") != ""
@@ -632,6 +632,7 @@ if sum(ALL_STORAGE_ENABLED_VARS) > 1:
 
 if AWS_STORAGE_ENABLED:
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    AWS_S3_FILE_OVERWRITE = False
     set_settings_from_env_if_present(
         AttrDict(vars()),
         [
@@ -650,7 +651,6 @@ if AWS_STORAGE_ENABLED:
             Setting("AWS_QUERYSTRING_AUTH", parser=str_to_bool),
             Setting("AWS_S3_MAX_MEMORY_SIZE", parser=int),
             Setting("AWS_QUERYSTRING_EXPIRE", parser=int),
-            Setting("AWS_S3_FILE_OVERWRITE", parser=str_to_bool, default=True),
             "AWS_S3_URL_PROTOCOL",
             "AWS_S3_REGION_NAME",
             "AWS_S3_ENDPOINT_URL",
@@ -681,6 +681,7 @@ if GOOGLE_STORAGE_ENABLED:
     # details on what these env variables do
 
     DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
+    GS_FILE_OVERWRITE = False
     set_settings_from_env_if_present(
         AttrDict(vars()),
         [
@@ -690,7 +691,6 @@ if GOOGLE_STORAGE_ENABLED:
             "GZIP_CONTENT_TYPES",
             Setting("GS_DEFAULT_ACL", default="publicRead"),
             Setting("GS_QUERYSTRING_AUTH", parser=str_to_bool),
-            Setting("GS_FILE_OVERWRITE", parser=str_to_bool),
             Setting("GS_MAX_MEMORY_SIZE", parser=int),
             Setting("GS_BLOB_CHUNK_SIZE", parser=int),
             Setting("GS_OBJECT_PARAMETERS", parser=json.loads),
@@ -707,6 +707,7 @@ if GOOGLE_STORAGE_ENABLED:
 
 if AZURE_STORAGE_ENABLED:
     DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
+    AZURE_OVERWRITE_FILES = False
     set_settings_from_env_if_present(
         AttrDict(vars()),
         [
@@ -722,7 +723,6 @@ if AZURE_STORAGE_ENABLED:
             Setting("AZURE_UPLOAD_MAX_CONN", parser=int),
             Setting("AZURE_CONNECTION_TIMEOUT_SECS", parser=int),
             Setting("AZURE_URL_EXPIRATION_SECS", parser=int),
-            Setting("AZURE_OVERWRITE_FILES", parser=str_to_bool),
             "AZURE_LOCATION",
             "AZURE_ENDPOINT_SUFFIX",
             "AZURE_CUSTOM_DOMAIN",
@@ -792,7 +792,9 @@ BATCH_ROWS_SIZE_LIMIT = int(
 TRASH_PAGE_SIZE_LIMIT = 200  # How many trash entries can be requested at once.
 
 # How many unique row values can be requested at once.
-UNIQUE_ROW_VALUES_SIZE_LIMIT = 50
+BASEROW_UNIQUE_ROW_VALUES_SIZE_LIMIT = int(
+    os.getenv("BASEROW_UNIQUE_ROW_VALUES_SIZE_LIMIT", 100)
+)
 
 # The amount of rows that can be imported when creating a table.
 INITIAL_TABLE_DATA_LIMIT = None
@@ -874,6 +876,7 @@ APPLICATION_TEMPLATES_DIR = os.path.join(BASE_DIR, "../../../templates")
 DEFAULT_APPLICATION_TEMPLATE = "project-tracker"
 
 MAX_FIELD_LIMIT = int(os.getenv("BASEROW_MAX_FIELD_LIMIT", 600))
+
 INITIAL_MIGRATION_FULL_TEXT_SEARCH_MAX_FIELD_LIMIT = int(
     os.getenv(
         "BASEROW_INITIAL_MIGRATION_FULL_TEXT_SEARCH_MAX_FIELD_LIMIT", MAX_FIELD_LIMIT
@@ -1107,6 +1110,15 @@ USE_PG_FULLTEXT_SEARCH = str_to_bool(
 )
 PG_SEARCH_CONFIG = os.getenv("BASEROW_PG_SEARCH_CONFIG", "simple")
 AUTO_VACUUM_AFTER_SEARCH_UPDATE = str_to_bool(os.getenv("BASEROW_AUTO_VACUUM", "true"))
+
+POSTHOG_PROJECT_API_KEY = os.getenv("POSTHOG_PROJECT_API_KEY", "")
+POSTHOG_HOST = os.getenv("POSTHOG_HOST", "")
+POSTHOG_ENABLED = POSTHOG_PROJECT_API_KEY and POSTHOG_HOST
+if POSTHOG_ENABLED:
+    posthog.project_api_key = POSTHOG_PROJECT_API_KEY
+    posthog.host = POSTHOG_HOST
+else:
+    posthog.disabled = True
 
 # Indicates whether we are running the tests or not. Set to True in the test.py settings
 # file used by pytest.ini

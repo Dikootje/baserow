@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, List, NamedTuple, Optional, Type
 from django.conf import settings
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector
-from django.db import DataError, ProgrammingError, connection
+from django.db import connection
 from django.db.models import Expression, Func, Q, QuerySet, TextField, Value
 from django.utils.encoding import force_str
 
@@ -109,9 +109,11 @@ class SearchHandler(
 
         return Func(
             expression,
-            Value(RE_REMOVE_NON_SEARCHABLE_PUNCTUATION_FROM_TSVECTOR_DATA.pattern),
+            Value(
+                RE_REMOVE_NON_SEARCHABLE_PUNCTUATION_FROM_TSVECTOR_DATA.pattern,
+            ),
             Value(" "),
-            Value("g", output_field=TextField()),
+            Value("g"),
             function="regexp_replace",
             output_field=TextField(),
         )
@@ -169,31 +171,34 @@ class SearchHandler(
             return escaped_query
 
     @classmethod
-    def after_field_created(
-        cls,
-        field: "Field",
-    ):
+    def after_field_created(cls, field: "Field", skip_search_updates: bool = False):
         """
         :param field: The Baserow field which was created in this table.
+        :param skip_search_updates: Whether to update the fields after.
         :return: None
         """
 
         if field.tsvector_column_created:
-            with safe_django_schema_editor(atomic=False) as schema_editor:
-                to_model = field.table.get_model(
-                    fields=[field], field_ids=[], add_dependencies=False
+            cls._create_tsv_column(field)
+            if not skip_search_updates:
+                cls.entire_field_values_changed_or_created(
+                    field.table, updated_fields=[field]
                 )
-                tsv_model_field = to_model._meta.get_field(field.tsv_db_column)
-                schema_editor.add_field(to_model, tsv_model_field)
-                schema_editor.add_index(
-                    to_model,
-                    GinIndex(
-                        fields=[field.tsv_db_column],
-                        name=field.tsv_index_name,
-                    ),
-                )
-            cls.entire_field_values_changed_or_created(
-                field.table, updated_fields=[field]
+
+    @classmethod
+    def _create_tsv_column(cls, field):
+        with safe_django_schema_editor(atomic=False) as schema_editor:
+            to_model = field.table.get_model(
+                fields=[field], field_ids=[], add_dependencies=False
+            )
+            tsv_model_field = to_model._meta.get_field(field.tsv_db_column)
+            schema_editor.add_field(to_model, tsv_model_field)
+            schema_editor.add_index(
+                to_model,
+                GinIndex(
+                    fields=[field.tsv_db_column],
+                    name=field.tsv_index_name,
+                ),
             )
 
     @classmethod
@@ -274,6 +279,9 @@ class SearchHandler(
         """
 
         from baserow.contrib.database.fields.models import Field
+
+        if not cls.full_text_enabled():
+            raise PostgresFullTextSearchDisabledException()
 
         # Prepare a fresh model we can use to create the column.
         model = table.get_model(force_add_tsvectors=True)
@@ -408,7 +416,7 @@ class SearchHandler(
             if set_background_updated_false:
                 update_query[ROW_NEEDS_BACKGROUND_UPDATE_COLUMN_NAME] = Value(False)
             return qs.update(**update_query)
-        except (ProgrammingError, DataError) as e:
+        except Exception as e:
             logger.error(
                 "Failed to do full update search vector because of {e}. "
                 "Attempting to do per field updates one by one instead...",
@@ -434,7 +442,6 @@ class SearchHandler(
         searching happily after.
         """
 
-        from baserow.contrib.database.fields.exceptions import FieldDoesNotExist
         from baserow.contrib.database.fields.handler import FieldHandler
 
         num_worked = 0
@@ -445,11 +452,14 @@ class SearchHandler(
                 cv = cls._get_field_with_vector_from_field(refetched_field, qs)
                 qs.update(**{cv.field_tsv_db_column: cv.search_vector})
                 num_worked += 1
-            except (ProgrammingError, DataError, FieldDoesNotExist) as another_e:
+            except Exception as another_e:
                 field = cv.field
                 logger.error(
                     "Failed to update search vector for field with id {field_id} / "
-                    "type {field_type} because of {e}, field.__str__ is: " + str(field),
+                    "type {field_type} because of {e}, field.__str__ is: "
+                    + str(field)
+                    + " and expression is "
+                    + str(cv.search_vector),
                     field_id=field.id,
                     field_type=str(type(field)),
                     e=str(another_e),
@@ -540,3 +550,13 @@ class SearchHandler(
             raise e
         traceback.print_exc()
         exception_capturer(e)
+
+    @classmethod
+    def after_field_moved_between_tables(
+        cls, moved_field: "Field", original_table_id: int
+    ):
+        if moved_field.tsvector_column_created:
+            cls._drop_column_if_table_exists(
+                f"database_table_{original_table_id}", moved_field.tsv_db_column
+            )
+            cls._create_tsv_column(moved_field)

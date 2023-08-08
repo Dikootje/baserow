@@ -67,12 +67,24 @@ export const registerRealtimeEvents = (realtime) => {
     }
   })
 
+  realtime.registerEvent('element_updated', ({ store }, { element }) => {
+    const selectedPage = store.getters['page/getSelected']
+    if (selectedPage.id === element.page_id) {
+      store.dispatch('element/forceUpdate', {
+        element,
+        values: element,
+      })
+    }
+  })
+
   realtime.registerEvent('element_moved', ({ store }, data) => {
     const selectedPage = store.getters['page/getSelected']
     if (selectedPage.id === data.page_id) {
       store.dispatch('element/forceMove', {
         elementId: data.element_id,
         beforeElementId: data.before_id,
+        parentElementId: data.parent_element_id,
+        placeInContainer: data.place_in_container,
       })
     }
   })
@@ -88,4 +100,16 @@ export const registerRealtimeEvents = (realtime) => {
       }
     }
   )
+
+  realtime.registerEvent('elements_moved', ({ store, app }, { elements }) => {
+    elements.forEach((element) => {
+      store.dispatch('element/forceUpdate', {
+        element,
+        values: {
+          order: element.order,
+          place_in_container: element.place_in_container,
+        },
+      })
+    })
+  })
 }

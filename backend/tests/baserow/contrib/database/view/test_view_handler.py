@@ -203,7 +203,8 @@ def test_update_grid_view(send_mock, data_fixture):
     with pytest.raises(ValueError):
         handler.update_view(user=user, view=object(), name="Test 1")
 
-    view = handler.update_view(user=user, view=grid, name="Test 1")
+    view_with_changes = handler.update_view(user=user, view=grid, name="Test 1")
+    view = view_with_changes.updated_view_instance
 
     send_mock.assert_called_once()
     assert send_mock.call_args[1]["view"].id == view.id
@@ -351,7 +352,7 @@ def test_update_form_view(send_mock, data_fixture):
     user_file_2 = data_fixture.create_user_file()
 
     handler = ViewHandler()
-    view = handler.update_view(
+    view_with_changes = handler.update_view(
         user=user,
         view=form,
         slug="Test slug",
@@ -364,6 +365,7 @@ def test_update_form_view(send_mock, data_fixture):
         submit_action="REDIRECT",
         submit_action_redirect_url="https://localhost",
     )
+    view = view_with_changes.updated_view_instance
 
     send_mock.assert_called_once()
     assert send_mock.call_args[1]["view"].id == view.id
@@ -1504,7 +1506,8 @@ def test_get_public_view_by_slug(data_fixture):
 @pytest.mark.django_db
 @patch("baserow.contrib.database.rows.signals.rows_created.send")
 def test_submit_form_view(send_mock, data_fixture):
-    table = data_fixture.create_database_table()
+    user = data_fixture.create_user()
+    table = data_fixture.create_database_table(user=user)
     form = data_fixture.create_form_view(table=table)
     text_field = data_fixture.create_text_field(table=table)
     number_field = data_fixture.create_number_field(table=table)
@@ -1522,15 +1525,17 @@ def test_submit_form_view(send_mock, data_fixture):
     handler = ViewHandler()
 
     with pytest.raises(ValidationError) as e:
-        handler.submit_form_view(form=form, values={})
+        handler.submit_form_view(user, form=form, values={})
 
     with pytest.raises(ValidationError) as e:
-        handler.submit_form_view(form=form, values={f"field_{number_field.id}": 0})
+        handler.submit_form_view(
+            user, form=form, values={f"field_{number_field.id}": 0}
+        )
 
     assert f"field_{text_field.id}" in e.value.error_dict
 
     instance = handler.submit_form_view(
-        form=form, values={f"field_{text_field.id}": "Text value"}
+        None, form=form, values={f"field_{text_field.id}": "Text value"}
     )
 
     send_mock.assert_called_once()
@@ -1541,6 +1546,7 @@ def test_submit_form_view(send_mock, data_fixture):
     assert send_mock.call_args[1]["model"]._generated_table_model
 
     handler.submit_form_view(
+        user,
         form=form,
         values={
             f"field_{text_field.id}": "Another value",
@@ -1562,7 +1568,8 @@ def test_submit_form_view(send_mock, data_fixture):
 
 @pytest.mark.django_db
 def test_submit_form_view_skip_required_with_conditions(data_fixture):
-    table = data_fixture.create_database_table()
+    user = data_fixture.create_user()
+    table = data_fixture.create_database_table(user=user)
     form = data_fixture.create_form_view(table=table)
     text_field = data_fixture.create_text_field(table=table)
     number_field = data_fixture.create_number_field(table=table)
@@ -1576,13 +1583,17 @@ def test_submit_form_view_skip_required_with_conditions(data_fixture):
     handler = ViewHandler()
 
     with pytest.raises(ValidationError):
-        handler.submit_form_view(form=form, values={f"field_{text_field.id}": "1"})
+        handler.submit_form_view(
+            user, form=form, values={f"field_{text_field.id}": "1"}
+        )
 
     number_option.show_when_matching_conditions = True
     number_option.save()
 
     with pytest.raises(ValidationError):
-        handler.submit_form_view(form=form, values={f"field_{text_field.id}": "1"})
+        handler.submit_form_view(
+            user, form=form, values={f"field_{text_field.id}": "1"}
+        )
 
     # When there is a condition and `show_when_matching_conditions` is `True`,
     # the backend can't validate whether the values match the filter, we we don't do
@@ -1591,7 +1602,7 @@ def test_submit_form_view_skip_required_with_conditions(data_fixture):
         field_option=number_option, field=text_field
     )
 
-    handler.submit_form_view(form=form, values={f"field_{text_field.id}": "1"})
+    handler.submit_form_view(user, form=form, values={f"field_{text_field.id}": "1"})
     model = table.get_model()
     assert model.objects.all().count() == 1
 
@@ -2247,7 +2258,8 @@ def test_get_public_rows_queryset_and_field_ids_filters_stack(data_fixture):
 
 @pytest.mark.django_db
 def test_can_submit_form_view_handler_with_zero_number_required(data_fixture):
-    table = data_fixture.create_database_table()
+    user = data_fixture.create_user()
+    table = data_fixture.create_database_table(user=user)
     form = data_fixture.create_form_view(table=table)
     number_field = data_fixture.create_number_field(table=table)
     data_fixture.create_form_view_field_option(
@@ -2256,9 +2268,11 @@ def test_can_submit_form_view_handler_with_zero_number_required(data_fixture):
 
     handler = ViewHandler()
 
-    handler.submit_form_view(form=form, values={f"field_{number_field.id}": 0})
+    handler.submit_form_view(user, form=form, values={f"field_{number_field.id}": 0})
     with pytest.raises(ValidationError):
-        handler.submit_form_view(form=form, values={f"field_{number_field.id}": False})
+        handler.submit_form_view(
+            user, form=form, values={f"field_{number_field.id}": False}
+        )
 
 
 @pytest.mark.django_db

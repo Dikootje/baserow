@@ -1,3 +1,5 @@
+import random
+import string
 from io import BytesIO
 
 from django.core.files.storage import FileSystemStorage
@@ -495,3 +497,110 @@ def test_linkrowfield_get_search_expression(
     assert qs.get().id == table_b_linking_to_jeff_and_clive.id
 
     assert not model.objects.all().pg_search("steve").exists()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_linkrowfield_get_search_expression_to_formula_button(
+    data_fixture,
+    enable_singleton_testing,
+    django_assert_num_queries,
+):
+    with transaction.atomic():
+        workspace = data_fixture.create_workspace()
+        creator = data_fixture.create_user(workspace=workspace)
+        table_a, table_b, link_field = data_fixture.create_two_linked_tables(
+            user=creator, table_kwargs={"force_add_tsvectors": True}
+        )
+
+        table_a_primary = table_a.field_set.get(primary=True).specific
+        table_a_text_field = FieldHandler().create_field(
+            creator, table_a, "text", name="text"
+        )
+        FieldHandler().update_field(
+            creator,
+            table_a_primary,
+            "formula",
+            formula="button(if(field('text') ='1', 'jeff', 'clive'), 'a')",
+        )
+
+        table_a_row_1 = RowHandler().create_row(
+            user=creator,
+            table=table_a,
+            values={
+                f"{link_field.db_column}": [],
+                f"{table_a_text_field.db_column}": "1",
+            },
+        )
+        table_a_row_2 = RowHandler().create_row(
+            user=creator,
+            table=table_a,
+            values={
+                f"{link_field.db_column}": [],
+                f"{table_a_text_field.db_column}": "0",
+            },
+        )
+        table_b_row_linking_to_jeff = RowHandler().create_row(
+            user=creator,
+            table=table_b,
+            values={
+                f"field_{link_field.link_row_related_field_id}": [table_a_row_1.id]
+            },
+        )
+        table_b_linking_to_jeff_and_clive = RowHandler().create_row(
+            user=creator,
+            table=table_b,
+            values={
+                f"field_{link_field.link_row_related_field_id}": [
+                    table_a_row_1.id,
+                    table_a_row_2.id,
+                ]
+            },
+        )
+    model = table_b.get_model()
+
+    qs = list(model.objects.all().pg_search("jeff").values_list("id", flat=True))
+    assert qs == [
+        table_b_row_linking_to_jeff.id,
+        table_b_linking_to_jeff_and_clive.id,
+    ]
+
+    qs = model.objects.all().pg_search("clive")
+    assert qs.get().id == table_b_linking_to_jeff_and_clive.id
+
+    assert not model.objects.all().pg_search("steve").exists()
+
+
+def make_big_string(n: int) -> str:
+    return bytes(
+        random.choices(
+            string.ascii_uppercase.encode("ascii") + (" " * 30).encode("ascii"), k=n
+        )
+    ).decode("ascii")
+
+
+@pytest.mark.django_db(transaction=True)
+def test_massive_textfield_get_search_expression(
+    data_fixture, enable_singleton_testing
+):
+    with transaction.atomic():
+        user = data_fixture.create_user()
+        database = data_fixture.create_database_application(user=user)
+        table = TableHandler().create_table_and_fields(
+            user=user,
+            database=database,
+            name=data_fixture.fake.name(),
+            fields=[
+                ("Name", "text", {}),
+            ],
+        )
+        field = table.field_set.get(name="Name")
+        row = RowHandler().create_row(
+            user=user,
+            table=table,
+            values={f"field_{field.id}": "Jeff" + make_big_string(1048575 * 10)},
+        )
+    model = table.get_model()
+    qs = model.objects.all().pg_search("Jeff")
+    assert qs.exists()
+    matching_row = qs.get()
+    assert matching_row.id == row.id

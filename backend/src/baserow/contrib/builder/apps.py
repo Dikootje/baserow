@@ -88,6 +88,7 @@ class BuilderConfig(AppConfig):
         from baserow.contrib.builder.data_sources.operations import (
             CreateDataSourceOperationType,
             DeleteDataSourceOperationType,
+            DispatchDataSourceOperationType,
             ListDataSourcesPageOperationType,
             OrderDataSourcesPageOperationType,
             ReadDataSourceOperationType,
@@ -100,6 +101,7 @@ class BuilderConfig(AppConfig):
         operation_type_registry.register(UpdateDataSourceOperationType())
         operation_type_registry.register(DeleteDataSourceOperationType())
         operation_type_registry.register(OrderDataSourcesPageOperationType())
+        operation_type_registry.register(DispatchDataSourceOperationType())
 
         from baserow.contrib.builder.domains.job_types import PublishDomainJobType
         from baserow.contrib.builder.pages.job_types import DuplicatePageJobType
@@ -131,8 +133,10 @@ class BuilderConfig(AppConfig):
         permission_manager_type_registry.register(AllowPublicBuilderManagerType())
 
         from .elements.element_types import (
+            ColumnElementType,
             HeadingElementType,
             ImageElementType,
+            InputTextElementType,
             LinkElementType,
             ParagraphElementType,
         )
@@ -142,10 +146,24 @@ class BuilderConfig(AppConfig):
         element_type_registry.register(ParagraphElementType())
         element_type_registry.register(LinkElementType())
         element_type_registry.register(ImageElementType())
+        element_type_registry.register(InputTextElementType())
+        element_type_registry.register(ColumnElementType())
 
         from .domains.trash_types import DomainTrashableItemType
 
         trash_item_type_registry.register(DomainTrashableItemType())
+
+        from baserow.contrib.builder.data_providers.registries import (
+            builder_data_provider_type_registry,
+        )
+
+        from .data_providers.data_provider_types import (
+            DataSourceDataProviderType,
+            PageParameterDataProviderType,
+        )
+
+        builder_data_provider_type_registry.register(DataSourceDataProviderType())
+        builder_data_provider_type_registry.register(PageParameterDataProviderType())
 
         from .domains.receivers import connect_to_domain_pre_delete_signal
 

@@ -115,6 +115,8 @@ import {
   BaserowDatetimeFormatTz,
   BaserowDay,
   BaserowDivide,
+  BaserowEncodeUri,
+  BaserowEncodeUriComponent,
   BaserowEqual,
   BaserowField,
   BaserowSearch,
@@ -225,6 +227,7 @@ import {
 import { FormViewFormModeType } from '@baserow/modules/database/formViewModeTypes'
 import { CollaborativeViewOwnershipType } from '@baserow/modules/database/viewOwnershipTypes'
 import { DatabasePlugin } from '@baserow/modules/database/plugins'
+import { CollaboratorAddedToRowNotificationType } from '@baserow/modules/database/notificationTypes'
 
 import en from '@baserow/modules/database/locales/en.json'
 import fr from '@baserow/modules/database/locales/fr.json'
@@ -446,6 +449,11 @@ export default (context) => {
   app.$registry.register('formula_function', new BaserowSearch(context))
   app.$registry.register('formula_function', new BaserowLength(context))
   app.$registry.register('formula_function', new BaserowReverse(context))
+  app.$registry.register('formula_function', new BaserowEncodeUri(context))
+  app.$registry.register(
+    'formula_function',
+    new BaserowEncodeUriComponent(context)
+  )
   // Number functions
   app.$registry.register('formula_function', new BaserowMultiply(context))
   app.$registry.register('formula_function', new BaserowDivide(context))
@@ -626,6 +634,12 @@ export default (context) => {
   )
 
   app.$registry.register('formViewMode', new FormViewFormModeType(context))
+
+  // notifications
+  app.$registry.register(
+    'notification',
+    new CollaboratorAddedToRowNotificationType(context)
+  )
 
   registerRealtimeEvents(app.$realtime)
 }

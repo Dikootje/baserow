@@ -64,7 +64,7 @@ class FieldType(
     This abstract class represents a custom field type that can be added to the
     field type registry. It must be extended so customisation can be done. Each field
     type will have its own model that must extend the Field model, this is needed so
-    that the user can set custom settings per field instance he has created.
+    that the user can set custom settings per field instance they have created.
 
     Example:
         from baserow.contrib.database.fields.models import Field
@@ -120,6 +120,13 @@ class FieldType(
     """Set this to True your after_import_serialized function can cause the field
     data to change and hence it needs to be refreshed after this function has run
     inside of the import process.
+    """
+
+    is_many_to_many_field = False
+    """
+    Set this to True if the underlying database field is a ManyToManyField. This
+    let the RowM2MChangeTracker to track changes to the field when creating/updating
+    values without having to query the database.
     """
 
     def prepare_value_for_db(self, instance: Field, value: Any) -> Any:

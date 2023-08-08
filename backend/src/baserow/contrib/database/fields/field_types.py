@@ -78,7 +78,6 @@ from baserow.contrib.database.formula import (
     FormulaHandler,
 )
 from baserow.contrib.database.models import Table
-from baserow.contrib.database.table.cache import invalidate_table_in_model_cache
 from baserow.contrib.database.validators import UnicodeRegexValidator
 from baserow.core.fields import SyncedDateTimeField
 from baserow.core.handler import CoreHandler
@@ -803,14 +802,16 @@ class DateFieldType(FieldType):
         return Func(
             Func(
                 # FIXME: what if date_force_timezone is None(user timezone)?
-                Value(field.date_force_timezone or "UTC", output_field=CharField()),
+                Value(
+                    field.date_force_timezone or "UTC", output_field=models.TextField()
+                ),
                 F(field.db_column),
                 function="timezone",
                 output_field=DateTimeField(),
             ),
             Value(field.get_psql_format()),
             function="to_char",
-            output_field=CharField(),
+            output_field=models.TextField(),
         )
 
     def prepare_value_for_db(self, instance, value):
@@ -1221,6 +1222,7 @@ class LinkRowFieldType(FieldType):
     _can_order_by = False
     can_be_primary_field = False
     can_get_unique_values = False
+    is_many_to_many_field = True
 
     def get_search_expression(self, field: Field, queryset: QuerySet) -> Expression:
         remote_field = queryset.model._meta.get_field(field.db_column).remote_field
@@ -1247,6 +1249,7 @@ class LinkRowFieldType(FieldType):
                         primary_field, remote_model.objects
                     ),
                     " ",
+                    output_field=models.TextField(),
                 )
             )
             .values("value")[:1]
@@ -1808,6 +1811,7 @@ class LinkRowFieldType(FieldType):
             link_row_table=field.table,
             link_row_related_field=field,
             link_row_relation_id=field.link_row_relation_id,
+            skip_search_updates=True,
         )
         field.save()
 
@@ -1890,6 +1894,7 @@ class LinkRowFieldType(FieldType):
                     link_row_related_field=to_field,
                     link_row_relation_id=to_field.link_row_relation_id,
                     has_related_field=True,
+                    skip_search_updates=True,
                 )
                 to_field.save()
             elif (
@@ -1897,17 +1902,19 @@ class LinkRowFieldType(FieldType):
                 and to_link_row_table_has_related_field
                 and from_field.link_row_table != to_field.link_row_table
             ):
-                # We are changing the related fields table so we need to invalidate
-                # its old model cache as this will not happen automatically.
-                invalidate_table_in_model_cache(from_field.link_row_table_id)
-
                 from_field.link_row_related_field.name = related_field_name
-                from_field.link_row_related_field.table = to_field.link_row_table
                 from_field.link_row_related_field.link_row_table = to_field.table
                 from_field.link_row_related_field.order = (
                     self.model_class.get_last_order(to_field.link_row_table)
                 )
-                from_field.link_row_related_field.save()
+                FieldHandler().move_field_between_tables(
+                    from_field.link_row_related_field, to_field.link_row_table
+                )
+                # We've changed the link_row_related_field on the from_field model
+                # instance, make sure we also update the to_field instance to have
+                # this updated instance so if it is used later it isn't stale and
+                # pointing at the wrong table.
+                to_field.link_row_related_field = from_field.link_row_related_field
 
     def after_update(
         self,
@@ -1944,6 +1951,7 @@ class LinkRowFieldType(FieldType):
                 link_row_table=to_field.table,
                 link_row_related_field=to_field,
                 link_row_relation_id=to_field.link_row_relation_id,
+                skip_search_updates=True,
             )
             to_field.save()
 
@@ -2239,7 +2247,7 @@ class FileFieldType(FieldType):
             field,
             queryset,
             path_to_value_in_jsonb_list=[
-                Value("visible_name", output_field=CharField())
+                Value("visible_name", output_field=models.TextField())
             ],
         )
 
@@ -2780,7 +2788,7 @@ class SingleSelectFieldType(SelectOptionBaseFieldType):
         self, field, field_name, order_direction
     ) -> OptionallyAnnotatedOrderBy:
         """
-        If the user wants to sort the results he expects them to be ordered
+        If the user wants to sort the results they expect them to be ordered
         alphabetically based on the select option value and not in the id which is
         stored in the table. This method generates a Case expression which maps the id
         to the correct position.
@@ -2847,6 +2855,7 @@ class MultipleSelectFieldType(SelectOptionBaseFieldType):
     type = "multiple_select"
     model_class = MultipleSelectField
     can_get_unique_values = False
+    is_many_to_many_field = True
 
     def get_serializer_field(self, instance, **kwargs):
         required = kwargs.pop("required", False)
@@ -3156,7 +3165,7 @@ class MultipleSelectFieldType(SelectOptionBaseFieldType):
 
     def get_order(self, field, field_name, order_direction):
         """
-        If the user wants to sort the results he expects them to be ordered
+        If the user wants to sort the results they expect them to be ordered
         alphabetically based on the select option value and not in the id which is
         stored in the table. This method generates a Case expression which maps the id
         to the correct position.
@@ -3461,7 +3470,12 @@ class FormulaFieldType(ReadOnlyFieldType):
             return False
 
     def get_fields_needing_periodic_update(self) -> Optional[QuerySet]:
-        return FormulaField.objects.filter(needs_periodic_update=True)
+        return FormulaField.objects.filter(
+            needs_periodic_update=True,
+            table__trashed=False,
+            table__database__trashed=False,
+            table__database__workspace__trashed=False,
+        )
 
     def run_periodic_update(
         self,
@@ -4241,6 +4255,12 @@ class MultipleCollaboratorsFieldType(FieldType):
     model_class = MultipleCollaboratorsField
     can_get_unique_values = False
     can_be_in_form_view = False
+    allowed_fields = ["notify_user_when_added"]
+    serializer_field_names = ["notify_user_when_added"]
+    serializer_field_overrides = {
+        "notify_user_when_added": serializers.BooleanField(required=False)
+    }
+    is_many_to_many_field = True
 
     def get_serializer_field(self, instance, **kwargs):
         required = kwargs.pop("required", False)
@@ -4498,7 +4518,7 @@ class MultipleCollaboratorsFieldType(FieldType):
 
     def get_order(self, field, field_name, order_direction):
         """
-        If the user wants to sort the results he expects them to be ordered
+        If the user wants to sort the results they expect them to be ordered
         alphabetically based on the user's name and not in the id which is
         stored in the table. This method generates a Case expression which maps
         the id to the correct position.

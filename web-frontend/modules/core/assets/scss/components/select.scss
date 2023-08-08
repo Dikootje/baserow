@@ -32,7 +32,7 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  max-height: (4 * 36px) + 20px; // we show max 8 items
+  max-height: (4 * 36px) + 20px; // we show max 4 items
   // note that the value is `scroll` and not `auto` because it depends on the
   // v-auto-overflow-scroll directive.
   overflow-y: scroll;
@@ -93,6 +93,14 @@
 
   &:hover {
     background-color: $color-neutral-100;
+  }
+
+  &--selected {
+    background-color: $color-primary-100;
+  }
+
+  &--indented {
+    margin-left: 20px;
   }
 
   &.select__item--loading::before {

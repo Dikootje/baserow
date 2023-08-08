@@ -66,9 +66,12 @@ import {
   RuntimeGet,
 } from '@baserow/modules/core/runtimeFormulaTypes'
 
+import priorityBus from '@baserow/modules/core/plugins/priorityBus'
+
 export default (context, inject) => {
   const { store, isDev, app } = context
   inject('bus', new Vue())
+  inject('priorityBus', priorityBus)
 
   // Allow locale file hot reloading in dev
   if (isDev && app.i18n) {
@@ -154,9 +157,9 @@ export default (context, inject) => {
 
   registry.register('errorPage', new DefaultErrorPageType(context))
 
-  registry.register('runtime_formula_type', new RuntimeConcat(context))
-  registry.register('runtime_formula_type', new RuntimeGet(context))
-  registry.register('runtime_formula_type', new RuntimeAdd(context))
+  registry.register('runtimeFormulaFunction', new RuntimeConcat(context))
+  registry.register('runtimeFormulaFunction', new RuntimeGet(context))
+  registry.register('runtimeFormulaFunction', new RuntimeAdd(context))
 
   // Notification types
   registry.register(
