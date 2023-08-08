@@ -192,8 +192,12 @@ class ViewIndexingHandler(metaclass=baserow_trace_methods(tracer)):
         :return: The index hash key calculated from the fields used for sorting.
         """
 
+        # TODO: remove :
         index_key = "-".join(
-            map(lambda vs: f"{vs.expression.name}:{vs.descending}", index_fields)
+            map(
+                lambda vs: f"{vs.expression.name}:{getattr(vs.expression, 'collation', '')}:{vs.descending}",
+                index_fields,
+            )
         )
         # limit to 20 characters, considering the limit of 30 for the index name
         return shake_128(index_key.encode("utf-8")).hexdigest(10)

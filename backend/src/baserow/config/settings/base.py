@@ -1135,3 +1135,9 @@ for plugin in [*BASEROW_BUILT_IN_PLUGINS, *BASEROW_BACKEND_PLUGIN_NAMES]:
     except ImportError as e:
         print("Could not import %s", plugin)
         print(e)
+
+
+# TODO:
+# from baserow.core.db import get_collation_name
+
+BASEROW_COLLATION = "en-x-icu"

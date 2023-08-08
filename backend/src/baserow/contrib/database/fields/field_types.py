@@ -16,7 +16,6 @@ from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.core.files.storage import Storage, default_storage
 from django.db import OperationalError, models
-
 from django.db.models import (
     CharField,
     DateTimeField,
@@ -29,7 +28,7 @@ from django.db.models import (
     Subquery,
     Value,
 )
-from django.db.models.functions import Coalesce, Collate
+from django.db.models.functions import Coalesce
 from django.utils.timezone import make_aware
 
 import pytz
@@ -80,6 +79,7 @@ from baserow.contrib.database.formula import (
 )
 from baserow.contrib.database.models import Table
 from baserow.contrib.database.validators import UnicodeRegexValidator
+from baserow.core.db import BaserowCollate
 from baserow.core.fields import SyncedDateTimeField
 from baserow.core.handler import CoreHandler
 from baserow.core.models import UserFile, WorkspaceUser
@@ -169,6 +169,21 @@ if TYPE_CHECKING:
         FieldUpdateCollector,
     )
     from baserow.contrib.database.table.models import GeneratedTableModel
+
+
+class CollationSortMixin:
+    def get_order(
+        self, field, field_name, order_direction
+    ) -> OptionallyAnnotatedOrderBy:
+        field_expr = BaserowCollate(F(field_name))
+        field_expr.name = field_name
+
+        if order_direction == "ASC":
+            field_order_by = field_expr.asc(nulls_first=True)
+        else:
+            field_order_by = field_expr.desc(nulls_last=True)
+
+        return OptionallyAnnotatedOrderBy(order=field_order_by, can_be_indexed=True)
 
 
 class TextFieldMatchingRegexFieldType(FieldType, ABC):
@@ -290,7 +305,7 @@ class CharFieldMatchingRegexFieldType(TextFieldMatchingRegexFieldType):
         return BaserowFormulaCharType(nullable=True)
 
 
-class TextFieldType(FieldType):
+class TextFieldType(CollationSortMixin, FieldType):
     type = "text"
     model_class = TextField
     allowed_fields = ["text_default"]
@@ -331,7 +346,7 @@ class TextFieldType(FieldType):
         return TextField()
 
 
-class LongTextFieldType(FieldType):
+class LongTextFieldType(CollationSortMixin, FieldType):
     type = "long_text"
     model_class = LongTextField
 
@@ -367,7 +382,7 @@ class LongTextFieldType(FieldType):
         return LongTextField()
 
 
-class URLFieldType(TextFieldMatchingRegexFieldType):
+class URLFieldType(CollationSortMixin, TextFieldMatchingRegexFieldType):
     type = "url"
     model_class = URLField
 
@@ -2204,7 +2219,7 @@ class LinkRowFieldType(FieldType):
         )
 
 
-class EmailFieldType(CharFieldMatchingRegexFieldType):
+class EmailFieldType(CollationSortMixin, CharFieldMatchingRegexFieldType):
     type = "email"
     model_class = EmailField
 
@@ -2796,7 +2811,7 @@ class SingleSelectFieldType(SelectOptionBaseFieldType):
         """
 
         name = F(f"{field_name}__value")
-        order = Collate(name, "en-x-icu")
+        order = BaserowCollate(name)
         order.name = name
 
         if order_direction == "ASC":
@@ -3179,7 +3194,7 @@ class MultipleSelectFieldType(SelectOptionBaseFieldType):
         query = Coalesce(StringAgg(f"{field_name}__value", ","), Value(""))
         annotation = {sort_column_name: query}
 
-        order = Collate(sort_column_name, "en-x-icu")
+        order = BaserowCollate(sort_column_name)
         order.name = sort_column_name
 
         if order_direction == "DESC":
@@ -4534,7 +4549,7 @@ class MultipleCollaboratorsFieldType(FieldType):
         query = Coalesce(StringAgg(f"{field_name}__first_name", ""), Value(""))
         annotation = {sort_column_name: query}
 
-        order = Collate(sort_column_name, "en-x-icu")
+        order = BaserowCollate(sort_column_name)
         order.name = sort_column_name
 
         if order_direction == "DESC":

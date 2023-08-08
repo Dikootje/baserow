@@ -4,9 +4,11 @@ from decimal import Decimal
 from math import ceil
 from typing import Any, Callable, Iterable, List, Optional, Tuple, TypeVar
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import DEFAULT_DB_ALIAS, connection, transaction
 from django.db.models import Max, Model, QuerySet
+from django.db.models.functions import Collate
 from django.db.models.sql.query import LOOKUP_SEP
 from django.db.transaction import Atomic, get_connection
 
@@ -318,3 +320,38 @@ def recalculate_full_orders(
             where_clause=where_clause,
         )
         cursor.execute(sql_query)
+
+
+EXPECTED_CHARSET = "UTF8"
+EXPECTED_COLLATION = "en-x-icu"
+
+
+# TODO: test + fix for collation check
+def get_collation_name() -> str:
+    """
+    Returns the name of the Baserow collation if it
+    can be used, None otherwise.
+
+    Will be called once on startup, use settings.BASEROW_COLLATION
+    to access the result.
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT character_set_name, default_collate_name FROM information_schema.character_sets"
+        )
+        row = cursor.fetchone()
+        current_character_set = row[0]
+        current_default_collation = row[1]
+
+        if current_default_collation == EXPECTED_COLLATION:
+            return EXPECTED_COLLATION
+
+        if current_character_set != EXPECTED_CHARSET:
+            return None
+
+        return EXPECTED_COLLATION
+
+
+def BaserowCollate(expression):
+    coll_name = settings.BASEROW_COLLATION
+    return Collate(expression, coll_name) if coll_name else expression
