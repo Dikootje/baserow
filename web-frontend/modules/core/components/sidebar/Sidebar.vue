@@ -307,11 +307,7 @@
               }"
             >
               <div
-                class="
-                  tree__action
-                  tree__action--has-right-icon
-                  tree__action--has-notification
-                "
+                class="tree__action tree__action--has-right-icon tree__action--has-notification"
               >
                 <a
                   class="tree__link tree__link--group"
