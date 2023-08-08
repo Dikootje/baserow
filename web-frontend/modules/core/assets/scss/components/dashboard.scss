@@ -15,7 +15,7 @@
 .dashboard__help-description {
   margin: 0 0 16px;
   font-size: 13px;
-  color: $color-primary-900;
+  color: $color-blue-900;
 }
 
 .dashboard__alert-button {
@@ -56,7 +56,7 @@
   z-index: 1;
   display: block;
   line-height: 28px;
-  color: $color-primary-900;
+  color: $color-blue-900;
 
   &:hover {
     text-decoration: none;
@@ -96,7 +96,7 @@
   line-height: 1.25;
   font-weight: 700;
   max-width: 100%;
-  color: $color-primary-900;
+  color: $color-blue-900;
   min-width: 0;
 
   &:hover {
@@ -112,7 +112,7 @@
 }
 
 .dashboard__group-title-options {
-  color: $color-primary-900;
+  color: $color-blue-900;
 
   .dashboard__group-title--loading & {
     visibility: hidden;
@@ -173,21 +173,21 @@
   @include center-text(32px, 14px);
 
   flex: 0 0 32px;
-  background-color: $color-primary-500;
+  background-color: $color-blue-500;
   border-radius: 3px;
   color: $white;
   font-size: 14px;
   margin-right: 12px;
 
   &.dashboard__group-item-icon--add {
-    background-color: $color-success-500;
+    background-color: $color-green-500;
   }
 }
 
 .dashboard__group-item-name {
   @extend %ellipsis;
 
-  color: $color-primary-900;
+  color: $color-blue-900;
   width: 100%;
   line-height: 32px;
 }

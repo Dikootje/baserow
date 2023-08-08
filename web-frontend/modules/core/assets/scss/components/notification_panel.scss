@@ -31,7 +31,7 @@
   font-size: 12px;
   line-height: 20px;
   text-align: right;
-  color: $color-primary-500;
+  color: $color-blue-500;
 }
 
 .notification-panel__notification {
@@ -104,7 +104,7 @@
     width: 8px;
     height: 8px;
     border-radius: 100%;
-    background-color: $color-primary-500;
+    background-color: $color-blue-500;
   }
 }
 
@@ -117,7 +117,7 @@
   flex: 0 0 24px;
   font-weight: bold;
   color: $white;
-  background-color: $color-primary-500;
+  background-color: $color-blue-500;
   border-radius: 100%;
   margin-right: 12px;
 
@@ -144,7 +144,7 @@
 .notification-panel__empty-icon {
   font-size: 30px;
   margin-bottom: 30px;
-  color: $color-primary-500;
+  color: $color-blue-500;
 }
 
 .notification-panel__empty-title {
@@ -182,7 +182,7 @@
   width: 8px;
   height: 8px;
   border-radius: 100%;
-  background-color: $color-primary-500;
+  background-color: $color-blue-500;
   display: inline-block;
   margin-right: 12px;
   margin-left: 8px;

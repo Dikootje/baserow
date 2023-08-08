@@ -11,15 +11,15 @@
 .api-docs__nav-link {
   font-size: 14px;
   font-weight: 700;
-  color: $color-primary-900;
+  color: $color-blue-900;
 
   &:hover {
     text-decoration: none;
-    color: $color-primary-700;
+    color: $color-blue-700;
   }
 
   &.active {
-    color: $color-primary-500;
+    color: $color-blue-500;
   }
 
   .api-docs__nav-sub & {

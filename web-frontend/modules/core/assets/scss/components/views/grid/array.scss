@@ -32,10 +32,10 @@
   }
 
   .grid-view__column--matches-search & {
-    background-color: $color-primary-100;
+    background-color: $color-blue-100;
 
     &.active {
-      background-color: $color-primary-100;
+      background-color: $color-blue-100;
     }
   }
 }

@@ -6,6 +6,6 @@
   @include select-option-style(flex, true);
 
   .grid-view__column--matches-search .grid-field-many-to-many__cell.active & {
-    background-color: $color-primary-200;
+    background-color: $color-blue-200;
   }
 }

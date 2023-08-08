@@ -46,10 +46,10 @@
   flex-shrink: 0;
   padding: 14px;
   border-bottom: solid 1px $color-neutral-200;
-  background-color: $color-error-100;
+  background-color: $color-red-100;
   white-space: normal;
   word-break: break-word;
-  color: $color-error-500;
+  color: $color-yellow-500;
 }
 
 .formula-field__body {
@@ -93,7 +93,7 @@
   padding: 0 6px;
   font-size: 13px;
   line-height: 24px;
-  color: $color-primary-900;
+  color: $color-blue-900;
   border-radius: 3px;
 
   &:hover {

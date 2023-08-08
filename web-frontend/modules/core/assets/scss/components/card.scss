@@ -54,7 +54,7 @@
   &::before {
     @extend .fas;
 
-    content: fa-content($fa-var-image);
+    // content: fa-content($fa-var-image);
     color: $color-neutral-300;
     margin: -20px auto auto -20px;
     z-index: 0;

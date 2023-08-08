@@ -108,7 +108,7 @@
   flex: 0 0;
   font-size: 12px;
   line-height: 22px;
-  color: $color-primary-900;
+  color: $color-blue-900;
 
   &:hover {
     text-decoration: none;
@@ -164,7 +164,9 @@
     transition-delay: 0s;
   }
 
-  &:not(.kanban-view__stack-card--disabled):not(.kanban-view__stack-card--dragging):hover {
+  &:not(.kanban-view__stack-card--disabled):not(
+      .kanban-view__stack-card--dragging
+    ):hover {
     cursor: pointer;
     box-shadow: 0 1px 3px 0 rgba($black, 0.32);
   }
@@ -183,7 +185,7 @@
   background-color: $white;
   border: solid 1px $color-neutral-400;
   border-radius: 100%;
-  color: $color-primary-900;
+  color: $color-blue-900;
 
   @include center-text(28px, 12px);
 

@@ -15,7 +15,7 @@
   border-radius: 100%;
   border: solid 1px $color-neutral-300;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.16);
-  color: $color-primary-900;
+  color: $color-blue-900;
   background-color: $white;
 
   &:hover {
@@ -69,7 +69,7 @@
       @include absolute(0, 0, 0, 0);
 
       content: '';
-      border: solid 1px $color-primary-500;
+      border: solid 1px $color-blue-500;
       pointer-events: none;
     }
 
@@ -97,7 +97,7 @@
 
   position: relative;
   background-color: $white;
-  color: $color-primary-900;
+  color: $color-blue-900;
 
   &:hover {
     background-color: $color-neutral-100;
@@ -132,12 +132,12 @@
 }
 
 .element-preview--in-error::after {
-  @extend .fas;
+  // @extend .fas;
 
-  @include fa-icon;
+  // @include fa-icon;
   @include absolute(0, 0, auto, auto);
 
-  content: fa-content($fa-var-exclamation-circle);
+  // content: fa-content($fa-var-exclamation-circle);
   pointer-events: none;
   width: 20px;
   height: 20px;
@@ -145,5 +145,5 @@
   font-size: 20px;
   margin-right: 5px;
   margin-top: 5px;
-  color: $color-error-300;
+  color: $color-red-300;
 }

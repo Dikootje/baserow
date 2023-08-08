@@ -16,7 +16,7 @@
   padding: 0 16px 0 32px;
   line-height: 33px;
   font-size: 14px;
-  color: $color-primary-900;
+  color: $color-blue-900;
   border-left: solid 3px transparent;
 
   &:hover {
@@ -26,7 +26,7 @@
 
   .trash-sidebar__group--active & {
     background-color: $color-neutral-200;
-    border-left-color: $color-primary-500;
+    border-left-color: $color-blue-500;
   }
 
   .trash-sidebar__group--trashed & {
@@ -34,19 +34,19 @@
   }
 
   &::before {
-    @extend .fas;
-    @extend .fa-fw;
+    // @extend .fas;
+    // @extend .fa-fw;
 
     @include absolute(50%, auto, auto, 10px);
 
-    content: fa-content($fa-var-caret-right);
-    color: $color-primary-900;
+    // content: fa-content($fa-var-caret-right);
+    color: $color-blue-900;
     font-size: 14px;
     line-height: 12px;
     margin-top: -6px;
 
     .trash-sidebar__group--active & {
-      content: fa-content($fa-var-caret-down);
+      // content: fa-content($fa-var-caret-down);
     }
   }
 }
@@ -74,7 +74,7 @@
   line-height: 33px;
   font-size: 13px;
   padding: 0 20px 0 28px;
-  color: $color-primary-900;
+  color: $color-blue-900;
   border-left: solid 3px transparent;
 
   &:hover {
@@ -84,7 +84,7 @@
 
   .trash-sidebar__application--active & {
     background-color: $color-neutral-200;
-    border-left-color: $color-primary-500;
+    border-left-color: $color-blue-500;
   }
 
   .trash-sidebar__application--trashed & {
@@ -135,7 +135,7 @@
 
 .trash__empty-icon {
   font-size: 30px;
-  color: $color-primary-500;
+  color: $color-blue-500;
   margin-bottom: 30px;
 }
 

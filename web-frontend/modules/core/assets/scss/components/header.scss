@@ -58,7 +58,7 @@
     color: $color-neutral-800;
 
     &:hover {
-      color: $color-primary-500;
+      color: $color-blue-500;
     }
   }
 }
@@ -95,7 +95,7 @@
   display: flex;
   align-items: center;
   font-weight: 600;
-  color: $color-primary-900;
+  color: $color-blue-900;
   padding: 0 10px;
   border-radius: 3px;
   white-space: nowrap;
@@ -113,19 +113,19 @@
   }
 
   &.active {
-    background-color: $color-success-100;
+    background-color: $color-green-500;
   }
 
   &.active--primary {
-    background-color: $color-primary-100;
+    background-color: $color-blue-100;
   }
 
   &.active--warning {
-    background-color: $color-warning-100;
+    background-color: $color-yellow-100;
   }
 
   &.active--error {
-    background-color: $color-error-100;
+    background-color: $color-red-100;
   }
 }
 
@@ -155,7 +155,7 @@
 }
 
 .header__filter-icon {
-  color: $color-primary-900;
+  color: $color-blue-900;
 
   &:not(:last-child) {
     margin-right: 4px;
@@ -166,7 +166,7 @@
   }
 
   &.header-filter-icon--view {
-    color: $color-primary-500;
+    color: $color-blue-500;
     font-size: 14px;
   }
 
@@ -176,7 +176,7 @@
 }
 
 .header__search-icon {
-  color: $color-primary-900;
+  color: $color-blue-900;
   margin-right: 4px;
 }
 

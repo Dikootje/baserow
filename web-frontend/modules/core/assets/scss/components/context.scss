@@ -66,7 +66,7 @@
     position: relative;
     display: block;
     border-radius: 3px;
-    color: $color-primary-900;
+    color: $color-blue-900;
     padding: 0 10px;
     user-select: none;
     line-height: 32px;
@@ -82,10 +82,10 @@
       &::after {
         @extend .fas;
 
-        content: fa-content($fa-var-check-circle);
+        // content: fa-content($fa-var-check-circle);
         width: 32px;
         text-align: center;
-        color: $color-success-500;
+        color: $color-green-500;
 
         @include absolute(8px, 0, auto, auto);
       }
@@ -110,7 +110,7 @@
     }
 
     &.context__menu-item--delete {
-      color: $color-error-600;
+      color: $color-red-600;
     }
   }
 

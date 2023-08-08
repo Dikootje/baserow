@@ -49,7 +49,7 @@
 }
 
 .radio__input input[type='radio']:checked + label {
-  // The filling color is hard coded here. we cannot set to $color-primary-500 because of interpolation issue within a background-image property.
+  // The filling color is hard coded here. we cannot set to $color-blue-500 because of interpolation issue within a background-image property.
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><rect width="16" height="16" rx="8" fill="%234e5cfe"/><circle cx="8" cy="8" r="3" fill="white"/></svg>');
   background-repeat: no-repeat;
   background-position: center;
@@ -58,7 +58,7 @@
 }
 
 .radio__input input[type='radio']:disabled:checked + label {
-  // The filling color is hard coded here. we cannot set to $color-primary-500 because of interpolation issue within a background-image property.
+  // The filling color is hard coded here. we cannot set to $color-blue-500 because of interpolation issue within a background-image property.
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><rect width="16" height="16" rx="8" fill="%23CDCECF"/><circle cx="8" cy="8" r="3" fill="white"/></svg>');
   background-repeat: no-repeat;
   background-position: center;

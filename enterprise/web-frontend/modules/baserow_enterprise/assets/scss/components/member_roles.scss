@@ -37,7 +37,7 @@
   flex: 0 0 30px;
   font-weight: bold;
   color: $white;
-  background-color: $color-primary-500;
+  background-color: $color-blue-500;
   border-radius: 100%;
 
   @include center-text(30px, 10px);
@@ -47,7 +47,7 @@
   flex: 0 0 30px;
   font-weight: bold;
   color: $white;
-  background-color: $color-primary-500;
+  background-color: $color-blue-500;
 
   @include center-text(30px, 10px);
 }

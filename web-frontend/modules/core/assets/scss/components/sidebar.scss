@@ -2,7 +2,7 @@
   @include absolute(0);
 
   overflow-y: auto;
-  background-color: $color-neutral-10;
+  background-color: $color-neutral-25;
   border-right: solid 1px $color-neutral-200;
   height: 100%;
 
@@ -42,7 +42,7 @@
   flex: 0 0 36px;
   font-weight: bold;
   color: $white;
-  background-color: $color-primary-500;
+  background-color: $color-blue-500;
   border-radius: 100%;
   margin-right: 12px;
 
@@ -77,14 +77,14 @@
 
   min-width: 0;
   line-height: 22px;
-  color: $color-primary-900;
+  color: $color-blue-900;
 }
 
 .sidebar__user-icon {
   flex: 0 0 20px;
   text-align: center;
   font-size: 12px;
-  color: $color-primary-900;
+  color: $color-blue-900;
 }
 
 .sidebar__user-email {
@@ -240,5 +240,5 @@
   width: 8px;
   height: 8px;
   border-radius: 100%;
-  background-color: $color-primary-500;
+  background-color: $color-blue-500;
 }

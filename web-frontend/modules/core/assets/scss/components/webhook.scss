@@ -87,11 +87,11 @@
   margin-left: 10px;
 
   &.webhook__head-call-state--ok {
-    color: $color-success-500;
+    color: $color-green-500;
   }
 
   &.webhook__head-call-state--error {
-    color: $color-error-500;
+    color: $color-yellow-500;
   }
 }
 
@@ -178,7 +178,7 @@
 .webhook__code {
   margin: 0;
   line-height: 21px;
-  color: $color-primary-900;
+  color: $color-blue-900;
   font-size: 13px;
   font-family: monospace;
 
@@ -239,7 +239,7 @@
   margin-left: 16px;
 
   &:hover {
-    color: $color-primary-900;
+    color: $color-blue-900;
     text-decoration: none;
   }
 }
@@ -250,11 +250,11 @@
   margin-right: 10px;
 
   &.webhook__head-call-state--ok {
-    color: $color-success-500;
+    color: $color-green-500;
   }
 
   &.webhook__head-call-state--error {
-    color: $color-error-500;
+    color: $color-yellow-500;
   }
 }
 
@@ -298,11 +298,11 @@
   text-align: right;
 
   &.webhook__test-state--ok {
-    color: $color-success-500;
+    color: $color-green-500;
   }
 
   &.webhook__test-state--error {
-    color: $color-error-500;
+    color: $color-yellow-500;
   }
 }
 

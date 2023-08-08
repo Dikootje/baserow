@@ -29,7 +29,7 @@
     border-radius: 3px;
     line-height: 28px;
     text-align: center;
-    color: $color-primary-900;
+    color: $color-blue-900;
     white-space: nowrap;
 
     &:hover {
@@ -38,7 +38,7 @@
     }
 
     &.active {
-      background-color: $color-primary-500;
+      background-color: $color-blue-500;
       color: $white;
     }
   }

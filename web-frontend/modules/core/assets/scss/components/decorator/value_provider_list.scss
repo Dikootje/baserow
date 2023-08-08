@@ -23,10 +23,10 @@
   }
 
   &--selected {
-    background-color: $color-primary-100;
+    background-color: $color-blue-100;
 
     &:hover {
-      background-color: $color-primary-100;
+      background-color: $color-blue-100;
     }
 
     &::after {
@@ -34,7 +34,7 @@
 
       // content: fa-content($fa-var-check-circle);
       text-align: center;
-      color: $color-success-500;
+      color: $color-green-500;
 
       @include absolute(8px, 8px, auto, auto);
     }

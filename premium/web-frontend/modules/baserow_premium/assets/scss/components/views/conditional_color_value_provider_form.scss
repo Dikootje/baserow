@@ -29,7 +29,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: $color-primary-900;
+  color: $color-blue-900;
   padding: 6px;
   border-radius: 4px;
   margin-left: 4px;
@@ -45,7 +45,7 @@
 
   padding: 6px 9px;
   text-align: center;
-  color: $color-primary-900;
+  color: $color-blue-900;
   border-radius: 3px;
   font-size: 14px;
 }
@@ -61,5 +61,5 @@
 }
 
 .conditional-color-value-provider-form__color-filter-add {
-  color: $color-primary-900;
+  color: $color-blue-900;
 }

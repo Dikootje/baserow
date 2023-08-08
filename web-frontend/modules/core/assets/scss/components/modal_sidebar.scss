@@ -13,7 +13,7 @@
   flex: 0 0 32px;
   border-radius: 100%;
   margin-right: 16px;
-  background-color: $color-primary-500;
+  background-color: $color-blue-500;
   color: $white;
   font-weight: 700;
 
@@ -50,7 +50,7 @@
   line-height: 42px;
   padding: 0 20px 0 50px;
   border-left: solid 4px transparent;
-  color: $color-primary-900;
+  color: $color-blue-900;
   user-select: none;
 
   &:hover {
@@ -60,7 +60,7 @@
 
   &.active {
     background-color: darken($color-neutral-100, 2%);
-    border-left-color: $color-primary-500;
+    border-left-color: $color-blue-500;
     font-weight: 600;
   }
 }
@@ -72,5 +72,5 @@
   line-height: 14px;
   margin-top: -7px;
   text-align: center;
-  width: $fa-fw-width;
+  // width: $fa-fw-width;
 }

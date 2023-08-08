@@ -9,10 +9,10 @@
 .delete-section__label {
   display: flex;
   align-items: center;
-  border: 1px solid $color-error-300;
+  border: 1px solid $color-red-300;
   border-radius: 3px;
-  background-color: $color-error-100;
-  color: $color-error-900;
+  background-color: $color-red-100;
+  color: $color-red-900;
   line-height: 28px;
   padding: 0 10px;
 
@@ -21,8 +21,8 @@
 
 .delete-section__label-icon {
   background-color: $white;
-  border: solid 2px $color-error-400;
-  color: $color-error-900;
+  border: solid 2px $color-red-400;
+  color: $color-red-900;
   border-radius: 100%;
   text-align: center;
   margin-right: 8px;
@@ -58,7 +58,7 @@
 }
 
 .delete-section__list-icon {
-  @extend .fa-fw;
+  // @extend .fa-fw;
 
   position: relative;
   top: -1px;

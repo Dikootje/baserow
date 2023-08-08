@@ -70,7 +70,7 @@
   text-align: right;
   padding-top: 6px;
   font-size: 13px;
-  color: $color-success-500;
+  color: $color-green-500;
 }
 
 .field-file__action {
@@ -85,7 +85,7 @@
   }
 
   &:hover {
-    color: $color-primary-900;
+    color: $color-blue-900;
     background-color: $color-neutral-100;
   }
 }

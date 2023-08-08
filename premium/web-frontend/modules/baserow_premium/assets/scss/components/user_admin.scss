@@ -8,7 +8,7 @@
   flex: 0 0 28px;
   font-weight: bold;
   color: $white;
-  background-color: $color-primary-500;
+  background-color: $color-blue-500;
   border-radius: 100%;
   margin-right: 12px;
 
@@ -30,16 +30,16 @@
   margin-right: 5px;
 
   &.user-admin-active__icon--activated {
-    color: $color-success-500;
+    color: $color-green-500;
   }
 
   &.user-admin-active__icon--deactivated {
-    color: $color-error-500;
+    color: $color-yellow-500;
   }
 }
 
 .user-admin-group__icon {
-  width: $fa-fw-width;
+  // width: $fa-fw-width;
   color: $color-neutral-700;
 }
 
@@ -48,6 +48,6 @@
 }
 
 .user-admin-edit__delete {
-  color: $color-error-500;
+  color: $color-yellow-500;
   font-size: 14px;
 }

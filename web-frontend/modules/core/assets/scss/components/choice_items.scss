@@ -49,7 +49,7 @@
 
   &:not(.disabled):not(.active):hover {
     background-color: $color-neutral-100;
-    color: $color-primary-900;
+    color: $color-blue-900;
   }
 
   &.disabled {
@@ -61,8 +61,8 @@
   }
 
   &.active {
-    color: $color-primary-900;
-    background-color: $color-primary-100;
+    color: $color-blue-900;
+    background-color: $color-blue-100;
 
     &::after {
       @extend .fas;
@@ -71,7 +71,7 @@
       width: 32px;
       line-height: 20px;
       text-align: center;
-      color: $color-success-500;
+      color: $color-green-500;
       margin-top: -10px;
 
       @include absolute(50%, 10px, auto, auto);

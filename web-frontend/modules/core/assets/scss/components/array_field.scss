@@ -54,11 +54,11 @@
 .array-field__checkbox {
   margin: auto;
   border-radius: 3px;
-  color: $color-success-600;
+  color: $color-green-600;
 
   @include center-text(18px, 11px);
 
   &--false {
-    color: $color-error-600;
+    color: $color-red-600;
   }
 }

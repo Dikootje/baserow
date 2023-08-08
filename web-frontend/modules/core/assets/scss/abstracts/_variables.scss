@@ -27,8 +27,8 @@ $z-index-notifications: 9 !default;
 
 // normalize overrides
 $base-font-family: $text-font-stack !default;
-$font-awesome-font-family: 'Font Awesome 5 Free', sans-serif !default;
-$font-awesome-font-weight: 900 !default;
+// $font-awesome-font-family: 'Font Awesome 5 Free', sans-serif !default;
+// $font-awesome-font-weight: 900 !default;
 
 // API docs variables
 $api-docs-nav-width: 220px !default;
@@ -46,3 +46,4 @@ $file-field-modal-body-nav-width: 120px !default;
 $file-field-modal-foot-height: 108px !default;
 
 $dashboard-breakpoint: 1100px;
+$builder-page-max-width: 1280px;

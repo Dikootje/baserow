@@ -111,7 +111,7 @@
   }
 
   &.active {
-    background-color: $color-primary-100;
+    background-color: $color-blue-100;
 
     &:not(.select__item--loading)::after {
       @extend .fas;
@@ -120,7 +120,7 @@
       // content: fa-content($fa-var-check-circle);
       width: 32px;
       text-align: center;
-      color: $color-success-500;
+      color: $color-green-500;
 
       @include absolute(0, 0, auto, auto);
     }
@@ -141,7 +141,7 @@
 
 .select__item-link {
   display: block;
-  color: $color-primary-900;
+  color: $color-blue-900;
 
   &:hover {
     text-decoration: none;
@@ -255,7 +255,7 @@
   position: relative;
   flex: 0 0 calc(50% - 10px);
   width: calc(50% - 10px);
-  color: $color-primary-900;
+  color: $color-blue-900;
   border-radius: 3px;
   padding: 0 32px 0 10px;
   margin-bottom: 4px;
@@ -281,7 +281,7 @@
   &::after {
     @extend .fas;
 
-    content: fa-content($fa-var-plus);
+    // content: fa-content($fa-var-plus);
     color: $color-neutral-200;
     margin-top: -6.5px;
     line-height: 13px;

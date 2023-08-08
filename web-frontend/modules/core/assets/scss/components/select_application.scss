@@ -46,7 +46,7 @@
   }
 
   &.active::before {
-    background-color: $color-primary-100;
+    background-color: $color-blue-100;
   }
 }
 
@@ -54,7 +54,7 @@
   @include center-text(32px, 14px);
 
   flex: 0 0 32px;
-  background-color: $color-primary-500;
+  background-color: $color-blue-500;
   border-radius: 3px;
   color: $white;
   font-size: 14px;
@@ -64,7 +64,7 @@
 .select-application__name {
   @extend %ellipsis;
 
-  color: $color-primary-900;
+  color: $color-blue-900;
   width: 100%;
   line-height: 32px;
 }

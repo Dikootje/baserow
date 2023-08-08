@@ -36,7 +36,7 @@
 .admin-dashboard__numbers-value {
   font-size: 24px;
   font-weight: 600;
-  color: $color-primary-900;
+  color: $color-blue-900;
   margin-bottom: 8px;
 }
 
@@ -50,10 +50,10 @@
 }
 
 .admin-dashboard__numbers-percentage-value {
-  color: $color-success-500;
+  color: $color-green-500;
   margin-right: 4px;
 
   &.admin-dashboard__numbers-percentage-value--negative {
-    color: $color-error-500;
+    color: $color-yellow-500;
   }
 }

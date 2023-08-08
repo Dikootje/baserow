@@ -1,9 +1,9 @@
 .license-yes {
-  color: $color-success-500;
+  color: $color-green-500;
 }
 
 .license-no {
-  color: $color-error-500;
+  color: $color-yellow-500;
 }
 
 .license-plan {
@@ -17,11 +17,11 @@
   }
 
   &.license-plan--premium {
-    background-color: $color-primary-100;
+    background-color: $color-blue-100;
   }
 
   &.license-plan--expired {
-    background-color: $color-error-100;
+    background-color: $color-red-100;
   }
 }
 

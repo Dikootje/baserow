@@ -18,13 +18,13 @@
 }
 
 .rich-text-editor__mention--current-user {
-  color: $color-primary-700;
-  background-color: $color-primary-100;
+  color: $color-blue-700;
+  background-color: $color-blue-100;
 }
 
 .rich-text-editor__mention--user-gone {
   text-decoration: line-through;
-  background-color: $color-error-100;
+  background-color: $color-red-100;
 }
 
 .rich-text-editor__mention-dropdown {

@@ -1,4 +1,3 @@
-@import 'old/variables'; // TODO: to remove
 @import 'abstracts/_variables';
 @import 'abstracts/_colors';
 @import 'abstracts/_fonts';
@@ -10,24 +9,5 @@
 @import 'abstracts/_alert';
 @import 'mixins/all';
 @import '_base';
-@import 'components/button';
-@import 'components/icon_button';
-@import 'components/floating_button';
-@import 'components/button_text';
-@import 'components/badge_counter';
-@import 'components/badge';
-@import 'components/alert';
-@import 'components/toast';
-@import 'components/avatar';
-@import 'components/chips';
-@import 'components/form';
-@import 'components/form_input';
-@import 'components/form_textarea';
-@import 'components/radio';
-@import 'components/radio_group';
-@import 'components/checkbox';
-@import 'components/switch';
-@import 'components/tabs';
-@import 'components/tooltip';
-@import '_vendors'; // TODO: to remove
+@import 'components/all';
 @import '_helpers';

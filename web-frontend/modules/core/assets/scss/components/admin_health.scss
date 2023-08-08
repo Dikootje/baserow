@@ -41,7 +41,7 @@
 
 .admin-health__check-item-description {
   font-size: 13px;
-  color: $color-warning-600;
+  color: $color-yellow-600;
   line-height: 160%;
 }
 
@@ -55,9 +55,9 @@
 }
 
 .admin-health__icon--success {
-  color: $color-success-500;
+  color: $color-green-500;
 }
 
 .admin-health__icon--fail {
-  color: $color-error-500;
+  color: $color-yellow-500;
 }

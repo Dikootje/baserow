@@ -8,13 +8,13 @@
 }
 
 .progress-bar__inner {
-  background-color: $color-success-300;
+  background-color: $color-green-300;
   border-radius: 5px;
   height: 100%;
   transition-timing-function: linear;
 
   &--overflow {
-    background-color: $color-error-500;
+    background-color: $color-yellow-500;
   }
 }
 

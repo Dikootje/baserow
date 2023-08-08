@@ -21,7 +21,7 @@
   flex: 0 0 36px;
   margin-right: 16px;
   border-radius: 100%;
-  background-color: $color-primary-500;
+  background-color: $color-blue-500;
   color: $white;
   font-weight: 700;
   font-size: 15px;
@@ -42,7 +42,7 @@
   @extend %ellipsis;
 
   font-size: 13px;
-  color: $color-primary-900;
+  color: $color-blue-900;
   margin-bottom: 6px;
   max-width: 100%;
 }
@@ -65,7 +65,7 @@
 
   li {
     font-size: 12px;
-    background-color: $color-primary-100;
+    background-color: $color-blue-100;
     border-radius: 3px;
     padding: 4px;
     margin-top: 6px;

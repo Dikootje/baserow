@@ -22,7 +22,7 @@
   border-radius: 3px;
 
   &.active {
-    background-color: $color-primary-100;
+    background-color: $color-blue-100;
   }
 
   &.tree__item--loading::after {
@@ -76,7 +76,7 @@
   @extend %tree__size;
   @extend %ellipsis;
 
-  color: $color-primary-900;
+  color: $color-blue-900;
   font-size: 14px;
   display: block;
 
@@ -101,14 +101,14 @@
   display: inline-block;
   position: absolute;
   right: 35px;
-  color: $color-primary-500;
+  color: $color-blue-500;
 }
 
 .tree__icon {
   @extend %tree__size;
 
   text-align: center;
-  width: $fa-fw-width;
+  // width: $fa-fw-width;
   color: $color-neutral-700;
   margin-right: 4px;
   font-size: 11px;
@@ -172,18 +172,18 @@
   @extend %tree_sub-size;
   @extend %ellipsis;
 
-  color: $color-primary-900;
+  color: $color-blue-900;
   display: block;
 
   &:hover {
     cursor: pointer;
     text-decoration: none;
-    color: $color-primary-500;
+    color: $color-blue-500;
   }
 
   .active > & {
     font-weight: 600;
-    color: $color-primary-600;
+    color: $color-blue-600;
   }
 }
 
@@ -197,7 +197,7 @@
   cursor: not-allowed;
 
   &:hover {
-    color: $color-primary-900;
+    color: $color-blue-900;
     opacity: 0.6;
     text-decoration: none;
     cursor: not-allowed;
@@ -254,7 +254,7 @@
   width: 19px;
   height: 16px;
   border-radius: 80px;
-  background-color: $color-primary-500;
+  background-color: $color-blue-500;
   color: white;
   font-weight: 700;
   text-align: center;

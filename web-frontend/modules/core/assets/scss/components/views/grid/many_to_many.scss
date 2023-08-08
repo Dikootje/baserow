@@ -29,7 +29,7 @@
   background-color: $color-neutral-100;
   border-radius: 3px;
   display: flex;
-  color: $color-primary-900;
+  color: $color-blue-900;
 
   @include fixed-height(22px, 13px);
 
@@ -38,23 +38,23 @@
   }
 
   .grid-field-many-to-many__cell.active & {
-    background-color: $color-primary-100;
+    background-color: $color-blue-100;
 
     .grid-view__column--matches-search & {
-      background-color: $color-primary-200;
+      background-color: $color-blue-200;
     }
   }
 
   &.grid-field-many-to-many__item--link {
     display: none;
     font-size: 11px;
-    color: $color-primary-900;
+    color: $color-blue-900;
 
     &:hover {
-      background-color: $color-primary-200;
+      background-color: $color-blue-200;
 
       .grid-view__column--matches-search & {
-        background-color: $color-primary-300;
+        background-color: $color-blue-300;
       }
     }
 
@@ -78,7 +78,7 @@
 
 .grid-field-many-to-many__remove {
   display: none;
-  color: $color-primary-900;
+  color: $color-blue-900;
   margin-left: 5px;
   font-size: 11px;
   padding: 0 2px;

@@ -88,7 +88,7 @@
 
   &:hover::before,
   &.dragging::before {
-    background-color: $color-primary-500;
+    background-color: $color-blue-500;
   }
 }
 
@@ -219,7 +219,7 @@
 
     content: '';
     z-index: 2;
-    border: 2px solid $color-warning-500;
+    border: 2px solid $color-yellow-500;
     pointer-events: none;
   }
 }
@@ -229,7 +229,7 @@
   @include fixed-height(20px, 12px);
 
   z-index: 1;
-  background-color: $color-warning-500;
+  background-color: $color-yellow-500;
   color: $white;
   padding: 0 4px;
 }
@@ -264,11 +264,11 @@
   }
 
   &.grid-view__column--sorted::after {
-    background-color: rgba($color-warning-100, 0.8);
+    background-color: rgba($color-yellow-100, 0.8);
   }
 
   &.grid-view__column--filtered::after {
-    background-color: rgba($color-success-100, 0.5);
+    background-color: rgba($color-green-500, 0.5);
   }
 }
 
@@ -278,7 +278,7 @@
   line-height: 32px;
 
   &.grid-view__row-info--matches-search {
-    background-color: $color-primary-100;
+    background-color: $color-blue-100;
   }
 }
 
@@ -346,8 +346,8 @@
   }
 
   &:hover {
-    background-color: $color-primary-100;
-    color: $color-primary-800;
+    background-color: $color-blue-100;
+    color: $color-blue-800;
   }
 }
 
@@ -360,17 +360,17 @@
     @include absolute(-2px);
 
     z-index: 2;
-    border: 2px solid $color-primary-500;
+    border: 2px solid $color-blue-500;
     border-radius: 2px;
 
     &.editing {
       @include absolute(-3px);
 
-      border: 3px solid $color-primary-600;
+      border: 3px solid $color-blue-600;
     }
 
     &.invalid {
-      border: 3px solid $color-error-400;
+      border: 3px solid $color-red-400;
       border-bottom: 0;
       border-bottom-left-radius: 0;
       border-bottom-right-radius: 0;
@@ -378,7 +378,7 @@
   }
 
   &.cell-error {
-    background-color: $color-error-100;
+    background-color: $color-red-100;
     color: $color-neutral-500;
   }
 
@@ -388,48 +388,48 @@
     }
 
     &.cell-error {
-      background-color: $color-error-100;
+      background-color: $color-red-100;
     }
   }
 
   .grid-view__column--matches-search & {
-    background-color: $color-primary-100;
+    background-color: $color-blue-100;
 
     &.active {
-      background-color: $color-primary-100;
+      background-color: $color-blue-100;
     }
   }
 
   .grid-view__column--multi-select & {
-    background-color: $color-primary-100;
+    background-color: $color-blue-100;
 
     &.active {
-      background-color: $color-primary-100;
+      background-color: $color-blue-100;
     }
   }
 
   .grid-view__column--multi-select-top & {
     top: -2px;
     z-index: 2;
-    border-top: 2px solid $color-primary-500;
+    border-top: 2px solid $color-blue-500;
   }
 
   .grid-view__column--multi-select-right & {
     right: -2px;
     z-index: 2;
-    border-right: 2px solid $color-primary-500;
+    border-right: 2px solid $color-blue-500;
   }
 
   .grid-view__column--multi-select-bottom & {
     bottom: -2px;
     z-index: 2;
-    border-bottom: 2px solid $color-primary-500;
+    border-bottom: 2px solid $color-blue-500;
   }
 
   .grid-view__column--multi-select-left & {
     left: -2px;
     z-index: 2;
-    border-left: 2px solid $color-primary-500;
+    border-left: 2px solid $color-blue-500;
   }
 
   .grid-view__cell--error {
@@ -437,10 +437,10 @@
 
     @include absolute(100%, -3px, auto, -3px);
 
-    border: 3px solid $color-error-400;
+    border: 3px solid $color-red-400;
     border-top: 0;
-    background-color: $color-error-100;
-    color: $color-error-900;
+    background-color: $color-red-100;
+    color: $color-red-900;
     padding: 0 6px;
     line-height: 34px;
     height: 34px;
@@ -449,14 +449,14 @@
   }
 
   &.active-by {
-    border-color: $color-success-500;
+    border-color: $color-green-500;
   }
 
   .grid-view__cell--active-by {
     @include absolute(-8px, 0, auto, auto);
     @include fixed-height(18px, 12px);
 
-    background-color: $color-success-500;
+    background-color: $color-green-500;
     color: $white;
     border-radius: 3px;
     padding: 0 3px;
@@ -493,7 +493,7 @@
 
     line-height: inherit;
     width: 30px;
-    color: $color-error-400;
+    color: $color-red-400;
     padding-right: 45px;
     text-align: right;
   }
@@ -525,7 +525,7 @@
 
     &:hover::before,
     &.dragging::before {
-      background-color: $color-primary-500;
+      background-color: $color-blue-500;
     }
   }
 
@@ -557,7 +557,7 @@
   color: $color-neutral-900;
 
   &:hover {
-    background-color: $color-primary-100;
+    background-color: $color-blue-100;
   }
 }
 
@@ -581,7 +581,7 @@
   }
 
   &.hover {
-    background-color: $color-primary-100;
+    background-color: $color-blue-100;
   }
 
   .grid-view__left & {
@@ -600,7 +600,7 @@
   @include absolute(0, auto, 48px, auto);
 
   z-index: 5;
-  border-left: solid 1px $color-primary-900;
+  border-left: solid 1px $color-blue-900;
 }
 
 .grid-view__row-dragging-container {
@@ -621,5 +621,5 @@
 .grid-view__row-target {
   @include absolute(auto, auto, auto, 0);
 
-  border-top: solid 1px $color-primary-900;
+  border-top: solid 1px $color-blue-900;
 }

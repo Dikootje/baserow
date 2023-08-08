@@ -48,7 +48,7 @@
 .sortings__remove {
   flex: 0 0 32px;
   width: 32px;
-  color: $color-primary-900;
+  color: $color-blue-900;
   line-height: 30px;
   text-align: center;
 
@@ -118,7 +118,7 @@
   }
 
   &.active {
-    background-color: $color-primary-100;
+    background-color: $color-blue-100;
 
     .sortings__order--disabled & {
       background-color: $color-neutral-100;
@@ -132,7 +132,7 @@
 
   &:hover {
     text-decoration: none;
-    color: $color-primary-900;
+    color: $color-blue-900;
   }
 }
 
@@ -141,6 +141,6 @@
   overflow: auto;
 
   .context__menu-icon {
-    color: $color-primary-900;
+    color: $color-blue-900;
   }
 }

@@ -38,7 +38,7 @@
     box-shadow: 0 1px 2px 0 rgba(7, 8, 16, 0.1);
 
     .form-textarea__textarea {
-      border: 1px solid $color-error-500;
+      border: 1px solid $color-yellow-500;
       margin: 0;
 
       &:focus {
@@ -47,7 +47,7 @@
     }
 
     .form-textarea__icon {
-      color: $color-error-500;
+      color: $color-yellow-500;
     }
   }
 
@@ -65,7 +65,7 @@
 
   &.form-textarea--disabled {
     cursor: not-allowed;
-    color: $color-primary-900;
+    color: $color-blue-900;
     background-color: $color-neutral-50;
 
     &:active,
