@@ -17,6 +17,7 @@ from baserow.contrib.builder.elements.registries import element_type_registry
 from baserow.contrib.builder.models import Builder
 from baserow.contrib.builder.pages.models import Page
 from baserow.contrib.builder.pages.service import PageService
+from baserow.contrib.builder.theme.registries import theme_component_registry
 from baserow.contrib.builder.types import BuilderDict, DataSourceDict, PageDict
 from baserow.contrib.database.constants import IMPORT_SERIALIZED_IMPORTING
 from baserow.core.db import specific_iterator
@@ -394,4 +395,6 @@ class BuilderApplicationType(ApplicationType):
         return builder
 
     def enhance_queryset(self, queryset):
-        return queryset.prefetch_related("page_set")
+        queryset = queryset.prefetch_related("page_set")
+        queryset = theme_component_registry.enhance_list_builder_queryset(queryset)
+        return queryset

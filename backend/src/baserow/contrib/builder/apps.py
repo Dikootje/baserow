@@ -163,6 +163,11 @@ class BuilderConfig(AppConfig):
         builder_data_provider_type_registry.register(DataSourceDataProviderType())
         builder_data_provider_type_registry.register(PageParameterDataProviderType())
 
+        from .theme.registries import theme_component_registry
+        from .theme.theme_types import DefaultThemeComponentType
+
+        theme_component_registry.register(DefaultThemeComponentType())
+
         from .domains.receivers import connect_to_domain_pre_delete_signal
 
         connect_to_domain_pre_delete_signal()
