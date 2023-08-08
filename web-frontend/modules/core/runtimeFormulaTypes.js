@@ -10,6 +10,7 @@ import {
 import { Node, VueNodeViewRenderer } from '@tiptap/vue-2'
 import GetFormulaComponent from '@baserow/modules/core/components/formula/GetFormulaComponent'
 import { mergeAttributes } from '@tiptap/core'
+import _ from 'lodash'
 
 export class RuntimeFormulaFunction extends Registerable {
   /**
