@@ -129,6 +129,7 @@ export default {
   },
   methods: {
     onUpdate() {
+      this.fixMultipleWrappers()
       this.$emit('input', this.toFormula(this.wrapperContent))
     },
     onFocus() {
@@ -157,6 +158,20 @@ export default {
     toFormula(content) {
       const functionCollection = new RuntimeFunctionCollection(this.$registry)
       return new FromTipTapVisitor(functionCollection).visit(content || [])
+    },
+    /**
+     * Sometimes TipTap will insert a new wrapper by itself. For example when you add
+     * text in front of a custom component it will create a separate wrapper for that
+     * text. This is annoying behaviour since we only want to deal with one wrapper
+     * and not multiple.
+     *
+     * This function checks if there are multiple wrappers and if so, combines them
+     * into one. That action is seamless to the user and won't interfere with the typing
+     */
+    fixMultipleWrappers() {
+      if (this.editor.getJSON().content.length > 1) {
+        this.editor.commands.joinForward()
+      }
     },
   },
 }
