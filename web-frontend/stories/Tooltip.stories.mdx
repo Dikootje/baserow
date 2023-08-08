@@ -1,0 +1,64 @@
+import { Meta, Story, Props, Canvas } from '@storybook/addon-docs/blocks'
+import { config, withDesign } from 'storybook-addon-designs'
+import { action } from '@storybook/addon-actions'
+import { useArgs } from '@storybook/client-api'
+import Tooltip from '@baserow/modules/core/directives/tooltip/'
+import Vue from 'vue'
+Vue.directive('tooltip', Tooltip)
+
+<Meta
+    title="Baserow/Tooltip"
+    parameters={{
+        backgrounds: {
+            default: 'white',
+            values: [
+                { name: 'white', value: '#ffffff' },
+                { name: 'light', value: '#eeeeee' },
+                { name: 'dark', value: '#222222' },
+            ],
+        },
+    }}
+    decorators={[withDesign]}
+/>
+
+# Tooltip (directive)
+
+export const Template = (args) => ({
+    template: `<span style="border: 1px solid #ccc; border-radius: 5px; padding: 5px;" v-tooltip="'This the tooltip content'">Pass your mouse here to display the tooltip</span>`,
+})
+
+export const TemplateCustomPosition = (args) => ({
+    template: `<div style="padding:200px"><span style="border: 1px solid #ccc; border-radius: 5px; padding: 5px;" v-tooltip="'This the tooltip content'" tooltip-position="top">Pass your mouse here to display the tooltip</span></div>`,
+})
+
+export const designConfig = {
+    type: 'figma',
+    url: 'https://www.figma.com/file/W7R2rQW7ohsZMeHRfEcPFW/Design-Library?node-id=59%3A739&mode=dev',
+}
+
+<Canvas>
+    <Story
+        name="Default"
+        parameters={{
+            design: config(designConfig),
+        }}
+    >
+        {Template.bind({})}
+    </Story>
+    <Story
+        name="Custom position"
+        parameters={{
+            design: config(designConfig),
+        }}
+    >
+        {TemplateCustomPosition.bind({})}
+    </Story>
+</Canvas>
+
+## Example
+
+```javascript
+<span v-tooltip="This the tooltip content" tooltip-position="top">
+    Pass your mouse here to display the tooltip
+</span>
+```

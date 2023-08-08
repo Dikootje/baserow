@@ -83,6 +83,7 @@ export default {
   bind(el, binding) {
     el.tooltipElement = null
     el.tooltipContentElement = null
+    console.log(binding)
     binding.def.update(el, binding)
   },
   update(el, binding) {
