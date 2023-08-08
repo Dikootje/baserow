@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import DataSourceService from '@baserow/modules/builder/services/dataSource'
-import { clone } from '@baserow/modules/core/utils/object'
 
 const state = {}
 
@@ -20,22 +19,8 @@ const mutations = {
       page.contents[dataSourceId] = value
     }
   },
-  UPDATE_FETCH_CONTEXT(state, { page, dataSourceId, value }) {
-    if (!page.fetchContext[dataSourceId]) {
-      // Here we need to change the reference of the dataSourceContents object to
-      // trigger computed values that use it in some situation (before the key exists
-      // for instance)
-      page.fetchContext = {
-        ...page.fetchContext,
-        [dataSourceId]: { lastDataSource: null, lastQueryData: null, ...value },
-      }
-    } else if (!_.isEqual(page.fetchContext[dataSourceId], value)) {
-      page.fetchContext[dataSourceId] = value
-    }
-  },
   CLEAR_CONTENTS(state, { page }) {
     page.contents = {}
-    page.fetchContext = {}
   },
 }
 
@@ -75,15 +60,6 @@ const actions = {
       }
     } catch (e) {
       commit('SET_CONTENT', { page, dataSourceId: dataSource.id, value: null })
-    } finally {
-      commit('UPDATE_FETCH_CONTEXT', {
-        page,
-        dataSourceId: dataSource.id,
-        value: {
-          lastDataSource: clone(dataSource),
-          lastQueryData: clone(queryData),
-        },
-      })
     }
   },
 
@@ -99,24 +75,10 @@ const actions = {
 
       Object.entries(data).forEach(([dataSourceIdStr, dataContent]) => {
         const dataSourceId = parseInt(dataSourceIdStr, 10)
-        const foundDataSource = page.dataSources.find(
-          ({ id }) => id === dataSourceId
-        )
-        // if we don't find the data source it means it's not fully configured
-        if (foundDataSource !== undefined) {
-          commit('UPDATE_FETCH_CONTEXT', {
-            page,
-            dataSourceId,
-            value: {
-              lastDataSource: clone(foundDataSource),
-              lastQueryData: clone(queryData),
-            },
-          })
-          if (dataContent._error) {
-            commit('SET_CONTENT', { page, dataSourceId, value: null })
-          } else {
-            commit('SET_CONTENT', { page, dataSourceId, value: dataContent })
-          }
+        if (dataContent._error) {
+          commit('SET_CONTENT', { page, dataSourceId, value: null })
+        } else {
+          commit('SET_CONTENT', { page, dataSourceId, value: dataContent })
         }
       })
     } catch (e) {
@@ -143,9 +105,6 @@ const actions = {
 const getters = {
   getDataSourceContents: (state) => (page) => {
     return page.contents
-  },
-  getFetchContext: (state) => (page) => {
-    return page.fetchContext
   },
 }
 

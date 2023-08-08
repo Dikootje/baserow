@@ -17,87 +17,78 @@ export default {
   provide() {
     return { builder: this.builder, page: this.page, mode: this.mode }
   },
-  async asyncData(context) {
-    let builder = context.store.getters['application/getSelected']
+  async asyncData({ store, params, error, $registry, app, req }) {
     let mode = 'public'
-    const builderId = parseInt(context.route.params.builderId, 10)
+    const builderId = parseInt(params.builderId, 10)
 
-    if (!builder) {
+    // We have a builderId parameter in the path so it's a preview
+    if (builderId) {
+      mode = 'preview'
+    }
+
+    let builder = store.getters['application/getSelected']
+
+    if (!builder || builderId !== builder.id) {
       try {
         if (builderId) {
           // We have the builderId in the params so this is a preview
           // Must fetch the builder instance by this Id.
-          await context.store.dispatch('publicBuilder/fetchById', {
+          await store.dispatch('publicBuilder/fetchById', {
             builderId,
           })
-          builder = await context.store.dispatch(
-            'application/selectById',
-            builderId
-          )
+          builder = await store.dispatch('application/selectById', builderId)
         } else {
           // We don't have the builderId so it's a public page.
           // Must fetch the builder instance by domain name.
-          const host = process.server
-            ? context.req.headers.host
-            : window.location.host
+          const host = process.server ? req.headers.host : window.location.host
           const domain = new URL(`http://${host}`).hostname
 
-          const { id: receivedBuilderId } = await context.store.dispatch(
+          const { id: receivedBuilderId } = await store.dispatch(
             'publicBuilder/fetchByDomain',
             {
               domain,
             }
           )
-          builder = await context.store.dispatch(
+          builder = await store.dispatch(
             'application/selectById',
             receivedBuilderId
           )
         }
       } catch (e) {
-        return context.error({
+        return error({
           statusCode: 404,
-          message: context.app.i18n.t('publicPage.siteNotFound'),
+          message: app.i18n.t('publicPage.siteNotFound'),
         })
       }
     }
 
-    if (builderId) {
-      mode = 'preview'
-    }
-
-    const found = resolveApplicationRoute(
-      builder.pages,
-      context.route.params.pathMatch
-    )
+    const found = resolveApplicationRoute(builder.pages, params.pathMatch)
 
     // Handle 404
     if (!found) {
-      return context.error({
+      return error({
         statusCode: 404,
-        message: context.app.i18n.t('publicPage.pageNotFound'),
+        message: app.i18n.t('publicPage.pageNotFound'),
       })
     }
 
-    const [pageFound, path, params] = found
+    const [pageFound, path, pageParamsValue] = found
 
-    const page = await context.store.getters['page/getById'](
-      builder,
-      pageFound.id
-    )
+    const page = await store.getters['page/getById'](builder, pageFound.id)
 
     await Promise.all([
-      context.store.dispatch('dataSource/fetchPublished', {
+      store.dispatch('dataSource/fetchPublished', {
         page,
       }),
-      context.store.dispatch('element/fetchPublished', { page }),
+      store.dispatch('element/fetchPublished', { page }),
     ])
 
     const runtimeFormulaContext = new RuntimeFormulaContext(
-      context.$registry.getAll('builderDataProvider'),
+      $registry.getAll('builderDataProvider'),
       {
         builder,
         page,
-        pageParamsValue: params,
+        pageParamsValue,
         mode,
       }
     )
@@ -106,7 +97,7 @@ export default {
     await runtimeFormulaContext.initAll()
 
     // And finally select the page to display it
-    await context.store.dispatch('page/selectById', {
+    await store.dispatch('page/selectById', {
       builder,
       pageId: pageFound.id,
     })
@@ -132,8 +123,8 @@ export default {
     elements() {
       return this.$store.getters['element/getRootElements'](this.page)
     },
-    backendContext() {
-      const runtimeFormulaContext = new RuntimeFormulaContext(
+    runtimeFormulaContext() {
+      return new RuntimeFormulaContext(
         this.$registry.getAll('builderDataProvider'),
         {
           builder: this.builder,
@@ -142,12 +133,17 @@ export default {
           mode: this.mode,
         }
       )
-      return runtimeFormulaContext.getAllBackendContext()
+    },
+    backendContext() {
+      return this.runtimeFormulaContext.getAllBackendContext()
     },
   },
   watch: {
     backendContext: {
       deep: true,
+      /**
+       * Update data source content on backend context changes
+       */
       handler(newValue) {
         this.$store.dispatch(
           'dataSourceContent/debouncedFetchPageDataSourceContent',

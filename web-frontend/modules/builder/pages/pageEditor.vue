@@ -34,7 +34,7 @@ export default {
     next()
   },
   layout: 'app',
-  async asyncData({ store, params, error, $registry, ...rest }) {
+  async asyncData({ store, params, error, $registry }) {
     const builderId = parseInt(params.builderId)
     const pageId = parseInt(params.pageId)
 
@@ -89,22 +89,26 @@ export default {
     dataSources() {
       return this.$store.getters['dataSource/getPageDataSources'](this.page)
     },
-    backendContext() {
-      const runtimeFormulaContext = new RuntimeFormulaContext(
+    runtimeFormulaContext() {
+      return new RuntimeFormulaContext(
         this.$registry.getAll('builderDataProvider'),
         {
           builder: this.builder,
           page: this.page,
-          pageParamsValue: this.params,
-          mode: this.mode,
+          mode: 'editing',
         }
       )
-      return runtimeFormulaContext.getAllBackendContext()
+    },
+    backendContext() {
+      return this.runtimeFormulaContext.getAllBackendContext()
     },
   },
   watch: {
     dataSources: {
       deep: true,
+      /**
+       * Update data source content on data source configuration changes
+       */
       handler() {
         this.$store.dispatch(
           'dataSourceContent/debouncedFetchPageDataSourceContent',
@@ -117,6 +121,9 @@ export default {
     },
     backendContext: {
       deep: true,
+      /**
+       * Update data source content on backend context changes
+       */
       handler(newBackendContext) {
         this.$store.dispatch(
           'dataSourceContent/debouncedFetchPageDataSourceContent',
