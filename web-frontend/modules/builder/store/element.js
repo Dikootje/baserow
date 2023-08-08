@@ -19,18 +19,8 @@ const mutations = {
     state.selected = null
     page.elements = elements
   },
-<<<<<<< HEAD
-  ADD_ITEM(state, { element, beforeId = null }) {
-    state.elements.push(element)
-=======
   ADD_ITEM(state, { page, element, beforeId = null }) {
-    if (beforeId === null) {
-      page.elements.push(element)
-    } else {
-      const insertionIndex = page.elements.findIndex((e) => e.id === beforeId)
-      page.elements.splice(insertionIndex, 0, element)
-    }
->>>>>>> 425cd51f3 (Change for element, dataSource content, pageparameters)
+    page.elements.push(element)
   },
   UPDATE_ITEM(state, { page, element: elementToUpdate, values }) {
     page.elements.forEach((element) => {
@@ -63,13 +53,8 @@ const actions = {
   clearAll({ commit }, { page }) {
     commit('CLEAR_ITEMS', { page })
   },
-<<<<<<< HEAD
-  forceCreate({ commit }, { element }) {
-    commit('ADD_ITEM', { element })
-=======
-  forceCreate({ commit }, { page, element, beforeId = null }) {
-    commit('ADD_ITEM', { page, element, beforeId })
->>>>>>> 425cd51f3 (Change for element, dataSource content, pageparameters)
+  forceCreate({ commit }, { page, element }) {
+    commit('ADD_ITEM', { page, element })
   },
   forceUpdate({ commit }, { page, element, values }) {
     commit('UPDATE_ITEM', { page, element, values })
@@ -127,11 +112,7 @@ const actions = {
     )
 
     if (forceCreate) {
-<<<<<<< HEAD
-      await dispatch('forceCreate', { element })
-=======
-      await dispatch('forceCreate', { page, element, beforeId })
->>>>>>> 425cd51f3 (Change for element, dataSource content, pageparameters)
+      await dispatch('forceCreate', { page, element })
       await dispatch('select', { element })
     }
 
@@ -289,13 +270,15 @@ const actions = {
       throw error
     }
   },
-  async duplicate({ getters, dispatch }, { page, elementId }) {
+  async duplicate({ dispatch }, { page, elementId }) {
     const { data: elementsCreated } = await ElementService(
       this.$client
     ).duplicate(elementId)
 
     await Promise.all(
-      elementsCreated.map((element) => dispatch('forceCreate', { page, element }))
+      elementsCreated.map((element) =>
+        dispatch('forceCreate', { page, element })
+      )
     )
 
     return elementsCreated

@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import Vue from 'vue'
 import DataSourceService from '@baserow/modules/builder/services/dataSource'
 
 const state = {}
@@ -7,6 +8,10 @@ let pageFetchTimeout = null
 
 const mutations = {
   SET_CONTENT(state, { page, dataSourceId, value }) {
+    if (!page.contents) {
+      Vue.set(page, 'contents', {})
+    }
+
     if (!page.contents[dataSourceId]) {
       // Here we need to change the reference of the dataSourceContents object to
       // trigger computed values that use it in some situation (before the key exists

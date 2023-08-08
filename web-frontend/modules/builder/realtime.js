@@ -106,6 +106,7 @@ export const registerRealtimeEvents = (realtime) => {
   )
 
   realtime.registerEvent('elements_moved', ({ store, app }, { elements }) => {
+    // TODO bug here if we are not on the right page
     elements.forEach((element) => {
       const selectedPage = store.getters['page/getSelected']
       store.dispatch('element/forceUpdate', {

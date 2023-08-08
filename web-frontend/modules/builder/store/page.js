@@ -7,11 +7,10 @@ export function populatePage(page) {
   page._ = {
     selected: false,
   }
+
   page.dataSource = []
-  page.contents = {}
-  page.fetchContext = {}
-  page.parameters = {}
   page.elements = []
+
   return page
 }
 

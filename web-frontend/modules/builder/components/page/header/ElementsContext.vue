@@ -14,7 +14,6 @@
         v-if="elementsMatchingSearchTerm.length"
         :elements="elementsMatchingSearchTerm"
         :element-selected="elementSelected"
-        :page="page"
         @select="selectElement($event)"
       />
       <div class="select__footer">

@@ -1,6 +1,5 @@
 import { DataProviderType } from '@baserow/modules/core/dataProviderTypes'
 
-import { clone } from '@baserow/modules/core/utils/object'
 import _ from 'lodash'
 
 export class DataSourceDataProviderType extends DataProviderType {
@@ -116,10 +115,8 @@ export class PageParameterDataProviderType extends DataProviderType {
   }
 
   getBackendContext(runtimeFormulaContext) {
-    return clone(
-      this.app.store.getters['pageParameter/getParameters'](
-        runtimeFormulaContext.applicationContext.page
-      )
+    return this.app.store.getters['pageParameter/getParameters'](
+      runtimeFormulaContext.applicationContext.page
     )
   }
 }

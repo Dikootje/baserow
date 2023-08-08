@@ -45,16 +45,12 @@ export default {
   computed: {
     PLACEMENTS: () => PLACEMENTS,
     ...mapGetters({
-      // TODO remove page get selected
       page: 'page/getSelected',
       deviceTypeSelected: 'page/getDeviceTypeSelected',
       elementSelected: 'element/getSelected',
     }),
     elements() {
       return this.$store.getters['element/getRootElements'](this.page)
-    },
-    elementSelectedId() {
-      return this.elementSelected?.id
     },
     deviceType() {
       return this.deviceTypeSelected
@@ -116,16 +112,6 @@ export default {
       previewScaled.style.width = `${currentWidth / scale}px`
       previewScaled.style.height = `${currentHeight / scale}px`
     },
-    async deleteElement(element) {
-      try {
-        await this.actionDeleteElement({
-          page: this.page,
-          elementId: element.id,
-        })
-      } catch (error) {
-        notifyIf(error)
-      }
-    },
     async moveElement(element, index, placement) {
       const elementToMoveId = element.id
 
@@ -161,39 +147,6 @@ export default {
       }
 
       return placementsDisabled
-    },
-    showAddElementModal(element, index, placement) {
-      this.beforeId =
-        placement === PLACEMENTS.BEFORE
-          ? element.id
-          : this.elements[index + 1]?.id
-      this.$refs.addElementModal.show()
-    },
-    async addElement(elementType) {
-      this.addingElementType = elementType.getType()
-      try {
-        await this.actionCreateElement({
-          page: this.page,
-          elementType: elementType.getType(),
-          beforeId: this.beforeId,
-        })
-        this.$refs.addElementModal.hide()
-      } catch (error) {
-        notifyIf(error)
-      }
-      this.addingElementType = null
-    },
-    async duplicateElement(element, index) {
-      this.copyingElementIndex = index
-      try {
-        await this.actionDuplicateElement({
-          page: this.page,
-          elementId: element.id,
-        })
-        this.$refs.addElementModal.hide()
-      } catch (error) {
-        notifyIf(error)
-      }
     },
   },
 }

@@ -1,9 +1,14 @@
+import Vue from 'vue'
+
 const state = {
   // The parameter values
 }
 
 const mutations = {
   SET_PARAMETER(state, { page, name, value }) {
+    if (!page.parameters) {
+      Vue.set(page, 'parameters', {})
+    }
     page.parameters = { ...page.parameters, [name]: value }
   },
 }
