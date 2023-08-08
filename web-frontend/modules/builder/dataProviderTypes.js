@@ -48,13 +48,6 @@ export class DataSourceDataProviderType extends DataProviderType {
       return null
     }
 
-    // Update the dataSource content if needed
-    this.app.store.dispatch('dataSourceContent/smartFetchDataSourceContent', {
-      page: runtimeFormulaContext.applicationContext.page,
-      dataSource,
-      data: runtimeFormulaContext.getAllBackendContext(),
-    })
-
     const dataSourceContents = this.app.store.getters[
       'dataSourceContent/getDataSourceContents'
     ](runtimeFormulaContext.applicationContext.page)

@@ -132,6 +132,32 @@ export default {
     elements() {
       return this.$store.getters['element/getRootElements'](this.page)
     },
+    backendContext() {
+      const runtimeFormulaContext = new RuntimeFormulaContext(
+        this.$registry.getAll('builderDataProvider'),
+        {
+          builder: this.builder,
+          page: this.page,
+          pageParamsValue: this.params,
+          mode: this.mode,
+        }
+      )
+      return runtimeFormulaContext.getAllBackendContext()
+    },
+  },
+  watch: {
+    backendContext: {
+      deep: true,
+      handler(newValue) {
+        this.$store.dispatch(
+          'dataSourceContent/debouncedFetchPageDataSourceContent',
+          {
+            page: this.page,
+            data: newValue,
+          }
+        )
+      },
+    },
   },
 }
 </script>

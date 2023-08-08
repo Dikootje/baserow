@@ -85,5 +85,48 @@ export default {
 
     return data
   },
+  computed: {
+    dataSources() {
+      return this.$store.getters['dataSource/getPageDataSources'](this.page)
+    },
+    backendContext() {
+      const runtimeFormulaContext = new RuntimeFormulaContext(
+        this.$registry.getAll('builderDataProvider'),
+        {
+          builder: this.builder,
+          page: this.page,
+          pageParamsValue: this.params,
+          mode: this.mode,
+        }
+      )
+      return runtimeFormulaContext.getAllBackendContext()
+    },
+  },
+  watch: {
+    dataSources: {
+      deep: true,
+      handler() {
+        this.$store.dispatch(
+          'dataSourceContent/debouncedFetchPageDataSourceContent',
+          {
+            page: this.page,
+            data: this.backendContext,
+          }
+        )
+      },
+    },
+    backendContext: {
+      deep: true,
+      handler(newBackendContext) {
+        this.$store.dispatch(
+          'dataSourceContent/debouncedFetchPageDataSourceContent',
+          {
+            page: this.page,
+            data: newBackendContext,
+          }
+        )
+      },
+    },
+  },
 }
 </script>

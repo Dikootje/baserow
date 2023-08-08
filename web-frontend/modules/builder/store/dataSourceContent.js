@@ -4,7 +4,7 @@ import { clone } from '@baserow/modules/core/utils/object'
 
 const state = {}
 
-const fetchTimeout = {}
+let pageFetchTimeout = null
 
 const mutations = {
   SET_CONTENT(state, { page, dataSourceId, value }) {
@@ -87,10 +87,10 @@ const actions = {
     }
   },
 
-  async fetchPageDataSourceContent(
-    { commit },
-    { page, data: queryData, dataSources }
-  ) {
+  /**
+   * Fetch the content for every data sources of the given page.
+   */
+  async fetchPageDataSourceContent({ commit }, { page, data: queryData }) {
     try {
       const { data } = await DataSourceService(this.app.$client).dispatchAll(
         page.id,
@@ -99,7 +99,7 @@ const actions = {
 
       Object.entries(data).forEach(([dataSourceIdStr, dataContent]) => {
         const dataSourceId = parseInt(dataSourceIdStr, 10)
-        const foundDataSource = dataSources.find(
+        const foundDataSource = page.dataSources.find(
           ({ id }) => id === dataSourceId
         )
         // if we don't find the data source it means it's not fully configured
@@ -125,37 +125,14 @@ const actions = {
     }
   },
 
-  /**
-   * Fetches the data from the server and add them to the store only when needed.
-   * It's necessary when it's the first call (the store is empty) and when the
-   * configuration or the body content has changed.
-   * @param {object} dataSource the data source we want to dispatch
-   * @param {object} data the query body
-   */
-  smartFetchDataSourceContent(
-    { dispatch, getters },
-    { page, dataSource, data: queryData }
-  ) {
-    const fetch = async () => {
-      const { lastDataSource = null, lastQueryData = null } =
-        getters.getFetchContext(page)[dataSource.id] || {}
-      // We want to update the content only if the dataSource configuration or the query
-      // parameters have changed.
-      if (
-        !_.isEqual(lastDataSource, dataSource) ||
-        !_.isEqual(lastQueryData, queryData)
-      ) {
-        await dispatch('fetchDataSourceContent', {
-          page,
-          dataSource,
-          data: queryData,
-        })
-      }
-    }
-
-    // Then subsequent calls are debounced by 500ms
-    clearTimeout(fetchTimeout[dataSource.id])
-    fetchTimeout[dataSource.id] = setTimeout(fetch, 500)
+  debouncedFetchPageDataSourceContent({ dispatch }, { page, data: queryData }) {
+    clearTimeout(pageFetchTimeout)
+    pageFetchTimeout = setTimeout(() => {
+      dispatch('fetchPageDataSourceContent', {
+        page,
+        data: queryData,
+      })
+    }, 500)
   },
 
   clearDataSourceContents({ commit }, { page }) {
