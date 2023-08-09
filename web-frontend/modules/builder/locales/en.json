@@ -254,9 +254,5 @@
     },
     "styleBoxForm": {
         "paddingError": "The value must be an integer between 0 and 200."
-    },
-    "dataProviderTypes": {
-        "dataSource": "Data Source",
-        "pathParam": "Path Parameter"
     }
 }

@@ -26,21 +26,18 @@ export default {
   },
   mixins: [formulaComponent],
   computed: {
-    dataProviderTypeCaptionMapping() {
-      // TODO this might become obsolete once jeremies DS MR is merged
-      return {
-        data_source: this.$t('dataProviderTypes.dataSource'),
-        path_param: this.$t('dataProviderTypes.pathParam'),
-      }
-    },
     path() {
       return this.node.attrs.path
     },
     pathParts() {
-      const [dataProviderType, ...parts] = this.path.split('.')
+      const [dataProvider, ...parts] = this.path.split('.')
+      const dataProviderType = this.$registry.get(
+        'builderDataProvider',
+        dataProvider
+      )
 
       return {
-        dataProvider: this.dataProviderTypeCaptionMapping[dataProviderType],
+        dataProvider: dataProviderType.name,
         parts,
       }
     },
