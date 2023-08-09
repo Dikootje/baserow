@@ -40,7 +40,7 @@ export default {
   computed: {
     classes() {
       return {
-        'formula_input_field--focused': this.isFocused,
+        'formula-input-field--focused': this.isFocused,
       }
     },
     placeHolderExt() {
@@ -62,10 +62,8 @@ export default {
         .map((type) => type.formulaComponent)
         .filter((component) => component !== null)
     },
-    extensions() {
-      const DocumentNode = Document.extend()
-      const TextNode = Text.extend({ inline: true })
-      const WrapperNode = Node.create({
+    wrapperNode() {
+      return Node.create({
         name: 'wrapper',
         group: 'block',
         content: 'inline*',
@@ -76,10 +74,14 @@ export default {
           return ['span', mergeAttributes(HTMLAttributes), 0]
         },
       })
+    },
+    extensions() {
+      const DocumentNode = Document.extend()
+      const TextNode = Text.extend({ inline: true })
 
       return [
         DocumentNode,
-        WrapperNode,
+        this.wrapperNode,
         TextNode,
         this.placeHolderExt,
         this.hardBreakExt,
