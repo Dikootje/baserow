@@ -131,9 +131,9 @@ export class DuplicateApplicationJobType extends JobType {
 
   async onJobDone(job) {
     const { i18n, store } = this.app
-    const application = { ...job.duplicated_application }
+    const application = job.duplicated_application
     try {
-      await store.dispatch('application/forceCreate', application)
+      await store.dispatch('application/forceCreate', { ...application })
       store.dispatch('toast/info', {
         title: i18n.t('duplicateApplicationJobType.duplicatedTitle'),
         message: application.name,

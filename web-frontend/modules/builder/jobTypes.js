@@ -45,7 +45,7 @@ export class DuplicatePageJobType extends JobType {
 
     await store.dispatch('page/forceCreate', {
       builder,
-      page: duplicatedPage,
+      page: { ...duplicatedPage },
     })
 
     store.dispatch('toast/info', {

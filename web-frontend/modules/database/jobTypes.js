@@ -48,7 +48,7 @@ export class DuplicateTableJobType extends JobType {
 
     await store.dispatch('table/forceUpsert', {
       database,
-      data: duplicatedTable,
+      data: { ...duplicatedTable },
     })
 
     store.dispatch('toast/info', {
