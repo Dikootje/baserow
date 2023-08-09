@@ -131,7 +131,7 @@ export class DuplicateApplicationJobType extends JobType {
 
   async onJobDone(job) {
     const { i18n, store } = this.app
-    const application = job.duplicated_application
+    const application = { ...job.duplicated_application }
     try {
       await store.dispatch('application/forceCreate', application)
       store.dispatch('toast/info', {
@@ -194,7 +194,7 @@ export class InstallTemplateJobType extends JobType {
     const installedApplications = job.installed_applications
     try {
       for (const application of installedApplications) {
-        await store.dispatch('application/forceCreate', application)
+        await store.dispatch('application/forceCreate', { ...application })
       }
       store.dispatch('toast/info', {
         title: i18n.t('InstallTemplateJobType.installedTitle'),

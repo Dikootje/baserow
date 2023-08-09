@@ -175,7 +175,7 @@ export const actions = {
     }
   },
   /**
-   * Create a new job and add it to the store. It also restart the polling if neeeded.
+   * Create a new job and add it to the store. It also restart the polling if needed.
    */
   create({ dispatch }, job) {
     dispatch('forceCreate', job)
