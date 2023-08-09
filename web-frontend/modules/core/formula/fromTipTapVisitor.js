@@ -33,13 +33,7 @@ export class FromTipTapVisitor {
       return this.visit(content[0])
     }
 
-    let result = `concat(${this.visit(content[0])}, ${this.visit(content[1])})`
-
-    for (let i = 2; i < content.length; i++) {
-      result = `concat(${result}, ${this.visit(content[i])})`
-    }
-
-    return result
+    return `concat(${content.map(this.visit.bind(this)).join(',')})`
   }
 
   visitText(node) {
@@ -47,7 +41,7 @@ export class FromTipTapVisitor {
   }
 
   visitHardBreak(node) {
-    return `'\\n'`
+    return "'\n'"
   }
 
   visitFunction(node) {

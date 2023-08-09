@@ -43,9 +43,9 @@ export default class JavascriptExecutor extends BaserowFormulaVisitor {
     let literal
 
     if (ctx.SINGLEQ_STRING_LITERAL() !== null) {
-      literal = literalWithoutOuterQuotes.replace("\\'", "'")
+      literal = literalWithoutOuterQuotes.replace(/\\'/g, "'")
     } else {
-      literal = literalWithoutOuterQuotes.replace('\\"', '"')
+      literal = literalWithoutOuterQuotes.replace(/\\"/g, '"')
     }
 
     return literal

@@ -15,7 +15,7 @@ export class ToTipTapVisitor extends BaserowFormulaVisitor {
 
   visitStringLiteral(ctx) {
     switch (ctx.getText()) {
-      case "'\\n'":
+      case "'\n'":
         return { type: 'hardBreak' }
       default:
         return { type: 'text', text: this.processString(ctx) }
@@ -42,12 +42,12 @@ export class ToTipTapVisitor extends BaserowFormulaVisitor {
     let literal
 
     if (ctx.SINGLEQ_STRING_LITERAL() !== null) {
-      literal = literalWithoutOuterQuotes.replace("\\'", "'")
+      literal = literalWithoutOuterQuotes.replace(/\\'/g, "'")
     } else {
-      literal = literalWithoutOuterQuotes.replace('\\"', '"')
+      literal = literalWithoutOuterQuotes.replace(/\\"/g, '"')
     }
 
-    return literal.replace(/\\'/g, "'")
+    return literal
   }
 
   visitFunctionCall(ctx) {
