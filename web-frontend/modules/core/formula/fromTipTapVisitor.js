@@ -33,7 +33,7 @@ export class FromTipTapVisitor {
       return this.visit(content[0])
     }
 
-    return `concat(${content.map(this.visit.bind(this)).join(',')})`
+    return `concat(${content.map(this.visit.bind(this)).join(', ')})`
   }
 
   visitText(node) {

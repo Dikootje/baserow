@@ -11,7 +11,7 @@
         ]
     },
     {
-        "formula": "concat(concat('hello', 'there'), 'friend :)')",
+        "formula": "concat('hello', 'there', 'friend :)')",
         "content": [
             { "type": "text", "text": "hello" },
             { "type": "text", "text": "there" },
@@ -39,7 +39,7 @@
     },
 
     {
-        "formula": "concat(concat('hello', '\\n'), 'there')",
+        "formula": "concat('hello', '\n', 'there')",
         "content": [
             {
                 "type": "text",
@@ -55,7 +55,7 @@
         ]
     },
     {
-        "formula": "concat(concat('hello', '\\n'), get('data_source.hello.there'))",
+        "formula": "concat('hello', '\n', get('data_source.hello.there'))",
         "content": [
             {
                 "type": "text",
