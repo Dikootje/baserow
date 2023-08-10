@@ -1211,14 +1211,14 @@ def test_search_calendar_rows(api_client, premium_data_fixture):
                 {
                     "id": AnyInt(),
                     "order": "1.00000000000000000000",
-                    "field_2": "Lunch with client",
-                    "field_1": "2023-01-02",
+                    description_field.db_column: "Lunch with client",
+                    date_field.db_column: "2023-01-02",
                 },
                 {
                     "id": AnyInt(),
                     "order": "1.00000000000000000000",
-                    "field_2": "Meeting with client",
-                    "field_1": "2023-01-02",
+                    description_field.db_column: "Meeting with client",
+                    date_field.db_column: "2023-01-02",
                 },
             ],
         }
