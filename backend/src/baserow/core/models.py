@@ -29,7 +29,6 @@ from .mixins import (
 )
 from .notifications.models import Notification
 from .services.models import Service
-from .timezones import ALL_TIMEZONES
 
 __all__ = [
     "Settings",
@@ -131,8 +130,6 @@ class UserProfile(models.Model):
         WEEKLY = "weekly", "weekly"
         NEVER = "never", "never"
 
-    TIMEZONES = [(tz, tz) for tz in ALL_TIMEZONES]
-
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     language = models.TextField(
         max_length=10,
@@ -154,7 +151,6 @@ class UserProfile(models.Model):
     )
     timezone = models.CharField(
         max_length=255,
-        choices=TIMEZONES,
         null=True,
         help_text="The user timezone to use for dates and times.",
     )
