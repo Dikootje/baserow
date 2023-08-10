@@ -142,6 +142,8 @@ def get_rows_grouped_by_date_field(
     from_timestamp: datetime,
     to_timestamp: datetime,
     user_timezone: str,
+    search: Optional[str] = None,
+    search_mode: Optional[str] = None,
     limit: int = 40,
     offset: int = 0,
     model: Optional[GeneratedTableModel] = None,
@@ -181,16 +183,10 @@ def get_rows_grouped_by_date_field(
     if not date_field_type.can_represent_date(date_field):
         raise CalendarViewHasNoDateField()
 
-    if base_queryset is None:
-        base_queryset = (
-            model.objects.all()
-            .enhance_by_fields()
-            .order_by(f"field_{date_field.id}", "order", "id")
-        )
-
-    base_option_queryset = ViewHandler().apply_filters(view, base_queryset)
-    all_filters = Q()
-    count_aggregates = {}
+    view_handler = ViewHandler()
+    base_queryset = view_handler.get_queryset(
+        view=view, model=model, search=search, search_mode=search_mode
+    )
 
     # Target timezone is the timezone that will be used
     # for aggregation of the results into date buckets
@@ -211,6 +207,9 @@ def get_rows_grouped_by_date_field(
         to_timestamp = (to_timestamp + timezone.timedelta(days=1)).date()
         from_timestamp = from_timestamp.date()
 
+    all_filters = Q()
+    count_aggregates = {}
+
     for start, end in generate_per_day_intervals(from_timestamp, to_timestamp):
         date_filters = Q(
             **{
@@ -219,9 +218,9 @@ def get_rows_grouped_by_date_field(
             }
         )
 
-        sub_queryset = base_option_queryset.filter(date_filters).values_list(
-            "id", flat=True
-        )[offset : offset + limit]
+        sub_queryset = base_queryset.filter(date_filters).values_list("id", flat=True)[
+            offset : offset + limit
+        ]
         all_filters |= Q(id__in=sub_queryset)
 
         start_date = start.date() if isinstance(start, datetime) else start
@@ -231,7 +230,7 @@ def get_rows_grouped_by_date_field(
         )
 
     queryset = list(base_queryset.filter(all_filters))
-    counts = base_option_queryset.aggregate(**count_aggregates)
+    counts = base_queryset.aggregate(**count_aggregates)
 
     rows = defaultdict(lambda: {"count": 0, "results": []})
 
