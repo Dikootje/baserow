@@ -60,14 +60,6 @@ from baserow.core.mixins import (
 from baserow.core.telemetry.utils import baserow_trace
 from baserow.core.utils import split_comma_separated_string
 
-deconstruct_filter_key_or_name_regex = re.compile(
-    r"filter__(?:field_)?([0-9a-zA-Z\s]+|created_on|updated_on)__([a-zA-Z0-9_]*)$"
-)
-
-
-deconstruct_filter_key_regex = re.compile(
-    r"filter__field_([0-9]+|created_on|updated_on)__([a-zA-Z0-9_]*)$"
-)
 tracer = trace.get_tracer(__name__)
 
 
@@ -408,6 +400,9 @@ class TableModelQuerySet(models.QuerySet):
         :rtype: QuerySet
         """
 
+        extract_filter_sections_regex = re.compile(r"filter__(.+)__(.+)$")
+        field_id_regex = re.compile(r"field_(\d+)$")
+
         if filter_type not in [FILTER_TYPE_AND, FILTER_TYPE_OR]:
             raise ValueError(f"Unknown filter type {filter_type}.")
 
@@ -417,14 +412,14 @@ class TableModelQuerySet(models.QuerySet):
             user_field_name_to_id_mapping = {
                 v["field"].name: k for k, v in self.model._field_objects.items()
             }
+        else:
+            user_field_name_to_id_mapping = {}
 
         for key, values in filter_object.items():
-            if user_field_names:
-                matches = deconstruct_filter_key_or_name_regex.match(key)
+            filter_sections = extract_filter_sections_regex.match(key)
+            if filter_sections:
+                field_name_or_id, filter_type = filter_sections.groups()
             else:
-                matches = deconstruct_filter_key_regex.match(key)
-
-            if not matches:
                 continue
 
             fixed_field_instance_mapping = {
@@ -432,24 +427,25 @@ class TableModelQuerySet(models.QuerySet):
                 "updated_on": LastModifiedField(),
             }
 
-            if matches[1] in fixed_field_instance_mapping.keys():
-                field_name = matches[1]
+            if field_name_or_id in fixed_field_instance_mapping.keys():
+                field_name = field_name_or_id
                 field_instance = fixed_field_instance_mapping.get(field_name)
             else:
-                if user_field_names:
-                    field_identifier = matches[1]
-
-                    field_id = user_field_name_to_id_mapping.get(field_identifier)
-                    if field_id is None:
-                        try:
-                            field_id = int(field_identifier)
-                        except ValueError:
-                            raise FilterFieldNotFound(
-                                field_identifier,
-                                f"Field {field_identifier} does not exist.",
-                            )
+                if (
+                    user_field_names
+                    and field_name_or_id in user_field_name_to_id_mapping
+                ):
+                    field_id = user_field_name_to_id_mapping[field_name_or_id]
                 else:
-                    field_id = int(matches[1])
+                    field_id_match = field_id_regex.match(field_name_or_id)
+                    if field_id_match:
+                        field_id = int(field_id_match.group(1))
+                    else:
+                        raise FilterFieldNotFound(
+                            field_name_or_id,
+                            f"Field {field_name_or_id} does not exist.",
+                        )
+
                 if field_id not in self.model._field_objects or (
                     only_filter_by_field_ids is not None
                     and field_id not in only_filter_by_field_ids
@@ -464,10 +460,12 @@ class TableModelQuerySet(models.QuerySet):
                 field_type = field_object["type"].type
 
             model_field = self.model._meta.get_field(field_name)
-            view_filter_type = view_filter_type_registry.get(matches[2])
+            view_filter_type = view_filter_type_registry.get(
+                filter_type
+            )
             if not view_filter_type.field_is_compatible(field_instance):
                 raise ViewFilterTypeNotAllowedForField(
-                    matches[2],
+                    filter_type,
                     field_type,
                 )
 
