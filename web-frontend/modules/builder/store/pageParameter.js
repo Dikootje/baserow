@@ -1,8 +1,6 @@
 import Vue from 'vue'
 
-const state = {
-  // The parameter values
-}
+const state = {}
 
 const mutations = {
   SET_PARAMETER(state, { page, name, value }) {
@@ -21,7 +19,7 @@ const actions = {
 
 const getters = {
   getParameters: (state) => (page) => {
-    return page.parameters
+    return page.parameters || {}
   },
 }
 

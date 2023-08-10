@@ -109,7 +109,7 @@ const actions = {
 
 const getters = {
   getDataSourceContents: (state) => (page) => {
-    return page.contents
+    return page.contents || {}
   },
 }
 
