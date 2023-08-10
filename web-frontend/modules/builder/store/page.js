@@ -4,10 +4,12 @@ import PageService from '@baserow/modules/builder/services/page'
 import { generateHash } from '@baserow/modules/core/utils/hashing'
 
 export function populatePage(page) {
-  page._ = {
-    selected: false,
+  return {
+    ...page,
+    _: {
+      selected: false,
+    },
   }
-  return page
 }
 
 const state = {
