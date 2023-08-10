@@ -43,7 +43,7 @@ export default {
     try {
       const builder = await store.dispatch('application/selectById', builderId)
 
-      const page = await store.getters['page/getById'](builder, pageId)
+      const page = store.getters['page/getById'](builder, pageId)
 
       await store.dispatch('workspace/selectById', builder.workspace.id)
 
