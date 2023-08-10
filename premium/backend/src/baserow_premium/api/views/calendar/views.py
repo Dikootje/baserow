@@ -23,6 +23,7 @@ from baserow.api.decorators import (
 )
 from baserow.api.errors import ERROR_USER_NOT_IN_GROUP
 from baserow.api.schemas import get_error_schema
+from baserow.contrib.database.api.constants import SEARCH_MODE_API_PARAM
 from baserow.contrib.database.api.rows.serializers import (
     RowSerializer,
     get_row_serializer_class,
@@ -42,7 +43,6 @@ from baserow.contrib.database.views.registries import view_type_registry
 from baserow.contrib.database.views.signals import view_loaded
 from baserow.core.exceptions import UserNotInWorkspace
 from baserow.core.handler import CoreHandler
-from baserow.contrib.database.api.constants import SEARCH_MODE_API_PARAM
 
 
 class CalendarViewView(APIView):

@@ -3,11 +3,11 @@ from django.conf import settings
 from baserow_premium.views.models import CalendarViewFieldOptions
 from pytz import all_timezones
 from rest_framework import serializers
-from baserow.contrib.database.search.handler import ALL_SEARCH_MODES
 
 from baserow.contrib.database.api.rows.serializers import (
     get_example_row_serializer_class,
 )
+from baserow.contrib.database.search.handler import ALL_SEARCH_MODES
 
 
 class CalendarViewFieldOptionsSerializer(serializers.ModelSerializer):

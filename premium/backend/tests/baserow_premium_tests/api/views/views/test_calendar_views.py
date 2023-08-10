@@ -24,7 +24,11 @@ from baserow.contrib.database.fields.registries import field_type_registry
 from baserow.contrib.database.rows.handler import RowHandler
 from baserow.contrib.database.views.handler import ViewHandler
 from baserow.contrib.database.views.models import View
-from baserow.test_utils.helpers import is_dict_subset, setup_interesting_test_table
+from baserow.test_utils.helpers import (
+    AnyInt,
+    is_dict_subset,
+    setup_interesting_test_table,
+)
 
 
 def get_list_url(calendar_view_id: int) -> str:
@@ -1205,13 +1209,13 @@ def test_search_calendar_rows(api_client, premium_data_fixture):
             "count": 2,
             "results": [
                 {
-                    "id": 2,
+                    "id": AnyInt(),
                     "order": "1.00000000000000000000",
                     "field_2": "Lunch with client",
                     "field_1": "2023-01-02",
                 },
                 {
-                    "id": 3,
+                    "id": AnyInt(),
                     "order": "1.00000000000000000000",
                     "field_2": "Meeting with client",
                     "field_1": "2023-01-02",
