@@ -532,8 +532,9 @@ class NotificationHandler:
             **kwargs,
         )
 
-        # With recipient=None we create a placeholder recipient that will be
-        # used to send the notification to all users.
+        # With recipient=None we create a placeholder that will be
+        # used as template to copy data from when users read/clear
+        # this broadcast notification.
         notification_recipient = cls.construct_notification_recipient(
             notification=notification, recipient=None
         )
@@ -640,10 +641,15 @@ class NotificationHandler:
         have pending email notifications.
 
         The function also enriches the returned queryset by adding an
-        'unsent_email_notifications' attribute to each user. This attribute is a
-        list containing the unsent notifications associated with the user up to
-        the limit provided. If limit is None (the default) all the unsent
-        notifications will be returned.
+        'unsent_email_notifications' attribute to each user. This attribute
+        contains the unsent notifications for the user that are scheduled to be
+        sent by email. The number of users returned can be limited by providing
+        the `limit_users` argument. The default value of None means that no
+        limit will be applied.
+        The number of notifications per user can also be limited by providing the
+        `limit_notifications_per_user` argument. The default value of None means
+        that the value of `settings.MAX_NOTIFICATIONS_LISTED_PER_EMAIL` will be
+        used.
 
         :param user_filters_q: A Q object containing the filters to apply to the
             users.
@@ -657,7 +663,7 @@ class NotificationHandler:
             containing their respective unsent notifications.
         """
 
-        if limit_notifications_per_user is None:
+        if not limit_notifications_per_user:
             limit_notifications_per_user = settings.MAX_NOTIFICATIONS_LISTED_PER_EMAIL
 
         unsent_notification_subquery = Subquery(
@@ -733,9 +739,10 @@ class NotificationHandler:
             users.
         :param max_emails: The maximum number of emails to send. If 0 or None,
             all emails will be sent.
-        :return: An EmailNotificationsSentResult object containing list of users
-            who were sent emails and the count of the remaining users to notify
-            that are not part of the returned list.
+        :return: An UserWithScheduledEmailNotifications object containing a list
+            of users with notifications scheduled to be sent by email and the
+            count of the remaining users to notify that are not part of the
+            returned list.
         """
 
         result = cls.filter_and_annotate_users_with_notifications_to_send_by_email(
@@ -743,10 +750,11 @@ class NotificationHandler:
         )
 
         emails: List[NotificationsSummaryEmail] = []
-        notified_user_ids: List[int] = []
+        email_recipient_ids: List[int] = []
+
         # The greatest notification ID is used to determine the last notification
         # fetched in the previous query and to avoid later marking as sent any
-        # notifications that were created in between the two queries.
+        # notifications that were created between select and later update.
         greatest_notification_id = 0
 
         for user in result.users_with_notifications:
@@ -755,7 +763,7 @@ class NotificationHandler:
             )
 
             emails.append(email)
-            notified_user_ids.append(user.id)
+            email_recipient_ids.append(user.id)
             greatest_notification_id = max(
                 greatest_notification_id, user.unsent_email_notifications[0].id
             )
@@ -768,12 +776,12 @@ class NotificationHandler:
             with atomic_if_not_already():
                 cls.mark_all_notifications_matching_filters_as_sent_by_emails(
                     Q(
-                        recipient_id__in=notified_user_ids,
+                        recipient_id__in=email_recipient_ids,
                         notification_id__lte=greatest_notification_id,
                     )
                 )
 
-                UserProfile.objects.filter(user_id__in=notified_user_ids).update(
+                UserProfile.objects.filter(user_id__in=email_recipient_ids).update(
                     last_notifications_email_sent_at=timezone.now()
                 )
 

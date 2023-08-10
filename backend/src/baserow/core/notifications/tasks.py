@@ -45,41 +45,45 @@ def send_queued_notifications_to_users(self):
         if not notifications_grouped_by_user:
             return
 
-        # Send all the notifications if less or equal to the limit.
-        # Otherwise, send just the updated unread count and let the user fetch the
-        # new notifications.
+        def broadcast_unread_notifications_to_user(user_id, notifications):
+            broadcast_to_users.apply(
+                (
+                    [user_id],
+                    {
+                        "type": "notifications_created",
+                        "notifications": NotificationRecipientSerializer(
+                            notifications, many=True
+                        ).data,
+                    },
+                )
+            )
+
+        def broadcast_only_unread_notifications_count_to_user(user_id):
+            per_workspace_added_count = [
+                {"workspace_id": k, "count": v}
+                for k, v in notifications_count_per_user_and_workspace[user_id].items()
+            ]
+            broadcast_to_users.apply(
+                (
+                    [user_id],
+                    {
+                        "type": "notifications_fetch_required",
+                        "notifications_added": per_workspace_added_count,
+                    },
+                )
+            )
+
+        # Send the full payload only if the number of notifications is below the
+        # limit. Otherwise, send only the number of notifications added per workspace
+        # and let the frontend fetch the notifications.
         def broadcast_all_notifications_at_once_to_user(
             notification_batch_limit=20,
         ):
             for user_id, notifications in notifications_grouped_by_user.items():
                 if len(notifications) <= notification_batch_limit:
-                    broadcast_to_users.apply(
-                        (
-                            [user_id],
-                            {
-                                "type": "notifications_created",
-                                "notifications": NotificationRecipientSerializer(
-                                    notifications, many=True
-                                ).data,
-                            },
-                        )
-                    )
+                    broadcast_unread_notifications_to_user(user_id, notifications)
                 else:
-                    per_workspace_added_count = [
-                        {"workspace_id": k, "count": v}
-                        for k, v in notifications_count_per_user_and_workspace[
-                            user_id
-                        ].items()
-                    ]
-                    broadcast_to_users.apply(
-                        (
-                            [user_id],
-                            {
-                                "type": "notifications_fetch_required",
-                                "notifications_added": per_workspace_added_count,
-                            },
-                        )
-                    )
+                    broadcast_only_unread_notifications_count_to_user(user_id)
 
         transaction.on_commit(broadcast_all_notifications_at_once_to_user)
 
@@ -131,25 +135,43 @@ def send_instant_notifications_email_to_users():
     )
 
 
+def filter_timezones_matching_hour_and_day(now, hour_of_day, day_of_week=None):
+    """
+    Returns a list of timezones that match the hour of the day and the day of
+    the week. If day_of_week is None, it will return all timezones matching the
+    hour of the day.
+    """
+
+    def is_matching_time(now, tz):
+        time_in_tz = now.astimezone(pytz.timezone(tz))
+        return time_in_tz.hour == hour_of_day and (
+            day_of_week is None or time_in_tz.weekday() == day_of_week
+        )
+
+    matching_timezones = [tz for tz in pytz.all_timezones if is_matching_time(now, tz)]
+
+    if matching_timezones:
+        msg = "Timezones where time match settings: %02d:00" % hour_of_day
+        if day_of_week is not None:
+            msg += f" on day of week {day_of_week}"
+        logger.debug(msg + "\n - " + "\n - ".join(matching_timezones))
+
+    return matching_timezones
+
+
 def send_daily_notifications_email_to_users(now: Optional[datetime] = None):
     from .handler import NotificationHandler as handler
 
     if now is None:
         now = timezone.now()
 
-    hour_of_day = settings.EMAIL_NOTIFICATIONS_DAILY_HOUR_OF_DAY
-    timezones_to_send_notifications = [
-        tz
-        for tz in pytz.all_timezones
-        if now.astimezone(pytz.timezone(tz)).hour == hour_of_day
-    ]
-    logger.debug(
-        "Timezones where the hour of the day match settings: %s"
-        % "\n - ".join(timezones_to_send_notifications),
+    timezones_to_send_notifications = filter_timezones_matching_hour_and_day(
+        now, settings.EMAIL_NOTIFICATIONS_DAILY_HOUR_OF_DAY
     )
-    logger.debug(f"Hour of the day to send daily notifications: {hour_of_day}")
-    localized_now = now.astimezone(pytz.timezone(timezones_to_send_notifications[0]))
-    logger.debug(f"Now: {now} - localized now: {localized_now}")
+
+    # The default timezone value is None, let's consider it as UTC.
+    if "UTC" in timezones_to_send_notifications:
+        timezones_to_send_notifications.append(None)
 
     notifications_frequency = UserProfile.EmailNotificationFrequencyOptions.DAILY.value
     max_emails = settings.EMAIL_NOTIFICATIONS_LIMIT_PER_TASK[notifications_frequency]
@@ -159,6 +181,7 @@ def send_daily_notifications_email_to_users(now: Optional[datetime] = None):
             profile__email_notification_frequency=notifications_frequency,
             profile__timezone__in=timezones_to_send_notifications,
         )
+        # avoid notify users to often if settings or timezones change often
         & ~Q(
             profile__last_notifications_email_sent_at__gt=now - timedelta(hours=12),
         ),
@@ -174,25 +197,13 @@ def send_weekly_notifications_email_to_users(now: Optional[datetime] = None):
 
     hour_of_day = settings.EMAIL_NOTIFICATIONS_DAILY_HOUR_OF_DAY
     day_of_week = settings.EMAIL_NOTIFICATIONS_WEEKLY_DAY_OF_WEEK
-    timezones_to_send_notifications = [
-        tz
-        for tz in pytz.all_timezones
-        if now.astimezone(pytz.timezone(tz)).hour == hour_of_day
-        and now.astimezone(pytz.timezone(tz)).weekday() == day_of_week
-    ]
-    logger.debug(
-        "Timezones where the day of the week and the hour of the day match settings: %s"
-        % "\n - ".join(timezones_to_send_notifications or ["None"]),
+    timezones_to_send_notifications = filter_timezones_matching_hour_and_day(
+        now, hour_of_day, day_of_week
     )
-    logger.debug(f"Hour of the day to send daily notifications: {hour_of_day}")
-    logger.debug(f"Day of the week to send weekly notifications: {day_of_week}")
-    if timezones_to_send_notifications:
-        localized_now = now.astimezone(
-            pytz.timezone(timezones_to_send_notifications[0])
-        )
-        logger.debug(f"Now: {now} - localized now: {localized_now}")
-    else:
-        logger.debug(f"Now: {now} - No timezones match the settings")
+
+    # The default timezone value is None, let's consider it as UTC.
+    if "UTC" in timezones_to_send_notifications:
+        timezones_to_send_notifications.append(None)
 
     notifications_frequency = UserProfile.EmailNotificationFrequencyOptions.WEEKLY.value
     max_emails = settings.EMAIL_NOTIFICATIONS_LIMIT_PER_TASK[notifications_frequency]
@@ -202,6 +213,7 @@ def send_weekly_notifications_email_to_users(now: Optional[datetime] = None):
             profile__email_notification_frequency=notifications_frequency,
             profile__timezone__in=timezones_to_send_notifications,
         )
+        # avoid notify users to often if settings or timezones change often
         & ~Q(
             profile__last_notifications_email_sent_at__gt=now - timedelta(days=4),
         ),

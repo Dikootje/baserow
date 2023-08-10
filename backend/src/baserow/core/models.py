@@ -123,6 +123,8 @@ class UserProfile(models.Model):
     default user model.
     """
 
+    # Keep these in sync with the web-frontend options in
+    # web-frontend/modules/core/enums.js
     class EmailNotificationFrequencyOptions(models.TextChoices):
         INSTANT = "instant", "instant"
         DAILY = "daily", "daily"
@@ -153,7 +155,7 @@ class UserProfile(models.Model):
     timezone = models.CharField(
         max_length=255,
         choices=TIMEZONES,
-        default="UTC",
+        null=True,
         help_text="The user timezone to use for dates and times.",
     )
     email_notification_frequency = models.TextField(
