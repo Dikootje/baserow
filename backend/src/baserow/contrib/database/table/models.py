@@ -460,9 +460,7 @@ class TableModelQuerySet(models.QuerySet):
                 field_type = field_object["type"].type
 
             model_field = self.model._meta.get_field(field_name)
-            view_filter_type = view_filter_type_registry.get(
-                filter_type
-            )
+            view_filter_type = view_filter_type_registry.get(filter_type)
             if not view_filter_type.field_is_compatible(field_instance):
                 raise ViewFilterTypeNotAllowedForField(
                     filter_type,
