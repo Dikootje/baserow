@@ -170,6 +170,7 @@ export class RuntimeGet extends RuntimeFormulaFunction {
       name: formulaComponentType,
       group: 'inline',
       inline: true,
+      selectable: false,
       atom: true,
       addNodeView() {
         return VueNodeViewRenderer(GetFormulaComponent)

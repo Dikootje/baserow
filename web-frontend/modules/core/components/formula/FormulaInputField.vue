@@ -1,5 +1,9 @@
 <template>
-  <EditorContent :class="classes" :editor="editor" />
+  <EditorContent
+    class="formula-input-field"
+    :class="classes"
+    :editor="editor"
+  />
 </template>
 
 <script>

@@ -1,16 +1,11 @@
 .get-formula-component {
   display: inline-block;
-  padding: 2px 6px;
+  padding: 4px 8px;
   background-color: $color-neutral-100;
   font-size: 12px;
-  margin-left: 1px;
-  margin-right: 1px;
-  border: 1px solid transparent;
+  margin: 1px 0;
   border-radius: 3px;
-}
-
-.get-formula-component--selected {
-  border-color: $color-neutral-300;
+  user-select: all;
 }
 
 .get-formula-component__caret {
