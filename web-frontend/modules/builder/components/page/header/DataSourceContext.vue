@@ -62,7 +62,7 @@ export default {
     },
   },
   data() {
-    return { state: null, creationInProgress: false }
+    return { state: null, creationInProgress: false, onGoingUpdate: {} }
   },
   computed: {
     ...mapGetters({

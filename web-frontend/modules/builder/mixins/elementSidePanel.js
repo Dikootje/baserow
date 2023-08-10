@@ -5,11 +5,10 @@ import { clone } from '@baserow/modules/core/utils/object'
 import { notifyIf } from '@baserow/modules/core/utils/error'
 
 export default {
-  inject: ['builder'],
+  inject: ['builder', 'page'],
   computed: {
     ...mapGetters({
       element: 'element/getSelected',
-      page: 'page/getSelected',
     }),
 
     elementType() {

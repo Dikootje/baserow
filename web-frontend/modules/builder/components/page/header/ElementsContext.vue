@@ -47,6 +47,7 @@ export default {
   name: 'ElementsContext',
   components: { AddElementModal, AddElementButton, ElementsList },
   mixins: [context],
+  inject: ['page'],
   data() {
     return {
       search: null,
@@ -55,7 +56,6 @@ export default {
   },
   computed: {
     ...mapGetters({
-      page: 'page/getSelected',
       elementSelected: 'element/getSelected',
     }),
     elements() {

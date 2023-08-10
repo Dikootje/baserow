@@ -33,6 +33,7 @@ import { PLACEMENTS } from '@baserow/modules/builder/enums'
 export default {
   name: 'PagePreview',
   components: { ElementPreview, PreviewNavigationBar },
+  inject: ['page'],
   data() {
     return {
       // The element that is currently being copied
@@ -45,7 +46,6 @@ export default {
   computed: {
     PLACEMENTS: () => PLACEMENTS,
     ...mapGetters({
-      page: 'page/getSelected',
       deviceTypeSelected: 'page/getDeviceTypeSelected',
       elementSelected: 'element/getSelected',
     }),

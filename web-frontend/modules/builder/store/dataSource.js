@@ -115,7 +115,7 @@ const actions = {
     }
   },
 
-  debouncedUpdate(
+  async debouncedUpdate(
     { dispatch, getters, commit },
     { page, dataSourceId, values }
   ) {
@@ -133,25 +133,34 @@ const actions = {
       }
     })
 
+    await dispatch('forceUpdate', {
+      page,
+      dataSource,
+      values: updateContext.valuesToUpdate,
+    })
+
     return new Promise((resolve, reject) => {
       const fire = async () => {
+        const toUpdate = updateContext.valuesToUpdate
+        updateContext.valuesToUpdate = {}
         try {
           const { data } = await DataSourceService(this.$client).update(
             dataSource.id,
-            updateContext.valuesToUpdate
+            toUpdate
           )
           await commit('FULL_UPDATE_ITEM', { page, dataSource, values: data })
+          updateContext.lastUpdatedValues = null
           resolve()
         } catch (error) {
           // Revert to old values on error
           await dispatch('forceUpdate', {
+            page,
             dataSource,
             values: updateContext.lastUpdatedValues,
           })
+          updateContext.lastUpdatedValues = null
           reject(error)
         }
-        updateContext.valuesToUpdate = {}
-        updateContext.lastUpdatedValues = null
       }
 
       if (updateContext.promiseResolve) {
